@@ -8,10 +8,16 @@ class Routes {
     switch (settings.name) {
       case RoutesName.splashScreen:
         return MaterialPageRoute(builder: (context) => SplashScreen());
-      case RoutesName.loginScreen:
-        return MaterialPageRoute(builder: (context) => LoginScreen());
+      case RoutesName.userRegisterScreen:
+        return MaterialPageRoute(builder: (context) => UserRegisterScreen());
       case RoutesName.otpVerifyScreen:
-        return MaterialPageRoute(builder: (context) => OtpVerificationScreen());
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => OtpVerificationScreen(
+            uniqueKey: args['uniqueKey'] ?? '',
+            otp: args['otp'] ?? '',
+          ),
+        );
       case RoutesName.chooseRoleScreen:
         return MaterialPageRoute(builder: (context) => ChooseRoleScreen());
       case RoutesName.personalInfoScreen:
