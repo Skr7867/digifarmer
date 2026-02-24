@@ -1,0 +1,11 @@
+export 'botttomNavBar/bottom_navigation_bar.dart';
+export 'home/home_screen.dart';
+export 'login/login_screen.dart';
+export 'newInvesment/new_investment_screen.dart';
+export 'otp/otp_verify_screen.dart';
+export 'payment/payment_screen.dart';
+export 'personalinfo/personal_info_screen.dart';
+export 'portfolio/portfolio_screen.dart';
+export 'proceedpayment/proceed_to_payment_screen.dart';
+export 'splash/splash_screen.dart';
+export 'userrole/choose_role_screen.dart';
