@@ -12,7 +12,7 @@ class VerifyOtpBloc extends Bloc<VerifyOtpEvent, VerifyOtpState> {
 
   VerifyOtpBloc(this.sendOtpResponseRepository)
     : super(const VerifyOtpState()) {
-    on<SetUniqueKey>(_setUniqueKey); // 👈 ADD THIS
+    on<SetUniqueKey>(_setUniqueKey);
 
     on<OtpChanged>(_onOtpChanged);
     on<VerifyOtp>(_verifyOtp);
@@ -41,7 +41,7 @@ class VerifyOtpBloc extends Bloc<VerifyOtpEvent, VerifyOtpState> {
         emit(
           state.copyWith(
             message: value.message,
-            postApiStatus: PostApiStatus.sucess,
+            postApiStatus: PostApiStatus.success,
           ),
         );
       } else {

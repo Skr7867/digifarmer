@@ -14,7 +14,6 @@ import '../../main.dart';
 import '../../repository/verifyOtp/verify_otp_repository.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
-  // ✅ Constructor se directly lo
   final String uniqueKey;
   final String otp;
 
@@ -44,10 +43,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     super.initState();
     _verifyOtpBloc = VerifyOtpBloc(getIt<VerifyOtpRepository>());
     startTimer();
-
-    // ✅ widget.uniqueKey guaranteed available — no timing issue
-    print('DEBUG uniqueKey from widget: ${widget.uniqueKey}');
-    print('DEBUG otp from widget: ${widget.otp}');
   }
 
   void startTimer() {
@@ -131,241 +126,277 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               if (state.postApiStatus == PostApiStatus.error) {
                 FlushBarHelper.flushBarErrorMessage(state.message, context);
               }
-              if (state.postApiStatus == PostApiStatus.sucess) {
+              if (state.postApiStatus == PostApiStatus.success) {
                 FlushBarHelper.flushBarSuccessMessage(state.message, context);
-                Navigator.pushNamed(context, RoutesName.chooseRoleScreen);
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.chooseRoleScreen,
+                  arguments: {"uniqueKey": widget.uniqueKey},
+                );
               }
             },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-
-                  /// Back Button
-                  InkWell(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xffF2F4F7),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.arrow_back_ios_new, size: 18),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
                     ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  /// ✅ OTP from widget directly
-                  if (widget.otp.isNotEmpty)
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.greenColor.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.greenColor.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: 22,
+                        right: 22,
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.lock_open_outlined,
-                              size: 18,
-                              color: AppColors.greenColor,
+                            const SizedBox(height: 10),
+
+                            /// Back Button
+                            InkWell(
+                              onTap: () => Navigator.pop(context),
+                              child: Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xffF2F4F7),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 18,
+                                ),
+                              ),
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Your OTP: ${widget.otp}',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: AppFonts.popinsBold,
-                                color: AppColors.greenColor,
-                                letterSpacing: 2,
+
+                            const SizedBox(height: 40),
+
+                            // OTP from widget directly
+                            if (widget.otp.isNotEmpty)
+                              Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.greenColor.withOpacity(
+                                      0.08,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppColors.greenColor.withOpacity(
+                                        0.3,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.lock_open_outlined,
+                                        size: 18,
+                                        color: AppColors.greenColor,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Your OTP: ${widget.otp}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: AppFonts.popinsBold,
+                                          color: AppColors.greenColor,
+                                          letterSpacing: 2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                            const SizedBox(height: 20),
+
+                            const Center(
+                              child: Text(
+                                "Enter Verification Code",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xff1D2939),
+                                  fontFamily: AppFonts.popins,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            const Center(
+                              child: Text(
+                                "We've sent a 6-digit code to your mobile",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xff667085),
+                                  fontFamily: AppFonts.popins,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 30),
+
+                            /// OTP Boxes
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List.generate(
+                                6,
+                                (index) => _otpBox(index),
+                              ),
+                            ),
+
+                            const SizedBox(height: 60),
+
+                            /// Resend Timer
+                            Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.access_time,
+                                    size: 16,
+                                    color: Color(0xff98A2B3),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    "Resend code in ",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontFamily: AppFonts.popins,
+                                    ),
+                                  ),
+                                  Text(
+                                    "0:${seconds.toString().padLeft(2, '0')}",
+                                    style: const TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: AppFonts.popins,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Center(
+                              child: GestureDetector(
+                                onTap: seconds == 0
+                                    ? () {
+                                        setState(() => seconds = 29);
+                                        startTimer();
+                                      }
+                                    : null,
+                                child: Text(
+                                  "Resend OTP",
+                                  style: TextStyle(
+                                    color: seconds == 0
+                                        ? AppColors.greenColor
+                                        : const Color(0xff98A2B3),
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: AppFonts.popins,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 60),
+
+                            /// ✅ Verify Button — widget.uniqueKey directly pass
+                            BlocBuilder<VerifyOtpBloc, VerifyOtpState>(
+                              buildWhen: (current, previous) =>
+                                  current.postApiStatus !=
+                                  previous.postApiStatus,
+                              builder: (context, state) {
+                                return RoundButton(
+                                  width: double.infinity,
+                                  buttonColor: AppColors.greenColor,
+                                  title:
+                                      state.postApiStatus ==
+                                          PostApiStatus.loading
+                                      ? 'Please wait...'
+                                      : 'Verify & Continue',
+                                  onPress: () {
+                                    print(
+                                      'DEBUG uniqueKey: ${widget.uniqueKey}',
+                                    );
+                                    print('DEBUG otp entered: $_enteredOtp');
+                                    _verifyOtpBloc.add(
+                                      VerifyOtp(uniqueKey: widget.uniqueKey),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+
+                            /// Bottom Help
+                            Center(
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    "Didn't receive the code?",
+                                    style: TextStyle(
+                                      color: Color(0xff98A2B3),
+                                      fontFamily: AppFonts.popins,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(
+                                        Icons.call,
+                                        size: 18,
+                                        color: Color(0xff155EEF),
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        "Call Support",
+                                        style: TextStyle(
+                                          color: Color(0xff155EEF),
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: AppFonts.popins,
+                                        ),
+                                      ),
+                                      SizedBox(width: 20),
+                                      Icon(
+                                        Icons.mail,
+                                        size: 18,
+                                        color: Color(0xff155EEF),
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        "Email Help",
+                                        style: TextStyle(
+                                          color: Color(0xff155EEF),
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: AppFonts.popins,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-
-                  const SizedBox(height: 20),
-
-                  const Center(
-                    child: Text(
-                      "Enter Verification Code",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff1D2939),
-                        fontFamily: AppFonts.popins,
-                      ),
-                    ),
                   ),
-
-                  const SizedBox(height: 12),
-
-                  const Center(
-                    child: Text(
-                      "We've sent a 6-digit code to your mobile",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xff667085),
-                        fontFamily: AppFonts.popins,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  /// OTP Boxes
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(6, (index) => _otpBox(index)),
-                  ),
-
-                  const SizedBox(height: 60),
-
-                  /// Resend Timer
-                  Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          size: 16,
-                          color: Color(0xff98A2B3),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          "Resend code in ",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontFamily: AppFonts.popins,
-                          ),
-                        ),
-                        Text(
-                          "0:${seconds.toString().padLeft(2, '0')}",
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: AppFonts.popins,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Center(
-                    child: GestureDetector(
-                      onTap: seconds == 0
-                          ? () {
-                              setState(() => seconds = 29);
-                              startTimer();
-                            }
-                          : null,
-                      child: Text(
-                        "Resend OTP",
-                        style: TextStyle(
-                          color: seconds == 0
-                              ? AppColors.greenColor
-                              : const Color(0xff98A2B3),
-                          fontWeight: FontWeight.w600,
-                          fontFamily: AppFonts.popins,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 60),
-
-                  /// ✅ Verify Button — widget.uniqueKey directly pass
-                  BlocBuilder<VerifyOtpBloc, VerifyOtpState>(
-                    buildWhen: (current, previous) =>
-                        current.postApiStatus != previous.postApiStatus,
-                    builder: (context, state) {
-                      return RoundButton(
-                        width: double.infinity,
-                        buttonColor: AppColors.greenColor,
-                        title: state.postApiStatus == PostApiStatus.loading
-                            ? 'Please wait...'
-                            : 'Verify & Continue',
-                        onPress: () {
-                          print('DEBUG uniqueKey: ${widget.uniqueKey}');
-                          print('DEBUG otp entered: $_enteredOtp');
-                          _verifyOtpBloc.add(
-                            VerifyOtp(uniqueKey: widget.uniqueKey),
-                          );
-                        },
-                      );
-                    },
-                  ),
-
-                  const Spacer(),
-
-                  /// Bottom Help
-                  Center(
-                    child: Column(
-                      children: [
-                        const Text(
-                          "Didn't receive the code?",
-                          style: TextStyle(
-                            color: Color(0xff98A2B3),
-                            fontFamily: AppFonts.popins,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(
-                              Icons.call,
-                              size: 18,
-                              color: Color(0xff155EEF),
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              "Call Support",
-                              style: TextStyle(
-                                color: Color(0xff155EEF),
-                                fontWeight: FontWeight.w600,
-                                fontFamily: AppFonts.popins,
-                              ),
-                            ),
-                            SizedBox(width: 20),
-                            Icon(
-                              Icons.mail,
-                              size: 18,
-                              color: Color(0xff155EEF),
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              "Email Help",
-                              style: TextStyle(
-                                color: Color(0xff155EEF),
-                                fontWeight: FontWeight.w600,
-                                fontFamily: AppFonts.popins,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),

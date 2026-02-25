@@ -19,7 +19,10 @@ class Routes {
           ),
         );
       case RoutesName.chooseRoleScreen:
-        return MaterialPageRoute(builder: (context) => ChooseRoleScreen());
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ChooseRoleScreen(uniqueKey: args?['uniqueKey'] ?? ''),
+        );
       case RoutesName.personalInfoScreen:
         return MaterialPageRoute(builder: (context) => PersonalInfoScreen());
       case RoutesName.homeScreen:

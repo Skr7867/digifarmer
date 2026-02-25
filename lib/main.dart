@@ -1,4 +1,6 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/repository/chooseRole/choose_role_http_repository.dart';
+import 'package:digifarmer/repository/chooseRole/choose_role_repository.dart';
 import 'package:digifarmer/repository/register/user_register_http_api_repository.dart';
 import 'package:digifarmer/repository/register/user_register_repository.dart';
 import 'package:digifarmer/repository/verifyOtp/verify_otp_http_repository.dart';
@@ -32,5 +34,8 @@ void serviceLocator() {
   );
   getIt.registerLazySingleton<VerifyOtpRepository>(
     () => VerifyOtpHttpRepository(),
+  );
+  getIt.registerLazySingleton<ChooseRoleRepository>(
+    () => ChooseRoleHttpRepository(),
   );
 }

@@ -41,7 +41,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 FlushBarHelper.flushBarErrorMessage(state.message, context);
               }
 
-              if (state.postApiStatus == PostApiStatus.sucess) {
+              if (state.postApiStatus == PostApiStatus.success) {
                 FlushBarHelper.flushBarSuccessMessage(state.message, context);
 
                 // ✅ state object directly use karo jo listener ko mila hai

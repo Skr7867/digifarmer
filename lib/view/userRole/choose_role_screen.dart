@@ -1,18 +1,29 @@
+import 'dart:developer';
+
+import 'package:digifarmer/blocs/chooseRole/choose_role_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/res/assets/image_assets.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
+import 'package:digifarmer/utils/enums.dart';
+import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../main.dart';
+import '../../repository/chooseRole/choose_role_repository.dart';
 import '../../res/fonts/app_fonts.dart';
 
 class ChooseRoleScreen extends StatefulWidget {
-  const ChooseRoleScreen({super.key});
+  final String uniqueKey;
+  const ChooseRoleScreen({super.key, required this.uniqueKey});
 
   @override
   State<ChooseRoleScreen> createState() => _ChooseRoleScreenState();
 }
 
 class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
+  late final ChooseRoleBloc _chooseRoleBloc;
+
   int selectedIndex = -1;
 
   final List<RoleModel> roles = [
@@ -21,108 +32,147 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
       subtitle: "Invest in agricultural projects and track returns",
       icon: Icons.show_chart,
       color: Color(0xff2E5AAC),
+      backendValue: "INVESTOR",
     ),
     RoleModel(
       title: "Land Owner",
       subtitle: "List your land and manage farming operations",
       icon: Icons.agriculture,
       color: Color(0xff2F9E5B),
+      backendValue: "LAND_OWNER",
     ),
     RoleModel(
       title: "Worker",
       subtitle: "Find work opportunities and manage tasks",
       icon: Icons.person,
       color: Color(0xff4C8F8F),
+      backendValue: "WORKER",
     ),
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _chooseRoleBloc = ChooseRoleBloc(getIt<ChooseRoleRepository>());
+    _chooseRoleBloc.add(SetUniqueKey(widget.uniqueKey));
+    log("DEBUG uniqueKey in ChooseRole: ${widget.uniqueKey}");
+  }
+
+  @override
+  void dispose() {
+    _chooseRoleBloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
+    return BlocProvider.value(
+      value: _chooseRoleBloc,
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade100,
+        body: SafeArea(
+          child: BlocListener<ChooseRoleBloc, ChooseRoleState>(
+            listenWhen: (current, previous) =>
+                current.postApiStatus != previous.postApiStatus,
+            listener: (context, state) {
+              if (state.postApiStatus == PostApiStatus.error) {
+                FlushBarHelper.flushBarErrorMessage(state.message, context);
+              }
 
-              /// Logo
-              Image.asset(ImageAssets.splashLogo, height: 80, width: 80),
+              if (state.postApiStatus == PostApiStatus.success) {
+                FlushBarHelper.flushBarSuccessMessage(state.message, context);
 
-              const SizedBox(height: 20),
+                Navigator.pushNamed(context, RoutesName.personalInfoScreen);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
 
-              /// Title
-              const Text(
-                "Choose Your Role",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
+                  Image.asset(ImageAssets.splashLogo, height: 80, width: 80),
 
-              const SizedBox(height: 6),
+                  const SizedBox(height: 20),
 
-              Text(
-                "Select how you'd like to use DigiFarmer",
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              /// Role List
-              Expanded(
-                child: ListView.builder(
-                  itemCount: roles.length,
-                  itemBuilder: (context, index) {
-                    return roleCard(index);
-                  },
-                ),
-              ),
-
-              RoundButton(
-                width: double.infinity,
-                buttonColor: selectedIndex == -1
-                    ? Colors.grey.shade300
-                    : Colors.blue,
-                title: 'Continue',
-                onPress: () {
-                  Navigator.pushNamed(context, RoutesName.personalInfoScreen);
-                },
-              ),
-              SizedBox(height: 20),
-
-              /// Bottom Help
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.info, size: 18, color: Colors.blue),
-                  SizedBox(width: 6),
-                  Text(
-                    "Learn about each role",
+                  const Text(
+                    "Choose Your Role",
                     style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                       fontFamily: AppFonts.popins,
                     ),
                   ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    "Select how you'd like to use DigiFarmer",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                      fontFamily: AppFonts.popins,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: roles.length,
+                      itemBuilder: (context, index) {
+                        return roleCard(index);
+                      },
+                    ),
+                  ),
+
+                  BlocBuilder<ChooseRoleBloc, ChooseRoleState>(
+                    builder: (context, state) {
+                      return RoundButton(
+                        width: double.infinity,
+                        buttonColor: selectedIndex == -1
+                            ? Colors.grey.shade300
+                            : Colors.blue,
+                        title: state.postApiStatus == PostApiStatus.loading
+                            ? "Please wait..."
+                            : "Continue",
+                        onPress: selectedIndex == -1
+                            ? null
+                            : () {
+                                _chooseRoleBloc.add(SubmitRole());
+                              },
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.info, size: 18, color: Colors.blue),
+                      SizedBox(width: 6),
+                      Text(
+                        "Learn about each role",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: AppFonts.popins,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
                 ],
               ),
-
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// ✅ Clickable Role Card
   Widget roleCard(int index) {
     final role = roles[index];
     final isSelected = selectedIndex == index;
@@ -132,6 +182,8 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
         setState(() {
           selectedIndex = index;
         });
+
+        _chooseRoleBloc.add(SetRole(role.backendValue));
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 18),
@@ -143,17 +195,9 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
             color: isSelected ? Colors.blue : Colors.grey.shade300,
             width: 1.3,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Row(
           children: [
-            /// Icon Box
             Container(
               height: 52,
               width: 52,
@@ -163,10 +207,7 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
               ),
               child: Icon(role.icon, color: Colors.white),
             ),
-
             const SizedBox(width: 16),
-
-            /// Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,27 +232,6 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
                 ],
               ),
             ),
-
-            /// Radio Indicator
-            Container(
-              height: 22,
-              width: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? Colors.blue : Colors.grey.shade400,
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? const Center(
-                      child: CircleAvatar(
-                        radius: 5,
-                        backgroundColor: Colors.blue,
-                      ),
-                    )
-                  : null,
-            ),
           ],
         ),
       ),
@@ -219,17 +239,18 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
   }
 }
 
-/// ✅ Role Model
 class RoleModel {
   final String title;
   final String subtitle;
   final IconData icon;
   final Color color;
+  final String backendValue;
 
   RoleModel({
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.color,
+    required this.backendValue,
   });
 }

@@ -43,7 +43,7 @@ class UserRegisterBloc extends Bloc<UserRegisterEvent, UserRegisterState> {
             message: value.message,
             uniqueKey: value.uniqueKey,
             otp: value.otp,
-            postApiStatus: PostApiStatus.sucess,
+            postApiStatus: PostApiStatus.success,
           ),
         );
       } else {
