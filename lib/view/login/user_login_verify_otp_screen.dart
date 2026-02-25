@@ -8,7 +8,6 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../blocs/loginOtpVerify/login_otp_verify_bloc.dart';
 import '../../res/assets/image_assets.dart';
 import '../../res/color/app_colors.dart';
@@ -395,16 +394,16 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
             borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
               colors: [
-                AppColors.greenColor.withOpacity(0.8),
+                AppColors.greenColor.withValues(alpha: 0.8),
                 AppColors.greenColor,
-                AppColors.greenColor.withOpacity(0.1),
+                AppColors.greenColor.withValues(alpha: 0.1),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.greenColor.withOpacity(0.3),
+                color: AppColors.greenColor.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -485,7 +484,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                   ),
                   decoration: BoxDecoration(
                     color: isEnabled
-                        ? AppColors.greenColor.withOpacity(0.1)
+                        ? AppColors.greenColor.withValues(alpha: 0.1)
                         : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(30),
                     border: Border.all(
