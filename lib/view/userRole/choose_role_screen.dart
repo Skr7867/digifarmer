@@ -82,7 +82,11 @@ class _ChooseRoleScreenState extends State<ChooseRoleScreen> {
               if (state.postApiStatus == PostApiStatus.success) {
                 FlushBarHelper.flushBarSuccessMessage(state.message, context);
 
-                Navigator.pushNamed(context, RoutesName.personalInfoScreen);
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.personalInfoScreen,
+                  arguments: {"uniqueKey": widget.uniqueKey},
+                );
               }
             },
             child: Padding(

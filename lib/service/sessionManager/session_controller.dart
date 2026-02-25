@@ -1,59 +1,57 @@
-// import 'dart:convert';
-// import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import '../storage/local_storage.dart';
+import 'session_user_model.dart';
 
-// import '../../model/user/user_model.dart';
-// import '../storage/local_storage.dart';
+class SessionController {
+  static final SessionController _session = SessionController._internal();
 
-// class SessionController {
-//   static final SessionController _session = SessionController._internal();
+  final LocalStorage localStorage = LocalStorage();
 
-//   final LocalStorage localStorage = LocalStorage();
+  SessionUserModel? user;
+  bool isLogin = false;
 
-//   UserModel user = UserModel();
-//   bool isLogin = false;
+  SessionController._internal();
 
-//   SessionController._internal();
+  factory SessionController() {
+    return _session;
+  }
 
-//   factory SessionController() {
-//     return _session;
-//   }
+  /// ✅ SAVE SESSION
+  Future<void> saveUserInPreference(SessionUserModel userModel) async {
+    try {
+      await localStorage.setValue('user', jsonEncode(userModel.toJson()));
+      await localStorage.setValue('isLogin', 'true');
 
-//   /// ✅ SAVE USER SESSION
-//   Future<void> saveUserInPreference(UserModel userModel) async {
-//     try {
-//       await localStorage.setValue('user', jsonEncode(userModel.toJson()));
-//       await localStorage.setValue('isLogin', 'true');
+      user = userModel;
+      isLogin = true;
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 
-//       /// update memory state also
-//       user = userModel;
-//       isLogin = true;
-//     } catch (e) {
-//       debugPrint(e.toString());
-//     }
-//   }
+  /// ✅ LOAD SESSION
+  Future<void> getUserFromPreference() async {
+    try {
+      final userData = await localStorage.readValue('user');
+      final loginFlag = await localStorage.readValue('isLogin');
 
-//   /// ✅ LOAD USER SESSION
-//   Future<void> getUserFromPreference() async {
-//     try {
-//       final userData = await localStorage.readValue('user');
-//       final loginFlag = await localStorage.readValue('isLogin');
+      if (userData != null && userData.isNotEmpty) {
+        user = SessionUserModel.fromJson(jsonDecode(userData));
+      }
 
-//       if (userData != null && userData.isNotEmpty) {
-//         user = UserModel.fromJson(jsonDecode(userData));
-//       }
+      isLogin = loginFlag == 'true';
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 
-//       isLogin = loginFlag == 'true';
-//     } catch (e) {
-//       debugPrint(e.toString());
-//     }
-//   }
+  /// ✅ LOGOUT
+  Future<void> clearSession() async {
+    await localStorage.clearValue('user');
+    await localStorage.clearValue('isLogin');
 
-//   /// ✅ LOGOUT (BONUS)
-//   Future<void> clearSession() async {
-//     await localStorage.clearValue('user');
-//     await localStorage.clearValue('isLogin');
-
-//     user = UserModel();
-//     isLogin = false;
-//   }
-// }
+    user = null;
+    isLogin = false;
+  }
+}

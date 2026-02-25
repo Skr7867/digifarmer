@@ -1,6 +1,5 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
-
 import '../../view/view.dart';
 
 class Routes {
@@ -24,7 +23,11 @@ class Routes {
           builder: (_) => ChooseRoleScreen(uniqueKey: args?['uniqueKey'] ?? ''),
         );
       case RoutesName.personalInfoScreen:
-        return MaterialPageRoute(builder: (context) => PersonalInfoScreen());
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (context) =>
+              PersonalInfoScreen(uniqueKey: args?['uniqueKey'] ?? ''),
+        );
       case RoutesName.homeScreen:
         return MaterialPageRoute(builder: (context) => HomeScreen());
       case RoutesName.bottomNavBar:
@@ -39,6 +42,16 @@ class Routes {
         );
       case RoutesName.paymentScreen:
         return MaterialPageRoute(builder: (context) => PaymentScreen());
+      case RoutesName.userLoginScreen:
+        return MaterialPageRoute(builder: (context) => UserLoginScreen());
+      case RoutesName.loginOtpVerifyScreen:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (context) => UserLoginVerifyOtpScreen(
+            mobileNumber: args['mobileNumber'],
+            uniqueKey: args['uniqueKey'] ?? '',
+          ),
+        );
       default:
         return MaterialPageRoute(
           builder: (context) {

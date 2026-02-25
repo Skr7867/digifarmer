@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/res/assets/image_assets.dart';
 import 'package:digifarmer/res/customeWidgets/custom_paddings.dart';
@@ -10,7 +8,6 @@ import 'package:digifarmer/utils/enums.dart';
 import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../blocs/register/user_register_bloc.dart';
 import '../../main.dart';
 import '../../repository/register/user_register_repository.dart';
@@ -35,7 +32,6 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
             listenWhen: (current, previous) =>
                 current.postApiStatus != previous.postApiStatus,
 
-            // UserRegisterScreen.dart mein sirf listener block change karo
             listener: (context, state) {
               if (state.postApiStatus == PostApiStatus.error) {
                 FlushBarHelper.flushBarErrorMessage(state.message, context);
@@ -44,18 +40,10 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               if (state.postApiStatus == PostApiStatus.success) {
                 FlushBarHelper.flushBarSuccessMessage(state.message, context);
 
-                // ✅ state object directly use karo jo listener ko mila hai
-                log('DEBUG uniqueKey: ${state.uniqueKey}');
-                log('DEBUG otp: ${state.otp}');
-
                 Navigator.pushNamed(
                   context,
                   RoutesName.otpVerifyScreen,
-                  arguments: {
-                    'uniqueKey':
-                        state.uniqueKey, // ← yeh state listener ka state hai
-                    'otp': state.otp,
-                  },
+                  arguments: {'uniqueKey': state.uniqueKey, 'otp': state.otp},
                 );
               }
             },
@@ -217,8 +205,6 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
                       const SizedBox(height: 8),
 
-                      /// EMAIL FIELD
-                      /// EMAIL FIELD
                       BlocBuilder<UserRegisterBloc, UserRegisterState>(
                         buildWhen: (current, previous) =>
                             current.email != previous.email,

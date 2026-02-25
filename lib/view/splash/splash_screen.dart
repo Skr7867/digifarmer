@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-
-import '../../config/routes/routes_name.dart';
 import '../../res/assets/image_assets.dart';
+import '../../service/splash/splash_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,16 +10,11 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final SplashServices _splashServices = SplashServices();
   @override
   void initState() {
     super.initState();
-    navigateToLogin();
-  }
-
-  void navigateToLogin() {
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushNamed(context, RoutesName.userRegisterScreen);
-    });
+    _splashServices.isLogin(context);
   }
 
   @override
