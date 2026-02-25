@@ -48,8 +48,9 @@ class Routes {
         final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
           builder: (context) => UserLoginVerifyOtpScreen(
-            mobileNumber: args['mobileNumber'],
+            mobileNumber: args['mobileNumber'] ?? '',
             uniqueKey: args['uniqueKey'] ?? '',
+            otp: args['otp'] ?? '',
           ),
         );
       default:

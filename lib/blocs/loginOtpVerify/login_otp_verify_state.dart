@@ -1,38 +1,51 @@
 part of 'login_otp_verify_bloc.dart';
 
 class LoginVerifyOtpState extends Equatable {
+  final String uniqueKey;
+  final String otp;
+  final String message;
+  final PostApiStatus postApiStatus;
+  final ResendPostApiStatus resendPostApiStatus;
+  final String accessToken;
+  final String refreshToken;
+
+  // Timer related fields
+  final int remainingSeconds;
+  final bool isResendEnabled;
+
   const LoginVerifyOtpState({
     this.uniqueKey = '',
     this.otp = '',
     this.message = '',
     this.postApiStatus = PostApiStatus.initial,
+    this.resendPostApiStatus = ResendPostApiStatus.initial,
     this.accessToken = '',
     this.refreshToken = '',
+    this.remainingSeconds = 60,
+    this.isResendEnabled = false,
   });
-
-  final String uniqueKey;
-  final String otp;
-  final String message;
-  final PostApiStatus postApiStatus;
-
-  final String accessToken;
-  final String refreshToken;
 
   LoginVerifyOtpState copyWith({
     String? uniqueKey,
     String? otp,
     String? message,
     PostApiStatus? postApiStatus,
+    ResendPostApiStatus? resendPostApiStatus,
     String? accessToken,
     String? refreshToken,
+    int? remainingSeconds,
+    bool? isResendEnabled,
   }) {
     return LoginVerifyOtpState(
       uniqueKey: uniqueKey ?? this.uniqueKey,
       otp: otp ?? this.otp,
       message: message ?? this.message,
       postApiStatus: postApiStatus ?? this.postApiStatus,
+      resendPostApiStatus: resendPostApiStatus ?? this.resendPostApiStatus,
       accessToken: accessToken ?? this.accessToken,
       refreshToken: refreshToken ?? this.refreshToken,
+      remainingSeconds: remainingSeconds ?? this.remainingSeconds,
+      isResendEnabled: isResendEnabled ?? this.isResendEnabled,
     );
   }
 
@@ -42,7 +55,10 @@ class LoginVerifyOtpState extends Equatable {
     otp,
     message,
     postApiStatus,
+    resendPostApiStatus,
     accessToken,
     refreshToken,
+    remainingSeconds,
+    isResendEnabled,
   ];
 }

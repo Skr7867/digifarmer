@@ -12,7 +12,7 @@ _LoginResponseModel _$LoginResponseModelFromJson(Map<String, dynamic> json) =>
       uniqueKey: json['uniqueKey'] as String,
       message: json['message'] as String,
       user: LoginUserModel.fromJson(json['user'] as Map<String, dynamic>),
-      otp: json['otp'] as String,
+      otp: json['otp'] as String?,
     );
 
 Map<String, dynamic> _$LoginResponseModelToJson(_LoginResponseModel instance) =>

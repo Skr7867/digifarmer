@@ -26,3 +26,25 @@ class OtpChanged extends LoginVerifyOtpEvent {
 }
 
 class SubmitLoginOtp extends LoginVerifyOtpEvent {}
+
+/// New Event for Resending OTP
+class ResendOtpEvent extends LoginVerifyOtpEvent {
+  final String mobileNumber;
+
+  const ResendOtpEvent(this.mobileNumber);
+
+  @override
+  List<Object?> get props => [mobileNumber];
+}
+
+/// Timer Events
+class TimerTick extends LoginVerifyOtpEvent {
+  final int remainingSeconds;
+
+  const TimerTick(this.remainingSeconds);
+
+  @override
+  List<Object?> get props => [remainingSeconds];
+}
+
+class ResetTimerEvent extends LoginVerifyOtpEvent {}

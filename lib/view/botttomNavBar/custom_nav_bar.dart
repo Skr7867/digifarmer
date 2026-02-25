@@ -33,8 +33,8 @@ class CustomBottomNavBar extends StatelessWidget {
           highlightColor: Colors.transparent,
         ),
         child: BottomNavigationBar(
-          currentIndex: currentIndex, // ✅ IMPORTANT
-          onTap: onTap, // ✅ IMPORTANT
+          currentIndex: currentIndex,
+          onTap: onTap,
           selectedLabelStyle: TextStyle(fontFamily: AppFonts.popins),
           unselectedLabelStyle: TextStyle(fontFamily: AppFonts.popins),
           backgroundColor: Colors.transparent,
@@ -51,11 +51,7 @@ class CustomBottomNavBar extends StatelessWidget {
               activeIcon: Icon(PhosphorIconsFill.house),
               label: 'Home',
             ),
-            BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.fileArrowDown),
-              activeIcon: Icon(PhosphorIconsFill.fileArrowDown),
-              label: 'Explore',
-            ),
+
             BottomNavigationBarItem(
               icon: Icon(PhosphorIconsRegular.chartBar),
               activeIcon: Icon(PhosphorIconsFill.chartBar),

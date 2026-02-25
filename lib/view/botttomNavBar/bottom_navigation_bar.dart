@@ -1,8 +1,6 @@
 import 'package:digifarmer/view/home/home_screen.dart';
 import 'package:digifarmer/view/portfolio/portfolio_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../explore/explore_screen.dart';
 import '../profile/profile_screen.dart';
 import '../wallet/wallet_screen.dart';
 import 'custom_nav_bar.dart';
@@ -19,7 +17,6 @@ class _BottomnavBarState extends State<BottomnavBar> {
 
   final List<Widget> screens = [
     HomeScreen(),
-    ExploreScreen(),
     PortfolioScreen(),
     WalletScreen(),
     ProfileScreen(),

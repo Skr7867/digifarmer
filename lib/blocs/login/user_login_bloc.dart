@@ -34,6 +34,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           state.copyWith(
             uniqueKey: response.uniqueKey,
             message: response.message,
+            otp: response.otp ?? '',
             postApiStatus: PostApiStatus.success,
           ),
         );

@@ -10,7 +10,7 @@ abstract class LoginResponseModel with _$LoginResponseModel {
     required String uniqueKey,
     required String message,
     required LoginUserModel user,
-    required String otp,
+    String? otp,
   }) = _LoginResponseModel;
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) =>

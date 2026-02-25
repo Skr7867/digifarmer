@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/repository/userLogin/user_login_repository.dart';
@@ -54,6 +56,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
               }
 
               if (state.postApiStatus == PostApiStatus.success) {
+                log('OTP from state: ${state.otp}');
                 FlushBarHelper.flushBarSuccessMessage(state.message, context);
 
                 Navigator.pushNamed(
@@ -62,6 +65,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                   arguments: {
                     "uniqueKey": state.uniqueKey,
                     "mobileNumber": state.mobileNumber,
+                    "otp": state.otp,
                   },
                 );
               }
@@ -158,10 +162,6 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
     return null;
   }
 }
-
-//////////////////////////////////////////////////////////////
-/// HEADER SECTION (Design unchanged)
-//////////////////////////////////////////////////////////////
 
 class _LoginHeader extends StatelessWidget {
   const _LoginHeader();
