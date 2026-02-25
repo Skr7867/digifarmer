@@ -12,28 +12,46 @@ import 'package:digifarmer/repository/userLogin/user_login_repository.dart';
 import 'package:digifarmer/repository/verifyOtp/verify_otp_http_repository.dart';
 import 'package:digifarmer/repository/verifyOtp/verify_otp_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'blocs/appTheme/theme_bloc.dart';
 import 'config/routes/routes.dart';
 
 GetIt getIt = GetIt.instance;
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   serviceLocator();
-  runApp(const MyApp());
+
+  runApp(
+    BlocProvider<ThemeBloc>(
+      create: (_) => getIt<ThemeBloc>(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: RoutesName.splashScreen,
-      onGenerateRoute: Routes.generateRoute,
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, state) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: state.themeData,
+          initialRoute: RoutesName.splashScreen,
+          onGenerateRoute: Routes.generateRoute,
+        );
+      },
     );
   }
 }
 
 void serviceLocator() {
+  getIt.registerLazySingleton<ThemeBloc>(
+    () => ThemeBloc()..add(LoadThemeEvent()),
+  );
   getIt.registerLazySingleton<UserRegisterRepository>(
     () => UserRegisterHttpApiRepository(),
   );

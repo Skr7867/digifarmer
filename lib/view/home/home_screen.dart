@@ -1,6 +1,8 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 
+import '../../res/fonts/app_fonts.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -12,16 +14,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF4F6F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
             /// ================= HEADER =================
             Container(
               padding: const EdgeInsets.fromLTRB(18, 50, 18, 20),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xff1C6C8C), Color(0xff2FA463)],
+                  colors: Theme.of(context).brightness == Brightness.dark
+                      ? [Colors.black87, Colors.black54]
+                      : [Color(0xff1C6C8C), Color(0xff2FA463)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -38,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -52,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               "Sarah Johnson",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).cardColor,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -67,9 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white24,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.notifications_none,
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                         ),
                       ),
                     ],
@@ -91,10 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(color: Colors.white70),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           "₹2,45,000",
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).cardColor,
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
                           ),
@@ -108,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: const [
+                          children: [
                             Column(
                               children: [
                                 Text(
@@ -122,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   "8",
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Theme.of(context).cardColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
                                   ),
@@ -142,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   "₹12,400",
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: Theme.of(context).cardColor,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
                                   ),
@@ -371,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -429,14 +433,19 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).cardColor,
                   fontWeight: FontWeight.bold,
+                  fontFamily: AppFonts.popins,
                 ),
               ),
               Text(
                 subtitle,
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontFamily: AppFonts.popins,
+                ),
               ),
             ],
           ),
