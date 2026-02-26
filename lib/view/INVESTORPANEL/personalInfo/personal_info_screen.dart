@@ -1,16 +1,17 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/main.dart';
 import 'package:digifarmer/res/customeWidgets/custom_app_bar.dart';
 import 'package:digifarmer/res/customeWidgets/custom_textfield.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/personalInfo/personal_info_bloc.dart';
-import '../../main.dart';
-import '../../repository/personalInfo/personal_info_repository.dart';
-import '../../res/color/app_colors.dart';
-import '../../utils/enums.dart';
-import '../../utils/flush_bar_helper.dart';
+
+import '../../../blocs/personalInfo/personal_info_bloc.dart';
+import '../../../repository/personalInfo/personal_info_repository.dart';
+import '../../../res/color/app_colors.dart';
+import '../../../utils/enums.dart';
+import '../../../utils/flush_bar_helper.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   final String uniqueKey;

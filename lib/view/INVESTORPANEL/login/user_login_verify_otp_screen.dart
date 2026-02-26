@@ -8,10 +8,11 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/loginOtpVerify/login_otp_verify_bloc.dart';
-import '../../res/assets/image_assets.dart';
-import '../../res/color/app_colors.dart';
-import '../../res/fonts/app_fonts.dart';
+
+import '../../../blocs/loginOtpVerify/login_otp_verify_bloc.dart';
+import '../../../res/assets/image_assets.dart';
+import '../../../res/color/app_colors.dart';
+import '../../../res/fonts/app_fonts.dart';
 
 class UserLoginVerifyOtpScreen extends StatefulWidget {
   final String mobileNumber;

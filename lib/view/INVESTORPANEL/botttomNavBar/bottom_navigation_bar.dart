@@ -1,6 +1,6 @@
-import 'package:digifarmer/view/home/home_screen.dart';
-import 'package:digifarmer/view/portfolio/portfolio_screen.dart';
 import 'package:flutter/material.dart';
+import '../home/home_screen.dart';
+import '../portfolio/portfolio_screen.dart';
 import '../profile/profile_screen.dart';
 import '../wallet/wallet_screen.dart';
 import 'custom_nav_bar.dart';

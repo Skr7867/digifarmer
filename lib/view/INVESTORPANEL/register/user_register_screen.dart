@@ -1,4 +1,5 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/main.dart';
 import 'package:digifarmer/res/assets/image_assets.dart';
 import 'package:digifarmer/res/customeWidgets/custom_paddings.dart';
 import 'package:digifarmer/res/customeWidgets/custom_textfield.dart';
@@ -8,10 +9,10 @@ import 'package:digifarmer/utils/enums.dart';
 import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../blocs/register/user_register_bloc.dart';
-import '../../main.dart';
-import '../../repository/register/user_register_repository.dart';
-import '../../res/color/app_colors.dart';
+
+import '../../../blocs/register/user_register_bloc.dart';
+import '../../../repository/register/user_register_repository.dart';
+import '../../../res/color/app_colors.dart';
 
 class UserRegisterScreen extends StatefulWidget {
   const UserRegisterScreen({super.key});

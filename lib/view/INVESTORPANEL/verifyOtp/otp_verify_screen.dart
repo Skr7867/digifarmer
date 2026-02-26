@@ -10,8 +10,8 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../main.dart';
-import '../../repository/verifyOtp/verify_otp_repository.dart';
+import '../../../main.dart';
+import '../../../repository/verifyOtp/verify_otp_repository.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String uniqueKey;

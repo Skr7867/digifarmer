@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'blocs/appTheme/theme_bloc.dart';
 import 'config/routes/routes.dart';
-import 'view/serviceLocator/service_locator.dart';
+import 'view/INVESTORPANEL/serviceLocator/service_locator.dart';
 
 GetIt getIt = GetIt.instance;
 void main() async {

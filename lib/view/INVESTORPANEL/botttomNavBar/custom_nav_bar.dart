@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-import '../../res/color/app_colors.dart';
-import '../../res/fonts/app_fonts.dart';
+import '../../../res/color/app_colors.dart';
+import '../../../res/fonts/app_fonts.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;

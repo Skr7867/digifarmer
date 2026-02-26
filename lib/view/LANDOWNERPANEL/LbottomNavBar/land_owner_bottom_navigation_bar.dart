@@ -1,7 +1,7 @@
-import 'package:digifarmer/view/portfolio/portfolio_screen.dart';
-import 'package:digifarmer/view/profile/profile_screen.dart';
-import 'package:digifarmer/view/wallet/wallet_screen.dart';
 import 'package:flutter/material.dart';
+import '../../INVESTORPANEL/portfolio/portfolio_screen.dart';
+import '../../INVESTORPANEL/profile/profile_screen.dart';
+import '../../INVESTORPANEL/wallet/wallet_screen.dart';
 import '../homeScreen/land_owner_home_screen.dart';
 import 'land_owner_custom_nav_bar.dart';
 

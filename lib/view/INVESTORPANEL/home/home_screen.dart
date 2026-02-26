@@ -1,7 +1,7 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 
-import '../../res/fonts/app_fonts.dart';
+import '../../../res/fonts/app_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

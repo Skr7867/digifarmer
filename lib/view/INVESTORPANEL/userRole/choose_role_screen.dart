@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:digifarmer/blocs/chooseRole/choose_role_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/main.dart';
 import 'package:digifarmer/res/assets/image_assets.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/utils/enums.dart';
@@ -9,9 +10,8 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../main.dart';
-import '../../repository/chooseRole/choose_role_repository.dart';
-import '../../res/fonts/app_fonts.dart';
+import '../../../repository/chooseRole/choose_role_repository.dart';
+import '../../../res/fonts/app_fonts.dart';
 
 class ChooseRoleScreen extends StatefulWidget {
   final String uniqueKey;
