@@ -1,18 +1,15 @@
 name: digifarmer
 description: "A new Flutter project."
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
+publish_to: 'none'
 
 version: 1.0.0+1
 
 environment:
   sdk: ^3.11.0
 
-
 dependencies:
   flutter:
     sdk: flutter
-
 
   cupertino_icons: ^1.0.8
   phosphor_flutter: ^2.1.0
@@ -40,28 +37,26 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.8.0
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
-  
-  
-
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/splash_screen_logo.png"
+  min_sdk_android: 21
 
 flutter:
-
-
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - assets/icons/
 
-  # example:
   fonts:
     - family: poppins
       fonts:
         - asset: assets/fonts/Poppins-Regular.ttf
+
     - family: poppinsBold
       fonts:
-        - asset: assets/fonts/Poppins-Regular.ttf
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
+        - asset: assets/fonts/Poppins-Bold.ttf
