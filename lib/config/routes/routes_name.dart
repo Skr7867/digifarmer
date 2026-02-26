@@ -12,4 +12,13 @@ class RoutesName {
   static const String proceedPaymentScreen = 'proceed_payment_screen';
   static const String paymentScreen = 'payment_screen';
   static const String loginOtpVerifyScreen = 'login_otp_verify_screen';
+
+  //*************************************************LAND OWNER SCREENS STARTED FROM HERE ***************************************/
+
+  static const String landOwnerBottomNavBar =
+      'land_owner_bottom_nav_bar_screen';
+
+  //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
+
+  static const String workerBottomNavBar = 'worker_bottom_nav_bar';
 }

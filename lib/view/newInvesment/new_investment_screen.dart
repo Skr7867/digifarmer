@@ -41,7 +41,12 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   children: [
-                    const Icon(Icons.arrow_back),
+                    InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Icon(Icons.arrow_back),
+                    ),
                     const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.all(10),
