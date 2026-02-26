@@ -130,11 +130,34 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
               FlushBarHelper.flushBarSuccessMessage(state.message, context);
 
               /// Navigate to home
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                RoutesName.bottomNavBar,
-                (route) => false,
-              );
+              final role = state.role;
+
+              if (role == "INVESTOR") {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  RoutesName.bottomNavBar,
+                  (route) => false,
+                );
+              } else if (role == "ADMIN") {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  RoutesName.landOwnerBottomNavBar,
+                  (route) => false,
+                );
+              } else if (role == "WORKER") {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  RoutesName.workerBottomNavBar,
+                  (route) => false,
+                );
+              } else {
+                // fallback
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  RoutesName.bottomNavBar,
+                  (route) => false,
+                );
+              }
             }
 
             // Handle Resend OTP

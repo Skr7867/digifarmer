@@ -53,14 +53,14 @@ class WorkerCustomNavBar extends StatelessWidget {
             ),
 
             BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.lockLaminated),
-              activeIcon: Icon(PhosphorIconsFill.chartBar),
-              label: 'My Lands',
+              icon: Icon(PhosphorIconsRegular.filePdf),
+              activeIcon: Icon(PhosphorIconsFill.filePdf),
+              label: 'Task',
             ),
             BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.wallet),
-              activeIcon: Icon(PhosphorIconsFill.wallet),
-              label: 'Contract',
+              icon: Icon(PhosphorIconsRegular.crop),
+              activeIcon: Icon(PhosphorIconsFill.crop),
+              label: 'Lands',
             ),
             BottomNavigationBarItem(
               icon: Icon(PhosphorIconsRegular.person),

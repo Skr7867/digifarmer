@@ -8,6 +8,7 @@ class LoginVerifyOtpState extends Equatable {
   final ResendPostApiStatus resendPostApiStatus;
   final String accessToken;
   final String refreshToken;
+  final String role;
 
   // Timer related fields
   final int remainingSeconds;
@@ -23,6 +24,7 @@ class LoginVerifyOtpState extends Equatable {
     this.refreshToken = '',
     this.remainingSeconds = 60,
     this.isResendEnabled = false,
+    this.role = '',
   });
 
   LoginVerifyOtpState copyWith({
@@ -35,6 +37,7 @@ class LoginVerifyOtpState extends Equatable {
     String? refreshToken,
     int? remainingSeconds,
     bool? isResendEnabled,
+    String? role,
   }) {
     return LoginVerifyOtpState(
       uniqueKey: uniqueKey ?? this.uniqueKey,
@@ -46,6 +49,7 @@ class LoginVerifyOtpState extends Equatable {
       refreshToken: refreshToken ?? this.refreshToken,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       isResendEnabled: isResendEnabled ?? this.isResendEnabled,
+      role: role ?? this.role,
     );
   }
 
@@ -60,5 +64,6 @@ class LoginVerifyOtpState extends Equatable {
     refreshToken,
     remainingSeconds,
     isResendEnabled,
+    role,
   ];
 }

@@ -127,6 +127,7 @@ class LoginVerifyOtpBloc
             message: response.message,
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
+            role: response.user.role ?? '',
             postApiStatus: PostApiStatus.success,
           ),
         );
