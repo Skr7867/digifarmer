@@ -52,13 +52,17 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                   return Center(child: InternetException(onPress: () {}));
                 } else {
                   return Center(
-                    child: Text(
-                      textAlign: TextAlign.center,
-                      state.allInvestmentPlan.message.toString(),
-                      style: TextStyle(
-                        fontFamily: AppFonts.popins,
-                        color: AppColors.redColor,
-                        fontSize: 15,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        state.allInvestmentPlan.message.toString(),
+                        style: TextStyle(
+                          fontFamily: AppFonts.popins,
+                          color: AppColors.redColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   );
