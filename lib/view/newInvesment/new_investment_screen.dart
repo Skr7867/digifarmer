@@ -1,9 +1,13 @@
-import 'package:digifarmer/config/routes/routes_name.dart';
-import 'package:digifarmer/res/customeWidgets/round_button.dart';
-import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:digifarmer/main.dart';
+import 'package:digifarmer/utils/enums.dart';
+import '../../blocs/allInvestmentPlan/all_investment_plan_bloc.dart';
+import '../../config/component/internet_exception.dart';
+import '../../model/investmentPlan/all_investment_plan_model.dart';
 import '../../res/color/app_colors.dart';
+import '../../res/fonts/app_fonts.dart';
+import '../../res/customeWidgets/round_button.dart';
 
 class NewInvestmentScreen extends StatefulWidget {
   const NewInvestmentScreen({super.key});
@@ -13,295 +17,233 @@ class NewInvestmentScreen extends StatefulWidget {
 }
 
 class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
-  int selectedTenure = 3;
-  double investmentAmount = 25000;
+  late AllInvestmentPlanBloc bloc;
 
-  final Map<int, double> interestRates = {2: 10, 3: 12, 5: 14};
+  int selectedTenure = 0;
+  double investmentAmount = 0;
 
-  double calculateReturns() {
-    double rate = interestRates[selectedTenure]! / 100;
-    return investmentAmount * rate * selectedTenure;
+  @override
+  void initState() {
+    super.initState();
+    bloc = AllInvestmentPlanBloc(allInvestmentPlanRepository: getIt())
+      ..add(PlanFetched());
   }
 
-  double calculateMaturity() {
-    return investmentAmount + calculateReturns();
+  @override
+  void dispose() {
+    bloc.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F7FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// HEADER
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Icon(Icons.arrow_back),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: const BoxDecoration(
-                        color: Color(0xffE6F4EA),
-                        shape: BoxShape.circle,
+      body: BlocProvider(
+        create: (_) => bloc,
+        child: BlocBuilder<AllInvestmentPlanBloc, AllInvestmentSplanState>(
+          builder: (context, state) {
+            switch (state.allInvestmentPlan.status) {
+              case Status.loading:
+                return const Center(child: CircularProgressIndicator());
+              case Status.error:
+                if (state.allInvestmentPlan.message ==
+                    'No Internet Connection') {
+                  return Center(child: InternetException(onPress: () {}));
+                } else {
+                  return Center(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      state.allInvestmentPlan.message.toString(),
+                      style: TextStyle(
+                        fontFamily: AppFonts.popins,
+                        color: AppColors.redColor,
+                        fontSize: 15,
                       ),
-                      child: const Icon(Icons.eco, color: Colors.green),
                     ),
-                    const SizedBox(width: 10),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Organic Rice Farm",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: AppFonts.popins,
-                          ),
-                        ),
-                        Text(
-                          "Maharashtra",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontFamily: AppFonts.popins,
-                          ),
-                        ),
-                      ],
+                  );
+                }
+              case Status.completed:
+                final data = state.allInvestmentPlan.data;
+
+                if (data == null || data.plans.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "No Plans Available",
+                      style: TextStyle(
+                        fontFamily: AppFonts.popins,
+                        fontSize: 15,
+                      ),
                     ),
-                  ],
-                ),
+                  );
+                }
+
+                /// For now select first active plan
+                final plan = data.plans.firstWhere(
+                  (e) => e.isActive == true,
+                  orElse: () => data.plans.first,
+                );
+
+                /// Initialize values
+                selectedTenure = selectedTenure == 0
+                    ? plan.availableDurations.first
+                    : selectedTenure;
+
+                investmentAmount = investmentAmount == 0
+                    ? plan.minInvestment.toDouble()
+                    : investmentAmount;
+
+                return _buildUI(plan);
+
+              default:
+                return const SizedBox();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  /// ================= UI =================
+
+  Widget _buildUI(InvestmentPlanModel plan) {
+    double baseRate = plan.baseReturnPercent / 100;
+    double multiplier =
+        (plan.durationMultipliers[selectedTenure.toString()] ?? 1).toDouble();
+
+    double finalRate = baseRate * multiplier;
+
+    double estimatedReturns =
+        investmentAmount * finalRate * (selectedTenure / 12);
+
+    double maturityAmount = investmentAmount + estimatedReturns;
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// PLAN NAME
+            Text(
+              plan.planName,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: AppFonts.popins,
               ),
-              Divider(),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-              /// STEP INDICATOR
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: .start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _stepCircle("1", true),
-                        _stepLine(),
-                        _stepCircle("2", false),
-                        _stepLine(),
-                        _stepCircle("3", false),
-                      ],
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// ENTER INVESTMENT
-                    const Text(
-                      "Enter Investment Amount",
-                      style: TextStyle(
-                        fontFamily: AppFonts.popins,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "Choose how much you want to invest",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontFamily: AppFonts.popins,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    /// AMOUNT BOX
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey.withValues(alpha: 0.25),
-                        ),
-                        color: const Color(0xffE9EEF5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          const Text(
-                            "Investment Amount",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontFamily: AppFonts.popins,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "₹ ${investmentAmount.toStringAsFixed(0)}",
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: AppFonts.popins,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    /// MIN MAX
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Minimum ₹5,000",
-                          style: TextStyle(fontFamily: AppFonts.popins),
-                        ),
-                        Text(
-                          "Maximum ₹1,00,000",
-                          style: TextStyle(fontFamily: AppFonts.popins),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    /// QUICK AMOUNT BUTTONS
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _amountButton(10000),
-                        _amountButton(25000),
-                        _amountButton(50000),
-                        _amountButton(100000),
-                      ],
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// TENURE
-                    const Text(
-                      "Select Investment Tenure",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: AppFonts.popins,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "Higher tenure offers better returns",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontFamily: AppFonts.popins,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _tenureCard(2),
-                    const SizedBox(height: 12),
-                    _tenureCard(3, popular: true),
-                    const SizedBox(height: 12),
-                    _tenureCard(5),
-
-                    const SizedBox(height: 20),
-
-                    /// INFO BOX
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xffFFF4DB),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.info, color: Colors.orange),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              "Yearly Compounding\nReturns are compounded annually. Your investment grows faster with longer tenure periods.",
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    /// TOTAL SECTION
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text("Total Investment"),
-                              Text(
-                                "₹ ${investmentAmount.toStringAsFixed(0)}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: AppFonts.popins,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                "Expected Returns",
-                                style: TextStyle(fontFamily: AppFonts.popins),
-                              ),
-                              Text(
-                                "₹ ${calculateReturns().toStringAsFixed(0)}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                  fontFamily: AppFonts.popins,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// CONTINUE BUTTON
-                    RoundButton(
-                      width: double.infinity,
-                      buttonColor: AppColors.greenColor,
-                      title: 'Continue to review',
-                      onPress: () {
-                        Navigator.pushNamed(
-                          context,
-                          RoutesName.proceedPaymentScreen,
-                        );
-                      },
-                    ),
-                  ],
-                ),
+            /// INVESTMENT AMOUNT BOX
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xffE9EEF5),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
+              child: Column(
+                children: [
+                  const Text("Investment Amount"),
+                  const SizedBox(height: 8),
+                  Text(
+                    "₹ ${investmentAmount.toStringAsFixed(0)}",
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Minimum ₹${plan.minInvestment}"),
+                Text("Maximum ₹${plan.maxInvestment}"),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            /// QUICK AMOUNT BUTTONS
+            Wrap(
+              spacing: 10,
+              children: [
+                _amountButton(plan.minInvestment.toDouble()),
+                _amountButton((plan.minInvestment * 2).toDouble()),
+                _amountButton((plan.maxInvestment / 2).toDouble()),
+                _amountButton(plan.maxInvestment.toDouble()),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            /// TENURE SECTION
+            const Text(
+              "Select Investment Tenure",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+
+            const SizedBox(height: 16),
+
+            ...plan.availableDurations.map((year) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _tenureCard(
+                  plan,
+                  year,
+                  estimatedReturns,
+                  maturityAmount,
+                ),
+              );
+            }),
+
+            const SizedBox(height: 20),
+
+            /// SUMMARY BOX
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  _row(
+                    "Total Investment",
+                    "₹ ${investmentAmount.toStringAsFixed(0)}",
+                  ),
+                  const SizedBox(height: 8),
+                  _row(
+                    "Expected Returns",
+                    "₹ ${estimatedReturns.toStringAsFixed(0)}",
+                    isGreen: true,
+                  ),
+                  const SizedBox(height: 8),
+                  _row(
+                    "Maturity Amount",
+                    "₹ ${maturityAmount.toStringAsFixed(0)}",
+                    isGreen: true,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            RoundButton(
+              width: double.infinity,
+              buttonColor: AppColors.greenColor,
+              title: 'Continue',
+              onPress: () {},
+            ),
+          ],
         ),
       ),
     );
@@ -320,17 +262,18 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.grey.shade300),
         ),
-        child: Text(
-          "₹${(amount / 1000).toStringAsFixed(0)}K",
-          style: TextStyle(fontFamily: AppFonts.popins),
-        ),
+        child: Text("₹${(amount / 1000).toStringAsFixed(0)}K"),
       ),
     );
   }
 
-  Widget _tenureCard(int year, {bool popular = false}) {
+  Widget _tenureCard(
+    InvestmentPlanModel plan,
+    int year,
+    double returns,
+    double maturity,
+  ) {
     bool isSelected = selectedTenure == year;
-    double rate = interestRates[year]!;
 
     return GestureDetector(
       onTap: () {
@@ -348,90 +291,27 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
           ),
           color: Colors.white,
         ),
-        child: Column(
+        child: Row(
           children: [
-            Row(
-              children: [
-                Radio(
-                  value: year,
-                  // ignore: deprecated_member_use
-                  groupValue: selectedTenure,
-                  // ignore: deprecated_member_use
-                  onChanged: (value) {
-                    setState(() {
-                      selectedTenure = value!;
-                    });
-                  },
-                ),
-                Text(
-                  "$year Years",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-                const Spacer(),
-
-                Text(
-                  "$rate% per annum",
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                if (popular)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      "Popular",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontFamily: AppFonts.popins,
-                      ),
-                    ),
-                  ),
-                const SizedBox(width: 8),
-              ],
+            Radio(
+              value: year,
+              groupValue: selectedTenure,
+              onChanged: (value) {
+                setState(() {
+                  selectedTenure = value!;
+                });
+              },
             ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xffE8F5E9),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  _rowData(
-                    "Estimated Returns",
-                    "₹ ${calculateReturns().toStringAsFixed(0)}",
-                  ),
-                  const SizedBox(height: 6),
-                  _rowData(
-                    "Maturity Amount",
-                    "₹ ${calculateMaturity().toStringAsFixed(0)}",
-                    isGreen: true,
-                  ),
-                ],
-              ),
-            ),
+            Text("$year Months"),
+            const Spacer(),
+            Text("${plan.baseReturnPercent}%"),
           ],
         ),
       ),
     );
   }
 
-  Widget _rowData(String title, String value, {bool isGreen = false}) {
+  Widget _row(String title, String value, {bool isGreen = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -441,34 +321,9 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: isGreen ? Colors.green : Colors.black,
-            fontFamily: AppFonts.popins,
           ),
         ),
       ],
     );
-  }
-
-  Widget _stepCircle(String text, bool active) {
-    return Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: active ? Colors.blue : Colors.grey.shade300,
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontFamily: AppFonts.popins,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _stepLine() {
-    return Container(width: 40, height: 2, color: Colors.grey.shade300);
   }
 }

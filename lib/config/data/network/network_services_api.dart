@@ -25,31 +25,41 @@ class NetworkApiServices extends BaseApiServices {
     return "Error: $statusCode";
   }
 
-  /// 🔥 GET API
+  //GET API
   @override
   Future<dynamic> getApi(String url, {String? token}) async {
     try {
       apiLog("GET URL", url);
-      apiLog("GET TOKEN", token);
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "Content-Type": "application/json",
-          if (token != null) "Authorization": "Bearer $token",
-        },
+      final response = await DioClient.dio.get(
+        url,
+        options: Options(
+          headers: {if (token != null) 'Authorization': 'Bearer $token'},
+        ),
       );
 
       apiLog("GET STATUS", response.statusCode);
-      apiLog("GET RESPONSE", response.body);
+      apiLog("GET RESPONSE", response.data);
 
-      return returnResponse(response);
-    } on SocketException {
-      throw InternetException();
+      return response.data;
+    } on DioException catch (e) {
+      apiLog("GET ERROR STATUS", e.response?.statusCode);
+      apiLog("GET ERROR DATA", e.response?.data);
+
+      final statusCode = e.response?.statusCode ?? 500;
+      final resData = e.response?.data;
+
+      final message = extractMessage(resData, statusCode);
+
+      if (statusCode >= 500) {
+        throw ServerException(message);
+      } else {
+        throw FetchDataException(message);
+      }
     }
   }
 
-  /// 🔥 POST API
+  // POST API
   @override
   Future<dynamic> postApi(
     dynamic data,
@@ -94,7 +104,7 @@ class NetworkApiServices extends BaseApiServices {
     }
   }
 
-  /// 🔥 PATCH API
+  // PATCH API
   @override
   Future<dynamic> patchApi(
     Map<String, dynamic> data,
@@ -123,7 +133,7 @@ class NetworkApiServices extends BaseApiServices {
     }
   }
 
-  /// 🔥 DELETE API
+  // DELETE API
   @override
   Future<dynamic> deleteApi(String url, {String? token}) async {
     try {
@@ -146,7 +156,7 @@ class NetworkApiServices extends BaseApiServices {
     }
   }
 
-  /// 🔥 RESPONSE PARSER
+  // RESPONSE PARSER
   dynamic returnResponse(http.Response response) {
     apiLog("RETURN STATUS", response.statusCode);
     apiLog("RETURN BODY", response.body);
