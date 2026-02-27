@@ -11,3 +11,5 @@ export 'investorpanel/userrole/choose_role_screen.dart';
 export 'investorpanel/verifyOtp/otp_verify_screen.dart';
 export 'investorpanel/login/user_login_screen.dart';
 export 'investorpanel/login/user_login_verify_otp_screen.dart';
+export 'landownerpanel/LbottomNavBar/land_owner_bottom_navigation_bar.dart';
+export 'workerpanel/workerBottomNavbar/worker_bottom_navigation_bar.dart';

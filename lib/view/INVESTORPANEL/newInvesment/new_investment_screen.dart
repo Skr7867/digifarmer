@@ -93,7 +93,10 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                       ElevatedButton(
                         onPressed: () =>
                             _allInvestmentPlanBloc.add(PlanFetched()),
-                        child: const Text('Retry'),
+                        child: const Text(
+                          'Retry',
+                          style: TextStyle(fontFamily: AppFonts.popins),
+                        ),
                       ),
                     ],
                   ),
@@ -102,7 +105,15 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
               case Status.completed:
                 final allPlanData = state.allInvestmentPlan.data;
                 if (allPlanData == null || allPlanData.plans.isEmpty) {
-                  return const Center(child: Text('No plans found'));
+                  return const Center(
+                    child: Text(
+                      'No plans found',
+                      style: TextStyle(
+                        fontFamily: AppFonts.popins,
+                        fontSize: 20,
+                      ),
+                    ),
+                  );
                 }
 
                 final plans = allPlanData.plans;
