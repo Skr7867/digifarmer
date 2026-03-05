@@ -1,3 +1,5 @@
+import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_http_repository.dart';
+import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_repository.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
@@ -50,5 +52,8 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<AllInvestmentPlanRepository>(
     () => AllInvestmentHttpRepository(),
+  );
+  getIt.registerLazySingleton<SaveBasicInfoRepository>(
+    () => SaveBasicInfoHttpRepository(),
   );
 }

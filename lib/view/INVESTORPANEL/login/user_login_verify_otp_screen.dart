@@ -129,55 +129,60 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
 
             if (state.postApiStatus == PostApiStatus.success) {
               FlushBarHelper.flushBarSuccessMessage(state.message, context);
+              void navigateByRole(BuildContext context, String role) {
+                switch (role) {
+                  case "INVESTOR":
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      RoutesName.bottomNavBar,
+                      (route) => false,
+                    );
+                    break;
 
-              /// Navigate to home
-              final role = state.role;
+                  case "LAND_OWNER":
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      RoutesName.landOwnerBottomNavBar,
+                      (route) => false,
+                    );
+                    break;
 
-              if (role == "INVESTOR") {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  RoutesName.bottomNavBar,
+                  case "WORKER":
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      RoutesName.workerBottomNavBar,
+                      (route) => false,
+                    );
+                    break;
 
-                  (route) => false,
-                );
-              } else if (role == "ADMIN") {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  RoutesName.landOwnerBottomNavBar,
-                  (route) => false,
-                );
-              } else if (role == "WORKER") {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  RoutesName.workerBottomNavBar,
-                  (route) => false,
-                );
-              } else {
-                // fallback
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  RoutesName.bottomNavBar,
-                  (route) => false,
-                );
+                  default:
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      RoutesName.bottomNavBar,
+                      (route) => false,
+                    );
+                }
               }
-            }
 
-            // Handle Resend OTP
-            if (state.resendPostApiStatus == ResendPostApiStatus.error) {
-              FlushBarHelper.flushBarErrorMessage(state.message, context);
-            }
+              navigateByRole(context, state.role);
 
-            if (state.resendPostApiStatus == ResendPostApiStatus.success) {
-              FlushBarHelper.flushBarSuccessMessage(
-                'OTP resent successfully!',
-                context,
-              );
-
-              // Clear OTP fields after resend
-              for (var controller in _otpControllers) {
-                controller.clear();
+              // Handle Resend OTP
+              if (state.resendPostApiStatus == ResendPostApiStatus.error) {
+                FlushBarHelper.flushBarErrorMessage(state.message, context);
               }
-              _otpFocusNodes[0].requestFocus();
+
+              if (state.resendPostApiStatus == ResendPostApiStatus.success) {
+                FlushBarHelper.flushBarSuccessMessage(
+                  'OTP resent successfully!',
+                  context,
+                );
+
+                // Clear OTP fields after resend
+                for (var controller in _otpControllers) {
+                  controller.clear();
+                }
+                _otpFocusNodes[0].requestFocus();
+              }
             }
           },
           child: SafeArea(

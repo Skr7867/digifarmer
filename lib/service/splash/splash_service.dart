@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../config/routes/routes_name.dart';
@@ -6,41 +7,48 @@ import '../sessionManager/session_controller.dart';
 
 class SplashServices {
   void isLogin(BuildContext context) {
-    SessionController()
-        .getUserFromPreference()
-        .then((value) {
-          debugPrint("SPLASH isLogin = ${SessionController().isLogin}");
+    SessionController().getUserFromPreference().then((value) {
+      final session = SessionController();
 
-          if (SessionController().isLogin) {
-            debugPrint("GO HOME");
-            Timer(
-              Duration(seconds: 2),
-              () => Navigator.pushNamedAndRemoveUntil(
-                context,
-                RoutesName.bottomNavBar,
-                (route) => false,
-              ),
+      if (session.isLogin) {
+        final role = session.user?.role;
+        Timer(const Duration(seconds: 2), () {
+          if (role == "INVESTOR") {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              RoutesName.bottomNavBar,
+              (route) => false,
+            );
+          } else if (role == "LAND_OWNER") {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              RoutesName.landOwnerBottomNavBar,
+              (route) => false,
+            );
+          } else if (role == "WORKER") {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              RoutesName.workerBottomNavBar,
+              (route) => false,
             );
           } else {
-            Timer(
-              Duration(seconds: 2),
-              () => Navigator.pushNamedAndRemoveUntil(
-                context,
-                RoutesName.userLoginScreen,
-                (route) => false,
-              ),
-            );
-          }
-        })
-        .onError((error, stacktrace) {
-          Timer(
-            Duration(seconds: 2),
-            () => Navigator.pushNamedAndRemoveUntil(
+            Navigator.pushNamedAndRemoveUntil(
               context,
               RoutesName.userLoginScreen,
               (route) => false,
-            ),
-          );
+            );
+          }
         });
+      } else {
+        Timer(
+          const Duration(seconds: 2),
+          () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            RoutesName.userLoginScreen,
+            (route) => false,
+          ),
+        );
+      }
+    });
   }
 }

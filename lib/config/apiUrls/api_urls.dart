@@ -8,4 +8,6 @@ class ApiUrls {
   static String loginSendOtp = '$baseUrl/api/v1/auth/login/send-otp';
   static String loginVerifyOtp = '$baseUrl/api/v1/auth/login/verify-otp';
   static String allPlansApi = '$baseUrl/api/v1/admin/plans/active';
+  static String landOwnerSaveBasicInfoApi =
+      '$baseUrl/api/v1/land-owner/lands/step1/basic-info';
 }
