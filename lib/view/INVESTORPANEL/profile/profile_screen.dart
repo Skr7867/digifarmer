@@ -1,8 +1,8 @@
-import 'package:digifarmer/blocs/appTheme/theme_bloc.dart';
 import 'package:digifarmer/res/customeWidgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
 import '../../../config/routes/routes_name.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../service/storage/local_storage.dart';

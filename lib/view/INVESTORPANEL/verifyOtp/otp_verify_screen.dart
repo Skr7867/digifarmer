@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:digifarmer/blocs/verifyOtp/verify_otp_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/res/color/app_colors.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
@@ -10,8 +9,9 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../blocs/INVESTORPANEL/verifyOtp/verify_otp_bloc.dart';
 import '../../../main.dart';
-import '../../../repository/verifyOtp/verify_otp_repository.dart';
+import '../../../repository/INVESTORPANEL/verifyOtp/verify_otp_repository.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String uniqueKey;
@@ -45,7 +45,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     startTimer();
   }
 
-  void startTimer() {
+  Future<void> startTimer() async {
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (seconds == 0) {
         t.cancel();

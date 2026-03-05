@@ -1,19 +1,20 @@
-import 'package:digifarmer/repository/invesmentPlan/all_investment_http_repository.dart';
-import 'package:digifarmer/repository/invesmentPlan/all_investment_plan_repository.dart';
 import 'package:get_it/get_it.dart';
-import 'package:digifarmer/blocs/appTheme/theme_bloc.dart';
-import 'package:digifarmer/repository/chooseRole/choose_role_http_repository.dart';
-import 'package:digifarmer/repository/chooseRole/choose_role_repository.dart';
-import 'package:digifarmer/repository/loginOtpVerify/login_otp_verify_http_repository.dart';
-import 'package:digifarmer/repository/loginOtpVerify/login_otp_verify_repository.dart';
-import 'package:digifarmer/repository/personalInfo/personal_info_http_repository.dart';
-import 'package:digifarmer/repository/personalInfo/personal_info_repository.dart';
-import 'package:digifarmer/repository/register/user_register_http_api_repository.dart';
-import 'package:digifarmer/repository/register/user_register_repository.dart';
-import 'package:digifarmer/repository/userLogin/user_login_http_repository.dart';
-import 'package:digifarmer/repository/userLogin/user_login_repository.dart';
-import 'package:digifarmer/repository/verifyOtp/verify_otp_http_repository.dart';
-import 'package:digifarmer/repository/verifyOtp/verify_otp_repository.dart';
+
+import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
+import '../../../repository/INVESTORPANEL/chooseRole/choose_role_http_repository.dart';
+import '../../../repository/INVESTORPANEL/chooseRole/choose_role_repository.dart';
+import '../../../repository/INVESTORPANEL/invesmentPlan/all_investment_http_repository.dart';
+import '../../../repository/INVESTORPANEL/invesmentPlan/all_investment_plan_repository.dart';
+import '../../../repository/INVESTORPANEL/loginOtpVerify/login_otp_verify_http_repository.dart';
+import '../../../repository/INVESTORPANEL/loginOtpVerify/login_otp_verify_repository.dart';
+import '../../../repository/INVESTORPANEL/personalInfo/personal_info_http_repository.dart';
+import '../../../repository/INVESTORPANEL/personalInfo/personal_info_repository.dart';
+import '../../../repository/INVESTORPANEL/register/user_register_http_api_repository.dart';
+import '../../../repository/INVESTORPANEL/register/user_register_repository.dart';
+import '../../../repository/INVESTORPANEL/userLogin/user_login_http_repository.dart';
+import '../../../repository/INVESTORPANEL/userLogin/user_login_repository.dart';
+import '../../../repository/INVESTORPANEL/verifyOtp/verify_otp_http_repository.dart';
+import '../../../repository/INVESTORPANEL/verifyOtp/verify_otp_repository.dart';
 
 final GetIt getIt = GetIt.instance;
 

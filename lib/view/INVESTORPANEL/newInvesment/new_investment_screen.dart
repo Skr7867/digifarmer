@@ -1,12 +1,12 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
-import 'package:digifarmer/model/investmentPlan/all_investment_plan_model.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../blocs/allInvestmentPlan/all_investment_plan_bloc.dart';
+import '../../../blocs/INVESTORPANEL/allInvestmentPlan/all_investment_plan_bloc.dart';
 import '../../../main.dart';
+import '../../../model/INVESTORPANEL/investmentPlan/all_investment_plan_model.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../utils/enums.dart';
 

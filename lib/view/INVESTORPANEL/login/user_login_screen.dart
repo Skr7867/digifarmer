@@ -2,13 +2,13 @@ import 'dart:developer';
 
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
-import 'package:digifarmer/repository/userLogin/user_login_repository.dart';
 import 'package:digifarmer/utils/enums.dart';
 import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../blocs/login/user_login_bloc.dart';
+import '../../../blocs/INVESTORPANEL/login/user_login_bloc.dart';
+import '../../../repository/INVESTORPANEL/userLogin/user_login_repository.dart';
 import '../../../res/assets/image_assets.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../res/customeWidgets/custom_textfield.dart';

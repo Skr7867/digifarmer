@@ -1,6 +1,4 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
-import 'package:digifarmer/view/LANDOWNERPANEL/LbottomNavBar/land_owner_bottom_navigation_bar.dart';
-import 'package:digifarmer/view/WORKERPANEL/workerBottomNavbar/worker_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../view/view.dart';
@@ -63,6 +61,8 @@ class Routes {
         return MaterialPageRoute(
           builder: (context) => LandOwnerBottomNavigationBar(),
         );
+      case RoutesName.addNewLandScreen:
+        return MaterialPageRoute(builder: (context) => AddNewLandScreen());
 
       //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
 

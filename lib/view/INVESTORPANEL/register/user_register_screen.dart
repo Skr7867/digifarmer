@@ -10,8 +10,8 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../blocs/register/user_register_bloc.dart';
-import '../../../repository/register/user_register_repository.dart';
+import '../../../blocs/INVESTORPANEL/register/user_register_bloc.dart';
+import '../../../repository/INVESTORPANEL/register/user_register_repository.dart';
 import '../../../res/color/app_colors.dart';
 
 class UserRegisterScreen extends StatefulWidget {

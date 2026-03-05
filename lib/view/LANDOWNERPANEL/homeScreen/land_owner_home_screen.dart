@@ -1,3 +1,4 @@
+import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 
 class LandOwnerHomeScreen extends StatelessWidget {
@@ -184,6 +185,12 @@ class LandOwnerHomeScreen extends StatelessWidget {
                     child: _quickActionCard(
                       icon: Icons.add,
                       title: "Add New Land",
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          RoutesName.addNewLandScreen,
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(width: 15),
@@ -237,23 +244,27 @@ class LandOwnerHomeScreen extends StatelessWidget {
   static Widget _quickActionCard({
     required IconData icon,
     required String title,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: const Color(0xffE8F5E9),
-            child: Icon(icon, color: const Color(0xff2BB673)),
-          ),
-          const SizedBox(height: 10),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-        ],
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: const Color(0xffE8F5E9),
+              child: Icon(icon, color: const Color(0xff2BB673)),
+            ),
+            const SizedBox(height: 10),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+          ],
+        ),
       ),
     );
   }

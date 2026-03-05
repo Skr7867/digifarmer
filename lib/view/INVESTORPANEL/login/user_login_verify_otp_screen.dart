@@ -1,7 +1,6 @@
 // user_login_verify_otp_screen.dart
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
-import 'package:digifarmer/repository/loginOtpVerify/login_otp_verify_repository.dart';
 import 'package:digifarmer/res/customeWidgets/custom_app_bar.dart';
 import 'package:digifarmer/utils/enums.dart';
 import 'package:digifarmer/utils/flush_bar_helper.dart';
@@ -9,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../blocs/loginOtpVerify/login_otp_verify_bloc.dart';
+import '../../../blocs/INVESTORPANEL/loginOtpVerify/login_otp_verify_bloc.dart';
+import '../../../repository/INVESTORPANEL/loginOtpVerify/login_otp_verify_repository.dart';
 import '../../../res/assets/image_assets.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../res/fonts/app_fonts.dart';
@@ -137,6 +137,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   RoutesName.bottomNavBar,
+
                   (route) => false,
                 );
               } else if (role == "ADMIN") {
