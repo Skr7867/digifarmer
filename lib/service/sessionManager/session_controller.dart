@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import '../storage/local_storage.dart';
 import 'session_user_model.dart';
@@ -38,6 +39,8 @@ class SessionController {
 
       if (userData != null && userData.isNotEmpty) {
         user = SessionUserModel.fromJson(jsonDecode(userData));
+        log("SAVED TOKEN => ${user?.accessToken}");
+        log("USER ROLE => ${user?.role}");
       }
 
       isLogin = loginFlag == 'true';
