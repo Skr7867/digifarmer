@@ -70,8 +70,12 @@ class Routes {
           builder: (context) => LocationScreen(tempId: tempId),
         );
       case RoutesName.uploadLandImageScreen:
+        // Safely extract tempId from Map
+        final args = settings.arguments as Map<String, dynamic>?;
+        final tempId = args?['tempId'] as String? ?? '';
+
         return MaterialPageRoute(
-          builder: (context) => UploadLandImagesScreen(),
+          builder: (_) => UploadLandImagesScreen(tempId: tempId),
         );
       //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
 
