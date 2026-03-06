@@ -1,6 +1,8 @@
 import 'package:digifarmer/repository/LANDOWNERPANEL/landImage/land_image_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landLocation/land_location_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landLocation/land_location_repository.dart';
+import 'package:digifarmer/repository/LANDOWNERPANEL/landStatus/land_status_http_repository.dart';
+import 'package:digifarmer/repository/LANDOWNERPANEL/landStatus/land_status_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_repository.dart';
 import 'package:get_it/get_it.dart';
@@ -65,5 +67,8 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<LandImagesRepository>(
     () => LandImagesHttpRepository(),
+  );
+  getIt.registerLazySingleton<LandStatusRepository>(
+    () => LandStatusHttpRepository(),
   );
 }

@@ -20,6 +20,7 @@ class RoutesName {
   static const String addNewLandScreen = 'add_new_land_screen';
   static const String locationScreen = 'location_screen';
   static const String uploadLandImageScreen = 'upload_land_image_screen';
+  static const String landStatusScreen = 'land_status_screen';
 
   //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
 

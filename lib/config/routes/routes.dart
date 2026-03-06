@@ -2,6 +2,7 @@ import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
 import '../../view/view.dart';
 
 class Routes {
@@ -70,13 +71,14 @@ class Routes {
           builder: (context) => LocationScreen(tempId: tempId),
         );
       case RoutesName.uploadLandImageScreen:
-        // Safely extract tempId from Map
         final args = settings.arguments as Map<String, dynamic>?;
         final tempId = args?['tempId'] as String? ?? '';
-
         return MaterialPageRoute(
           builder: (_) => UploadLandImagesScreen(tempId: tempId),
         );
+
+      case RoutesName.landStatusScreen:
+        return MaterialPageRoute(builder: (context) => LandStatusScreen());
       //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
 
       case RoutesName.workerBottomNavBar:

@@ -16,4 +16,5 @@ class ApiUrls {
       '$baseUrl/api/v1/land-owner/lands/step3/presigned-urls';
   static String confirmUploadApi =
       '$baseUrl/api/v1/land-owner/lands/step3/confirm';
+  static String landStatusApi = '$baseUrl/api/v1/timeline/lands/timeline/all';
 }

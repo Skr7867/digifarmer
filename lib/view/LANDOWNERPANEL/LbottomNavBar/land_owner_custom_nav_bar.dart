@@ -58,9 +58,9 @@ class LandOwnerCustomNavBar extends StatelessWidget {
               label: 'My Lands',
             ),
             BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.wallet),
-              activeIcon: Icon(PhosphorIconsFill.wallet),
-              label: 'Contract',
+              icon: Icon(PhosphorIconsRegular.lampPendant),
+              activeIcon: Icon(PhosphorIconsFill.lampPendant),
+              label: 'Status',
             ),
             BottomNavigationBarItem(
               icon: Icon(PhosphorIconsRegular.person),
