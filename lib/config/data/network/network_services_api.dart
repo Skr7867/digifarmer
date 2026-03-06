@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
 import '../exception/app_exception.dart';
 import 'base_api_services.dart';
-import 'package:http/http.dart' as http;
 import 'dio_client.dart';
 
 class NetworkApiServices extends BaseApiServices {
@@ -90,6 +92,51 @@ class NetworkApiServices extends BaseApiServices {
     } on DioException catch (e) {
       apiLog("POST ERROR STATUS", e.response?.statusCode);
       apiLog("POST ERROR DATA", e.response?.data);
+
+      final statusCode = e.response?.statusCode ?? 500;
+      final resData = e.response?.data;
+
+      final message = extractMessage(resData, statusCode);
+
+      if (statusCode >= 500) {
+        throw ServerException(message);
+      } else {
+        throw FetchDataException(message);
+      }
+    }
+  }
+  // PUT API
+
+  @override
+  Future<dynamic> putApi(
+    dynamic data,
+    String url, {
+    String? token,
+    bool isFileUpload = false,
+  }) async {
+    try {
+      apiLog("PUT URL", url);
+      apiLog("PUT DATA", data);
+      apiLog("PUT TOKEN", token);
+
+      final response = await DioClient.dio.put(
+        url,
+        data: data,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      apiLog("PUT STATUS", response.statusCode);
+      apiLog("PUT RESPONSE", response.data);
+
+      return response.data;
+    } on DioException catch (e) {
+      apiLog("PUT ERROR STATUS", e.response?.statusCode);
+      apiLog("PUT ERROR DATA", e.response?.data);
 
       final statusCode = e.response?.statusCode ?? 500;
       final resData = e.response?.data;

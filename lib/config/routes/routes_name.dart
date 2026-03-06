@@ -18,6 +18,8 @@ class RoutesName {
   static const String landOwnerBottomNavBar =
       'land_owner_bottom_nav_bar_screen';
   static const String addNewLandScreen = 'add_new_land_screen';
+  static const String locationScreen = 'location_screen';
+  static const String uploadLandImageScreen = 'upload_land_image_screen';
 
   //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
 

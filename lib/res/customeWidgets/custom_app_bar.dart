@@ -10,16 +10,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool automaticallyImplyLeading;
   final double elevation;
   final TextStyle? titleStyle;
+  final Color backgroundColor;
+  final Gradient? gradient;
 
   const CustomAppBar({
     super.key,
     this.title = '',
-    this.automaticallyImplyLeading = false,
     this.actions,
     this.leading,
     this.centerTitle = true,
+    this.automaticallyImplyLeading = false,
     this.elevation = 4.0,
     this.titleStyle,
+    this.backgroundColor = Colors.white,
+    this.gradient, // ✅ optional gradient
   });
 
   @override
@@ -33,28 +37,26 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               fontSize: 15,
               fontWeight: FontWeight.bold,
               fontFamily: AppFonts.popins,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
       ),
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
       actions: actions,
       centerTitle: centerTitle,
-      elevation: elevation, // ➤ This now shows up
-      iconTheme: IconThemeData(
-        color: Theme.of(context).textTheme.bodyLarge?.color,
-      ),
-      backgroundColor: Colors.white, // ✅ Set a solid color
-      shadowColor: Colors.black.withOpacity(
-        0.25,
-      ), // Optional: tweak shadow appearance
+      elevation: elevation,
 
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          // gradient: AppColors.exploreGradient,
-        ),
+      iconTheme: IconThemeData(
+        color: Theme.of(context).scaffoldBackgroundColor,
       ),
+
+      backgroundColor: gradient == null ? backgroundColor : Colors.transparent,
+
+      shadowColor: Colors.black.withValues(alpha: 0.25),
+
+      flexibleSpace: gradient != null
+          ? Container(decoration: BoxDecoration(gradient: gradient))
+          : null,
     );
   }
 

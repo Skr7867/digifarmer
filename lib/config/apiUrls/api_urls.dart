@@ -10,4 +10,6 @@ class ApiUrls {
   static String allPlansApi = '$baseUrl/api/v1/admin/plans/active';
   static String landOwnerSaveBasicInfoApi =
       '$baseUrl/api/v1/land-owner/lands/step1/basic-info';
+  static String landLocationApi =
+      '$baseUrl/api/v1/land-owner/lands/step2/location';
 }

@@ -13,4 +13,5 @@ export 'investorpanel/userrole/choose_role_screen.dart';
 export 'investorpanel/verifyOtp/otp_verify_screen.dart';
 export 'landownerpanel/LbottomNavBar/land_owner_bottom_navigation_bar.dart';
 export 'landownerpanel/addNewLand/add_new_land_screen.dart';
+export 'landownerpanel/location/location_screen.dart';
 export 'workerpanel/workerBottomNavbar/worker_bottom_navigation_bar.dart';

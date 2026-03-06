@@ -1,4 +1,5 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../view/view.dart';
@@ -63,7 +64,15 @@ class Routes {
         );
       case RoutesName.addNewLandScreen:
         return MaterialPageRoute(builder: (context) => AddNewLandScreen());
-
+      case RoutesName.locationScreen:
+        final tempId = settings.arguments as String;
+        return MaterialPageRoute(
+          builder: (context) => LocationScreen(tempId: tempId),
+        );
+      case RoutesName.uploadLandImageScreen:
+        return MaterialPageRoute(
+          builder: (context) => UploadLandImagesScreen(),
+        );
       //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
 
       case RoutesName.workerBottomNavBar:
