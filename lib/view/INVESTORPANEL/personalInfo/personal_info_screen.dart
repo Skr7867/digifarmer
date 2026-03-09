@@ -82,6 +82,11 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         appBar: const CustomAppBar(
           title: 'Personal Details',
           automaticallyImplyLeading: true,
+          gradient: LinearGradient(
+            colors: [Color(0xff34A853), Color(0xff0D47A1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
         body: BlocListener<PersonalInfoBloc, PersonalInfoState>(
           listenWhen: (c, p) => c.postApiStatus != p.postApiStatus,

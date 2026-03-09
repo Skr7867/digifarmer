@@ -1,3 +1,5 @@
+import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_http_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landImage/land_image_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landLocation/land_location_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landLocation/land_location_repository.dart';
@@ -70,5 +72,8 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<LandStatusRepository>(
     () => LandStatusHttpRepository(),
+  );
+  getIt.registerLazySingleton<PlanPurchasedRepository>(
+    () => PlanPurchasedHttpRepository(),
   );
 }

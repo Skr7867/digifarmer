@@ -17,4 +17,5 @@ class ApiUrls {
   static String confirmUploadApi =
       '$baseUrl/api/v1/land-owner/lands/step3/confirm';
   static String landStatusApi = '$baseUrl/api/v1/timeline/lands/timeline/all';
+  static String planPurchasedApi = '$baseUrl/api/v1/investor/investments/apply';
 }

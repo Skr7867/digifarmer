@@ -1,8 +1,12 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/main.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../blocs/INVESTORPANEL/planPurchase/plan_purchase_bloc.dart';
 import '../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
+import '../../repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
 import '../../view/view.dart';
 
@@ -44,7 +48,11 @@ class Routes {
         final investment = settings.arguments as InvestmentSelectionModel;
 
         return MaterialPageRoute(
-          builder: (context) => ProceedToPaymentScreen(investment: investment),
+          builder: (context) => BlocProvider(
+            create: (_) =>
+                PurchasePlanBloc(repository: getIt<PlanPurchasedRepository>()),
+            child: ProceedToPaymentScreen(investment: investment),
+          ),
         );
       case RoutesName.paymentScreen:
         return MaterialPageRoute(builder: (context) => PaymentScreen());
