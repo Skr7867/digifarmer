@@ -4,19 +4,28 @@ import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 
+import '../../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
 import 'investment_growth_screen.dart';
 
 class ProceedToPaymentScreen extends StatelessWidget {
-  const ProceedToPaymentScreen({super.key});
+  final InvestmentSelectionModel investment;
+
+  const ProceedToPaymentScreen({super.key, required this.investment});
 
   @override
   Widget build(BuildContext context) {
+    final plan = investment.plan;
+    final amount = investment.amount;
+    final returns = investment.expectedReturn;
+    final maturity = investment.maturityAmount;
+
     return Scaffold(
       backgroundColor: const Color(0xffF5F7FA),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// HEADER
             Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
@@ -26,28 +35,41 @@ class ProceedToPaymentScreen extends StatelessWidget {
                   end: Alignment.bottomRight,
                 ),
               ),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      SizedBox(height: 80),
-                      Icon(Icons.arrow_back, color: Colors.white),
-                      SizedBox(width: 12),
+                      const SizedBox(height: 80),
+
+                      InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
 
                       Container(
-                        padding: EdgeInsets.all(5),
+                        padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.energy_savings_leaf_sharp,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(width: 12),
-                      Column(
+
+                      const SizedBox(width: 12),
+
+                      const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -68,24 +90,34 @@ class ProceedToPaymentScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Spacer(),
-                      Icon(Icons.share, color: Colors.white),
+
+                      const Spacer(),
+
+                      const Icon(Icons.share, color: Colors.white),
                     ],
                   ),
 
+                  const SizedBox(height: 20),
+
+                  /// Investment Summary
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
+
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+                        /// Amount
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Investment Amount",
                               style: TextStyle(
                                 color: Colors.white70,
@@ -93,22 +125,24 @@ class ProceedToPaymentScreen extends StatelessWidget {
                                 fontFamily: AppFonts.popins,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              "₹25,000",
-                              style: TextStyle(
+                              "₹${amount.toStringAsFixed(0)}",
+                              style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 20,
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: AppFonts.popins,
                               ),
                             ),
                           ],
                         ),
+
+                        /// Tenure
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
+                            const Text(
                               "Tenure Selected",
                               style: TextStyle(
                                 color: Colors.white70,
@@ -116,12 +150,12 @@ class ProceedToPaymentScreen extends StatelessWidget {
                                 fontSize: 12,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              "3 Years",
-                              style: TextStyle(
+                              plan.durationFormatted,
+                              style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 18,
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: AppFonts.popins,
                               ),
@@ -137,7 +171,7 @@ class ProceedToPaymentScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// 🟢 SUMMARY CARD
+            /// SUMMARY CARD
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
@@ -150,27 +184,33 @@ class ProceedToPaymentScreen extends StatelessWidget {
                     color: AppColors.greenColor.withValues(alpha: 0.2),
                   ),
                 ),
+
                 child: Column(
                   children: [
                     ListTile(
                       leading: Container(
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppColors.greenColor.withValues(alpha: .24),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(Icons.trending_up, color: Colors.green),
+                        child: const Icon(
+                          Icons.trending_up,
+                          color: Colors.green,
+                        ),
                       ),
-                      title: Text(
+
+                      title: const Text(
                         "Maturity Amount",
                         style: TextStyle(
                           fontSize: 12,
                           fontFamily: AppFonts.popins,
                         ),
                       ),
-                      subtitle: const Text(
-                        "₹35,123",
-                        style: TextStyle(
+
+                      subtitle: Text(
+                        "₹${maturity.toStringAsFixed(0)}",
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           fontFamily: AppFonts.popins,
@@ -179,16 +219,17 @@ class ProceedToPaymentScreen extends StatelessWidget {
 
                       trailing: Column(
                         children: [
-                          SizedBox(height: 9),
+                          const SizedBox(height: 9),
+
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
                               color: AppColors.greenColor,
                               borderRadius: BorderRadius.circular(50),
                             ),
                             child: Text(
-                              '+40.49',
-                              style: TextStyle(
+                              "+${returns.toStringAsFixed(0)}",
+                              style: const TextStyle(
                                 color: AppColors.whiteColor,
                                 fontFamily: AppFonts.popinsBold,
                                 fontSize: 15,
@@ -196,7 +237,8 @@ class ProceedToPaymentScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Text(
+
+                          const Text(
                             'Total Growth',
                             style: TextStyle(
                               fontFamily: AppFonts.popins,
@@ -209,18 +251,19 @@ class ProceedToPaymentScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 10),
+
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             "Total Returns",
                             style: TextStyle(fontFamily: AppFonts.popins),
                           ),
                           Text(
-                            "₹10,123",
-                            style: TextStyle(
+                            "₹${returns.toStringAsFixed(0)}",
+                            style: const TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,
                               fontFamily: AppFonts.popins,
@@ -229,19 +272,21 @@ class ProceedToPaymentScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 6),
+
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 18),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             "Annual ROI",
                             style: TextStyle(fontFamily: AppFonts.popins),
                           ),
                           Text(
-                            "12%",
-                            style: TextStyle(
+                            "${plan.returnPercent}%",
+                            style: const TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,
                               fontFamily: AppFonts.popins,
@@ -257,7 +302,7 @@ class ProceedToPaymentScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// 📈 Investment Growth Projection
+            /// Growth Chart
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
@@ -269,126 +314,18 @@ class ProceedToPaymentScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(height: 12),
 
-            AttractivePieChart(),
-
-            const SizedBox(height: 24),
-
-            /// 📅 Year-wise Breakdown
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                "Year-wise Breakdown",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            _yearCard(
-              "1",
-              "Year 1",
-              "Dec 2024 - Dec 2025",
-              "₹28,000",
-              "+₹3,000",
+            AttractivePieChart(
+              investment: amount.toDouble(),
+              returns: returns,
+              maturity: maturity,
             ),
 
-            _yearCard(
-              "2",
-              "Year 2",
-              "Dec 2025 - Dec 2026",
-              "₹31,360",
-              "+₹3,360",
-            ),
+            const SizedBox(height: 30),
 
-            _yearCard(
-              "3",
-              "Year 3 (Maturity)",
-              "Dec 2026 - Dec 2027",
-              "₹35,123",
-              "+₹3,763",
-            ),
-
-            const SizedBox(height: 24),
-
-            // Investment Features
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                "Investment Features",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                children: const [
-                  _FeatureCard(
-                    Icons.security,
-                    "Secured",
-                    "Insurance Protected",
-                  ),
-                  _FeatureCard(Icons.eco, "Organic", "Sustainable Farming"),
-                  _FeatureCard(
-                    Icons.visibility,
-                    "Transparent",
-                    "Real-time Updates",
-                  ),
-                  _FeatureCard(
-                    Icons.phone_android,
-                    "Digital",
-                    "Easy Management",
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// ✅ Ready to Invest
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xffE8F5E9),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        "Ready to Invest?\nSecure your investment in sustainable farming today.",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontFamily: AppFonts.popins,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 🟢 PROCEED BUTTON
+            /// PROCEED BUTTON
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: RoundButton(
@@ -400,144 +337,10 @@ class ProceedToPaymentScreen extends StatelessWidget {
                 },
               ),
             ),
-            SizedBox(height: 30),
+
+            const SizedBox(height: 30),
           ],
         ),
-      ),
-    );
-  }
-
-  static Widget _yearCard(
-    String number,
-    String title,
-    String subtitle,
-    String amount,
-    String profit,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 🔵 Number Circle
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: const Color(0xffE3F2FD),
-              child: Text(
-                number,
-                style: const TextStyle(fontFamily: AppFonts.popins),
-              ),
-            ),
-
-            const SizedBox(width: 12),
-
-            /// 📅 Title + Subtitle Section
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontFamily: AppFonts.popins,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle, // 👈 Dec 2024 - Dec 2025
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontFamily: AppFonts.popins,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            /// 💰 Amount Section
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  amount,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  profit,
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontSize: 12,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FeatureCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _FeatureCard(this.icon, this.title, this.subtitle);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: Colors.green),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontFamily: AppFonts.popins,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-              fontFamily: AppFonts.popins,
-            ),
-          ),
-        ],
       ),
     );
   }

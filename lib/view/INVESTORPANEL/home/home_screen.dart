@@ -1,7 +1,12 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../blocs/INVESTORPANEL/allInvestmentPlan/all_investment_plan_bloc.dart';
+import '../../../main.dart';
+import '../../../repository/INVESTORPANEL/invesmentPlan/all_investment_plan_repository.dart';
 import '../../../res/fonts/app_fonts.dart';
+import '../newInvesment/new_investment_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -299,9 +304,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: _actionCard(
                           onTap: () {
-                            Navigator.pushNamed(
+                            Navigator.push(
                               context,
-                              RoutesName.newInvestmentScreen,
+                              MaterialPageRoute(
+                                builder: (_) => BlocProvider(
+                                  create: (context) => AllInvestmentPlanBloc(
+                                    allInvestmentPlanRepository:
+                                        getIt<AllInvestmentPlanRepository>(),
+                                  )..add(PlanFetched()),
+                                  child: const NewInvestmentScreen(),
+                                ),
+                              ),
                             );
                           },
                           title: "New Investment",

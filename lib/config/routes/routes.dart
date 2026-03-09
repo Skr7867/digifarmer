@@ -2,6 +2,7 @@ import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
 import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
 import '../../view/view.dart';
 
@@ -40,8 +41,10 @@ class Routes {
       case RoutesName.portFolioScreen:
         return MaterialPageRoute(builder: (context) => PortfolioScreen());
       case RoutesName.proceedPaymentScreen:
+        final investment = settings.arguments as InvestmentSelectionModel;
+
         return MaterialPageRoute(
-          builder: (context) => ProceedToPaymentScreen(),
+          builder: (context) => ProceedToPaymentScreen(investment: investment),
         );
       case RoutesName.paymentScreen:
         return MaterialPageRoute(builder: (context) => PaymentScreen());

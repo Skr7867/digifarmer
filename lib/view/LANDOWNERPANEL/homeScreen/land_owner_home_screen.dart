@@ -1,5 +1,10 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../blocs/LANDOWNERPANEL/landStatus/land_status_bloc.dart';
+import '../../../model/LANDOWNERSPANEL/landOwnerTimeLine/land_owner_timeline_model.dart';
+import '../../../utils/enums.dart';
 
 class LandOwnerHomeScreen extends StatelessWidget {
   const LandOwnerHomeScreen({super.key});
@@ -8,239 +13,235 @@ class LandOwnerHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// ================= HEADER =================
-            Container(
-              padding: const EdgeInsets.only(
-                top: 50,
-                left: 16,
-                right: 16,
-                bottom: 20,
+
+      body: BlocBuilder<LandStatusBloc, LandStatusState>(
+        builder: (context, state) {
+          switch (state.landStatus.status) {
+            case Status.loading:
+              return const Center(child: CircularProgressIndicator());
+
+            case Status.error:
+              return Center(
+                child: Text(state.landStatus.message ?? "Something went wrong"),
+              );
+
+            case Status.completed:
+              final lands = state.landStatus.data!.data.lands;
+
+              final activeCount = lands
+                  .where((e) => e.status == "DOC_VERIFIED")
+                  .length;
+
+              final pendingCount = lands
+                  .where((e) => e.status == "PENDING")
+                  .length;
+
+              return _buildHome(context, lands, activeCount, pendingCount);
+
+            default:
+              return const SizedBox();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildHome(
+    BuildContext context,
+    List<LandOwnerTimelineLand> lands,
+    int activeCount,
+    int pendingCount,
+  ) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// ================= HEADER =================
+          Container(
+            padding: const EdgeInsets.only(
+              top: 50,
+              left: 16,
+              right: 16,
+              bottom: 20,
+            ),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xff1E88E5), Color(0xff2BB673)],
               ),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xff1E88E5), Color(0xff2BB673)],
-                ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(25),
-                  bottomRight: Radius.circular(25),
-                ),
-              ),
-              child: Column(
-                children: [
-                  /// Top Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(Icons.menu, color: Colors.white),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.notifications_none,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 12),
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: Colors.white,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                "https://i.pravatar.cc/100",
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// Welcome Text
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Welcome back,",
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Rajesh Kumar",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Land Owner ID: LO2024567",
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// Stats Card
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        _StatItem(title: "Total Lands", value: "8"),
-                        _StatItem(title: "Active Leases", value: "5"),
-                        _StatItem(title: "Pending", value: "2"),
-                      ],
-                    ),
-                  ),
-                ],
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(25),
+                bottomRight: Radius.circular(25),
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            /// ================= TOTAL EARNINGS =================
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xff2BB673),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              children: [
+                /// Top Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Total Earnings",
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "₹4,85,000",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
+                    const Icon(Icons.menu, color: Colors.white),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "This Month\n₹42,000",
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        const Icon(
+                          Icons.notifications_none,
+                          color: Colors.white,
                         ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xff2BB673),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                        const SizedBox(width: 12),
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.white,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.network(
+                              "https://i.pravatar.cc/100",
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          onPressed: () {},
-                          child: const Text("View Details"),
                         ),
                       ],
                     ),
                   ],
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 25),
+                const SizedBox(height: 20),
 
-            /// ================= QUICK ACTIONS =================
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                "Quick Actions",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _quickActionCard(
-                      icon: Icons.add,
-                      title: "Add New Land",
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          RoutesName.addNewLandScreen,
-                        );
-                      },
-                    ),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Welcome back,",
+                    style: TextStyle(color: Colors.white70),
                   ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: _quickActionCard(
-                      icon: Icons.description,
-                      title: "View Contracts",
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
 
-            const SizedBox(height: 25),
+                const SizedBox(height: 5),
 
-            /// ================= MY LANDS =================
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    "My Lands",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  Text(
-                    "View All >",
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Rajesh Kumar",
                     style: TextStyle(
-                      color: Color(0xff2BB673),
-                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 4),
+
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Land Owner ID: LO2024567",
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                /// Stats Card
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _StatItem(
+                        title: "Total Lands",
+                        value: lands.length.toString(),
+                      ),
+                      _StatItem(
+                        title: "Active Leases",
+                        value: activeCount.toString(),
+                      ),
+                      _StatItem(
+                        title: "Pending",
+                        value: pendingCount.toString(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+          ),
 
-            const SizedBox(height: 15),
+          const SizedBox(height: 20),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _landCard(),
+          /// ================= QUICK ACTIONS =================
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              "Quick Actions",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
+          ),
 
-            const SizedBox(height: 30),
-          ],
-        ),
+          const SizedBox(height: 12),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _quickActionCard(
+                    icon: Icons.add,
+                    title: "Add New Land",
+                    onTap: () {
+                      Navigator.pushNamed(context, RoutesName.addNewLandScreen);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: _quickActionCard(
+                    icon: Icons.description,
+                    title: "View Contracts",
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 25),
+
+          /// ================= MY LANDS =================
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              "My Lands",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          /// Dynamic Lands List
+          ListView.builder(
+            itemCount: lands.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final land = lands[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: _landCard(land),
+              );
+            },
+          ),
+
+          const SizedBox(height: 30),
+        ],
       ),
     );
   }
 
+  /// ================= QUICK ACTION CARD =================
   static Widget _quickActionCard({
     required IconData icon,
     required String title,
@@ -269,7 +270,8 @@ class LandOwnerHomeScreen extends StatelessWidget {
     );
   }
 
-  static Widget _landCard() {
+  /// ================= LAND CARD =================
+  static Widget _landCard(LandOwnerTimelineLand land) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -278,7 +280,7 @@ class LandOwnerHomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Land Image
+          /// Dummy Image
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: Image.network(
@@ -297,10 +299,11 @@ class LandOwnerHomeScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Survey No. 245/3B",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    Text(
+                      land.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
+
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -310,29 +313,31 @@ class LandOwnerHomeScreen extends StatelessWidget {
                         color: Colors.green.shade100,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        "Active",
-                        style: TextStyle(color: Colors.green, fontSize: 12),
+                      child: Text(
+                        land.status,
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 6),
-                const Text(
-                  "Dharwad, Karnataka",
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+
+                Text(
+                  land.location,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
+
                 const SizedBox(height: 10),
-                const Text("Area: 5.2 Acres"),
-                const Text("Current Crop: Sugarcane"),
-                const Text(
-                  "Monthly Lease ₹18,500",
-                  style: TextStyle(
-                    color: Color(0xff2BB673),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+
+                Text("Area: ${land.area}"),
+                Text("Land ID: ${land.landId}"),
+
                 const SizedBox(height: 12),
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

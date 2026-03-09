@@ -1,6 +1,9 @@
 import 'package:digifarmer/view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../blocs/LANDOWNERPANEL/landStatus/land_status_bloc.dart';
+import '../../../main.dart';
 import '../../INVESTORPANEL/portfolio/portfolio_screen.dart';
 import '../../INVESTORPANEL/profile/profile_screen.dart';
 import '../homeScreen/land_owner_home_screen.dart';
@@ -19,10 +22,15 @@ class _LandOwnerBottomNavigationBarState
   int currentIndex = 0;
 
   final List<Widget> screens = [
-    LandOwnerHomeScreen(),
-    PortfolioScreen(),
-    LandStatusScreen(),
-    ProfileScreen(),
+    BlocProvider(
+      create: (context) =>
+          LandStatusBloc(landStatusRepository: getIt())
+            ..add(LandStatusFetched()),
+      child: const LandOwnerHomeScreen(),
+    ),
+    const PortfolioScreen(),
+    const LandStatusScreen(),
+    const ProfileScreen(),
   ];
 
   @override

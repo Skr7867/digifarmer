@@ -30,24 +30,9 @@ _InvestmentPlanModel _$InvestmentPlanModelFromJson(
   description: json['description'] as String? ?? '',
   minInvestment: (json['minInvestment'] as num?)?.toInt() ?? 0,
   maxInvestment: (json['maxInvestment'] as num?)?.toInt() ?? 0,
-  defaultDurationMonths: (json['defaultDurationMonths'] as num?)?.toInt() ?? 0,
-  availableDurations:
-      (json['availableDurations'] as List<dynamic>?)
-          ?.map((e) => (e as num).toInt())
-          .toList() ??
-      const [],
-  baseReturnPercent: (json['baseReturnPercent'] as num?)?.toInt() ?? 0,
-  durationMultipliers:
-      (json['durationMultipliers'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as num),
-      ) ??
-      const {},
-  availableRoiFrequencies:
-      (json['availableRoiFrequencies'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
-  defaultRoiFrequency: json['defaultRoiFrequency'] as String? ?? '',
+  durationMonths: (json['durationMonths'] as num?)?.toInt() ?? 0,
+  returnPercent: (json['returnPercent'] as num?)?.toInt() ?? 0,
+  roiFrequency: json['roiFrequency'] as String? ?? '',
   lockInPeriodMonths: (json['lockInPeriodMonths'] as num?)?.toInt() ?? 0,
   prematureExitAllowed: json['prematureExitAllowed'] as bool? ?? false,
   prematureExitPenalty: (json['prematureExitPenalty'] as num?)?.toInt() ?? 0,
@@ -56,7 +41,28 @@ _InvestmentPlanModel _$InvestmentPlanModelFromJson(
   isPopular: json['isPopular'] as bool? ?? false,
   createdAt: json['createdAt'] as String? ?? '',
   updatedAt: json['updatedAt'] as String? ?? '',
-  version: (json['__v'] as num?)?.toInt() ?? 0,
+  totalReturnPercent: (json['totalReturnPercent'] as num?)?.toInt() ?? 0,
+  totalReturnOnLakh: (json['totalReturnOnLakh'] as num?)?.toInt() ?? 0,
+  periodicReturn: (json['periodicReturn'] as num?)?.toDouble() ?? 0.0,
+  periodicLabel: json['periodicLabel'] as String? ?? '',
+  minInvestmentFormatted: json['minInvestmentFormatted'] as String? ?? '',
+  maxInvestmentFormatted: json['maxInvestmentFormatted'] as String? ?? '',
+  durationFormatted: json['durationFormatted'] as String? ?? '',
+  returnFormatted: json['returnFormatted'] as String? ?? '',
+  examples: json['examples'] == null
+      ? null
+      : ExamplesModel.fromJson(json['examples'] as Map<String, dynamic>),
+  features:
+      (json['features'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  summary: json['summary'] == null
+      ? null
+      : SummaryModel.fromJson(json['summary'] as Map<String, dynamic>),
+  investmentGuide: json['investmentGuide'] == null
+      ? null
+      : InvestmentGuideModel.fromJson(
+          json['investmentGuide'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$InvestmentPlanModelToJson(
@@ -68,12 +74,9 @@ Map<String, dynamic> _$InvestmentPlanModelToJson(
   'description': instance.description,
   'minInvestment': instance.minInvestment,
   'maxInvestment': instance.maxInvestment,
-  'defaultDurationMonths': instance.defaultDurationMonths,
-  'availableDurations': instance.availableDurations,
-  'baseReturnPercent': instance.baseReturnPercent,
-  'durationMultipliers': instance.durationMultipliers,
-  'availableRoiFrequencies': instance.availableRoiFrequencies,
-  'defaultRoiFrequency': instance.defaultRoiFrequency,
+  'durationMonths': instance.durationMonths,
+  'returnPercent': instance.returnPercent,
+  'roiFrequency': instance.roiFrequency,
   'lockInPeriodMonths': instance.lockInPeriodMonths,
   'prematureExitAllowed': instance.prematureExitAllowed,
   'prematureExitPenalty': instance.prematureExitPenalty,
@@ -82,5 +85,88 @@ Map<String, dynamic> _$InvestmentPlanModelToJson(
   'isPopular': instance.isPopular,
   'createdAt': instance.createdAt,
   'updatedAt': instance.updatedAt,
-  '__v': instance.version,
+  'totalReturnPercent': instance.totalReturnPercent,
+  'totalReturnOnLakh': instance.totalReturnOnLakh,
+  'periodicReturn': instance.periodicReturn,
+  'periodicLabel': instance.periodicLabel,
+  'minInvestmentFormatted': instance.minInvestmentFormatted,
+  'maxInvestmentFormatted': instance.maxInvestmentFormatted,
+  'durationFormatted': instance.durationFormatted,
+  'returnFormatted': instance.returnFormatted,
+  'examples': instance.examples,
+  'features': instance.features,
+  'summary': instance.summary,
+  'investmentGuide': instance.investmentGuide,
+};
+
+_ExamplesModel _$ExamplesModelFromJson(Map<String, dynamic> json) =>
+    _ExamplesModel(
+      on100000: json['on100000'] == null
+          ? null
+          : ExampleDetailModel.fromJson(
+              json['on100000'] as Map<String, dynamic>,
+            ),
+    );
+
+Map<String, dynamic> _$ExamplesModelToJson(_ExamplesModel instance) =>
+    <String, dynamic>{'on100000': instance.on100000};
+
+_ExampleDetailModel _$ExampleDetailModelFromJson(Map<String, dynamic> json) =>
+    _ExampleDetailModel(
+      invested: json['invested'] as String? ?? '',
+      totalReturn: json['totalReturn'] as String? ?? '',
+      maturityAmount: json['maturityAmount'] as String? ?? '',
+      periodicReturn: json['periodicReturn'] as String? ?? '',
+    );
+
+Map<String, dynamic> _$ExampleDetailModelToJson(_ExampleDetailModel instance) =>
+    <String, dynamic>{
+      'invested': instance.invested,
+      'totalReturn': instance.totalReturn,
+      'maturityAmount': instance.maturityAmount,
+      'periodicReturn': instance.periodicReturn,
+    };
+
+_SummaryModel _$SummaryModelFromJson(Map<String, dynamic> json) =>
+    _SummaryModel(
+      investmentRange: json['investmentRange'] as String? ?? '',
+      duration: json['duration'] as String? ?? '',
+      expectedReturn: json['expectedReturn'] as String? ?? '',
+      totalReturn: json['totalReturn'] as String? ?? '',
+      lockInPeriod: json['lockInPeriod'] as String? ?? '',
+      riskLevel: json['riskLevel'] as String? ?? '',
+      roiFrequency: json['roiFrequency'] as String? ?? '',
+    );
+
+Map<String, dynamic> _$SummaryModelToJson(_SummaryModel instance) =>
+    <String, dynamic>{
+      'investmentRange': instance.investmentRange,
+      'duration': instance.duration,
+      'expectedReturn': instance.expectedReturn,
+      'totalReturn': instance.totalReturn,
+      'lockInPeriod': instance.lockInPeriod,
+      'riskLevel': instance.riskLevel,
+      'roiFrequency': instance.roiFrequency,
+    };
+
+_InvestmentGuideModel _$InvestmentGuideModelFromJson(
+  Map<String, dynamic> json,
+) => _InvestmentGuideModel(
+  minimumAmount: (json['minimumAmount'] as num?)?.toInt() ?? 0,
+  recommendedDuration: (json['recommendedDuration'] as num?)?.toInt() ?? 0,
+  expectedAnnualReturn: json['expectedAnnualReturn'] as String? ?? '',
+  lockInRequired: json['lockInRequired'] as bool? ?? false,
+  exitPenalty: json['exitPenalty'] as String? ?? '',
+  roiOption: json['roiOption'] as String? ?? '',
+);
+
+Map<String, dynamic> _$InvestmentGuideModelToJson(
+  _InvestmentGuideModel instance,
+) => <String, dynamic>{
+  'minimumAmount': instance.minimumAmount,
+  'recommendedDuration': instance.recommendedDuration,
+  'expectedAnnualReturn': instance.expectedAnnualReturn,
+  'lockInRequired': instance.lockInRequired,
+  'exitPenalty': instance.exitPenalty,
+  'roiOption': instance.roiOption,
 };
