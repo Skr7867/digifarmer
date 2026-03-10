@@ -1,3 +1,4 @@
+import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 
 class WorkerHomeScreen extends StatelessWidget {
@@ -41,12 +42,18 @@ class WorkerHomeScreen extends StatelessWidget {
                           "https://i.pravatar.cc/100",
                         ),
                       ),
-                      Row(
-                        children: const [
-                          Icon(Icons.notifications_none, color: Colors.white),
-                          SizedBox(width: 5),
-                          CircleAvatar(radius: 4, backgroundColor: Colors.red),
-                        ],
+
+                      InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            RoutesName.workerNotification,
+                          );
+                        },
+                        child: Icon(
+                          Icons.notifications_none,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
@@ -94,6 +101,9 @@ class WorkerHomeScreen extends StatelessWidget {
               time: "9:00 AM – 11:00 AM",
               buttonText: "Continue",
               buttonColor: Colors.orange,
+              onTap: () {
+                Navigator.pushNamed(context, RoutesName.workerTaskDetails);
+              },
             ),
 
             _taskCard(
@@ -105,6 +115,9 @@ class WorkerHomeScreen extends StatelessWidget {
               time: "6:00 AM – 8:00 AM",
               buttonText: "View",
               buttonColor: Colors.green,
+              onTap: () {
+                Navigator.pushNamed(context, RoutesName.workerTaskDetails);
+              },
             ),
 
             _taskCard(
@@ -116,6 +129,9 @@ class WorkerHomeScreen extends StatelessWidget {
               time: "11:30 AM – 1:00 PM",
               buttonText: "Start Task",
               buttonColor: Colors.blue,
+              onTap: () {
+                Navigator.pushNamed(context, RoutesName.workerTaskDetails);
+              },
             ),
 
             _taskCard(
@@ -127,6 +143,9 @@ class WorkerHomeScreen extends StatelessWidget {
               time: "2:00 PM – 4:00 PM",
               buttonText: "Start Task",
               buttonColor: Colors.purple,
+              onTap: () {
+                Navigator.pushNamed(context, RoutesName.workerTaskDetails);
+              },
             ),
 
             const SizedBox(height: 20),
@@ -229,6 +248,7 @@ class WorkerHomeScreen extends StatelessWidget {
     required String time,
     required String buttonText,
     required Color buttonColor,
+    required VoidCallback onTap,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -260,17 +280,24 @@ class WorkerHomeScreen extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 8),
+
           Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+
           Text(plot, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+
           const SizedBox(height: 8),
+
           Text(time, style: const TextStyle(fontSize: 12)),
+
           const SizedBox(height: 8),
+
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
-              onPressed: () {},
+              onPressed: onTap,
               child: Text(buttonText),
             ),
           ),

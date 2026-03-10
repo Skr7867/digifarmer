@@ -1,9 +1,9 @@
 import 'package:digifarmer/view/WORKERPANEL/workerHomeScreen/worker_home_screen.dart';
-
 import 'package:flutter/material.dart';
+
 import '../../INVESTORPANEL/portfolio/portfolio_screen.dart';
-import '../../INVESTORPANEL/profile/profile_screen.dart';
 import '../../INVESTORPANEL/wallet/wallet_screen.dart';
+import '../profile/worker_profile_screen.dart';
 import 'worker_custom_nav_bar.dart';
 
 class WorkerBottomNavigationBar extends StatefulWidget {
@@ -21,7 +21,8 @@ class _WorkerBottomNavigationBarState extends State<WorkerBottomNavigationBar> {
     WorkerHomeScreen(),
     PortfolioScreen(),
     WalletScreen(),
-    ProfileScreen(),
+    // ProfileScreen(),
+    WorkerProfileScreen(),
   ];
 
   @override

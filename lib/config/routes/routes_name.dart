@@ -25,4 +25,8 @@ class RoutesName {
   //*************************************************WORKER PANEL SCREENS STARTED FROM HERE ************************************/
 
   static const String workerBottomNavBar = 'worker_bottom_nav_bar';
+  static const String workerTaskDetails = 'worker_task_details';
+  static const String workerTaskSubmit = 'worker_task_submit';
+  static const String workerNotification = 'worker_notification_screen';
+  static const String workerProfileScreen = 'worker_profile_screen';
 }

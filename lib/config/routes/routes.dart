@@ -1,6 +1,7 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/notification/worker_notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,6 +9,9 @@ import '../../blocs/INVESTORPANEL/planPurchase/plan_purchase_bloc.dart';
 import '../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
 import '../../repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
+import '../../view/WORKERPANEL/profile/worker_profile_screen.dart';
+import '../../view/WORKERPANEL/submitTask/submit_task_screen.dart';
+import '../../view/WORKERPANEL/taskDetails/worker_task_details_screen.dart';
 import '../../view/view.dart';
 
 class Routes {
@@ -96,6 +100,20 @@ class Routes {
         return MaterialPageRoute(
           builder: (context) => WorkerBottomNavigationBar(),
         );
+      case RoutesName.workerTaskDetails:
+        return MaterialPageRoute(
+          builder: (context) => WorkerTaskDetailsScreen(),
+        );
+      case RoutesName.workerTaskSubmit:
+        return MaterialPageRoute(
+          builder: (context) => WorkerTaskSubmitScreen(),
+        );
+      case RoutesName.workerNotification:
+        return MaterialPageRoute(
+          builder: (context) => WorkerNotificationScreen(),
+        );
+      case RoutesName.workerProfileScreen:
+        return MaterialPageRoute(builder: (context) => WorkerProfileScreen());
       default:
         return MaterialPageRoute(
           builder: (context) {
