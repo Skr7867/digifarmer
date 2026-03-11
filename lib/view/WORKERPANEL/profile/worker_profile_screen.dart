@@ -132,7 +132,9 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, RoutesName.workerSettingScreen);
+            },
             color: const Color(0xFF666666),
           ),
         ],
@@ -324,6 +326,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
             showEdit: true,
             onEdit: _handleEdit,
             child: Column(
+              crossAxisAlignment: .start,
               children: [
                 _buildDetailRow(
                   'Full Name',
@@ -368,6 +371,7 @@ class _WorkerProfileScreenState extends State<WorkerProfileScreen> {
           _buildSection(
             title: 'Bank Details',
             child: Column(
+              crossAxisAlignment: .start,
               children: [
                 _buildDetailRow(
                   'Account Number',

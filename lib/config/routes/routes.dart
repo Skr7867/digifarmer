@@ -1,7 +1,9 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/helpAndSupport/help_and_support_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/notification/worker_notification_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/setting/worker_setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -114,6 +116,12 @@ class Routes {
         );
       case RoutesName.workerProfileScreen:
         return MaterialPageRoute(builder: (context) => WorkerProfileScreen());
+      case RoutesName.workerSettingScreen:
+        return MaterialPageRoute(builder: (context) => WorkerSettingScreen());
+      case RoutesName.workerHelpSupportScreen:
+        return MaterialPageRoute(
+          builder: (context) => WorkerHelpAndSupportScreen(),
+        );
       default:
         return MaterialPageRoute(
           builder: (context) {

@@ -29,4 +29,6 @@ class RoutesName {
   static const String workerTaskSubmit = 'worker_task_submit';
   static const String workerNotification = 'worker_notification_screen';
   static const String workerProfileScreen = 'worker_profile_screen';
+  static const String workerSettingScreen = 'worker_settings_screen';
+  static const String workerHelpSupportScreen = 'worker_help_support_screen';
 }
