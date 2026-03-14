@@ -7,6 +7,14 @@ import 'package:digifarmer/repository/LANDOWNERPANEL/landStatus/land_status_http
 import 'package:digifarmer/repository/LANDOWNERPANEL/landStatus/land_status_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/startTask/start_task_http_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/startTask/start_task_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/taskDetails/task_details_http_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/taskDetails/task_details_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/taskUpdate/task_update_http_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/taskUpdate/task_update_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/workerdashboard/worker_dashboard_http_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/workerdashboard/worker_dashboard_repository.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
@@ -75,5 +83,17 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<PlanPurchasedRepository>(
     () => PlanPurchasedHttpRepository(),
+  );
+  getIt.registerLazySingleton<WorkerDashboardRepository>(
+    () => WorkerDashboardHttpRepository(),
+  );
+  getIt.registerLazySingleton<TaskDetailsRepository>(
+    () => TaskDetailsHttpRepository(),
+  );
+  getIt.registerLazySingleton<StartTaskRepository>(
+    () => StartTaskHttpRepository(),
+  );
+  getIt.registerLazySingleton<TaskUpdateRepository>(
+    () => TaskUpdateHttpRepository(),
   );
 }

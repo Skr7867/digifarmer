@@ -14,6 +14,7 @@ import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
 import '../../view/WORKERPANEL/profile/worker_profile_screen.dart';
 import '../../view/WORKERPANEL/submitTask/submit_task_screen.dart';
 import '../../view/WORKERPANEL/taskDetails/worker_task_details_screen.dart';
+import '../../view/WORKERPANEL/taskUpdate/task_update_screen.dart';
 import '../../view/view.dart';
 
 class Routes {
@@ -103,8 +104,12 @@ class Routes {
           builder: (context) => WorkerBottomNavigationBar(),
         );
       case RoutesName.workerTaskDetails:
+        final args = settings.arguments as Map<String, dynamic>;
+
+        final String taskId = args['leadId'];
+
         return MaterialPageRoute(
-          builder: (context) => WorkerTaskDetailsScreen(),
+          builder: (context) => WorkerTaskDetailsScreen(taskId: taskId),
         );
       case RoutesName.workerTaskSubmit:
         return MaterialPageRoute(
@@ -121,6 +126,11 @@ class Routes {
       case RoutesName.workerHelpSupportScreen:
         return MaterialPageRoute(
           builder: (context) => WorkerHelpAndSupportScreen(),
+        );
+      case RoutesName.workerTaskUpdateScreen:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => WorkerTaskUpdateScreen(taskId: args?['taskId'] ?? ''),
         );
       default:
         return MaterialPageRoute(

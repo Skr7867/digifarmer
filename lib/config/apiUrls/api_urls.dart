@@ -18,4 +18,16 @@ class ApiUrls {
       '$baseUrl/api/v1/land-owner/lands/step3/confirm';
   static String landStatusApi = '$baseUrl/api/v1/timeline/lands/timeline/all';
   static String planPurchasedApi = '$baseUrl/api/v1/investor/investments/apply';
+
+  // ***************************workerApi from here ************************
+
+  static String workerDashBoardDataApi = '$baseUrl/api/v1/worker/dashboard';
+  static String taskDetailsApi(String taskId) =>
+      '$baseUrl/api/v1/worker/tasks/$taskId/dashboard';
+
+  static String startTaskApi(String taskId) =>
+      '$baseUrl/api/v1/worker/tasks/$taskId/start';
+
+  static String taskUpdateApi(String taskId) =>
+      '$baseUrl/api/v1/worker/tasks/$taskId/progress';
 }

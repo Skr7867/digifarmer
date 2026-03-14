@@ -21,7 +21,6 @@ class _WorkerBottomNavigationBarState extends State<WorkerBottomNavigationBar> {
     WorkerHomeScreen(),
     PortfolioScreen(),
     WalletScreen(),
-    // ProfileScreen(),
     WorkerProfileScreen(),
   ];
 
