@@ -30,4 +30,6 @@ class ApiUrls {
 
   static String taskUpdateApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId/progress';
+  static String taskCompleteApi(String taskId) =>
+      '$baseUrl/api/v1/worker/tasks/$taskId/complete';
 }

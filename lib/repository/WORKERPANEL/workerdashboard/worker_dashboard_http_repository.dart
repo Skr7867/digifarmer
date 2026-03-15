@@ -7,8 +7,8 @@ import '../../../config/data/network/network_services_api.dart';
 class WorkerDashboardHttpRepository implements WorkerDashboardRepository {
   final _apiServices = NetworkApiServices();
   @override
-  Future<WorkerDashboardModel> fetchWorkerDashboardData() async {
+  Future<WorkerDashBoardModel> fetchWorkerDashboardData() async {
     final response = await _apiServices.getApi(ApiUrls.workerDashBoardDataApi);
-    return WorkerDashboardModel.fromJson(response);
+    return WorkerDashBoardModel.fromJson(response);
   }
 }

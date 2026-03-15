@@ -1,6 +1,7 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/completeTask/complete_task_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/helpAndSupport/help_and_support_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/notification/worker_notification_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/setting/worker_setting_screen.dart';
@@ -131,6 +132,14 @@ class Routes {
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
           builder: (_) => WorkerTaskUpdateScreen(taskId: args?['taskId'] ?? ''),
+        );
+      case RoutesName.completeTaskScreen:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => WorkerCompleteTaskScreen(
+            taskId: args?['taskId'] ?? '',
+            taskTitle: args?['taskTitle'] ?? '',
+          ),
         );
       default:
         return MaterialPageRoute(

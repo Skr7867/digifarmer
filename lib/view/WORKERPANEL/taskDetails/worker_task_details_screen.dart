@@ -662,7 +662,12 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
             if (isCompleted) {
               // Navigate to summary screen
             } else {
-              Navigator.pushNamed(context, RoutesName.workerTaskSubmit);
+              //Navigator.pushNamed(context, RoutesName.workerTaskSubmit);
+              Navigator.pushNamed(
+                context,
+                RoutesName.completeTaskScreen,
+                arguments: {'taskId': taskId, 'taskTitle': task!.taskTitle},
+              );
             }
           },
         ),
@@ -752,7 +757,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
 
   static Widget _infoBox(IconData icon, String title, String text, context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.12,
+      height: MediaQuery.of(context).size.height * 0.18,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: const Color(0xffF3F4F6),
@@ -762,7 +767,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 18, color: Colors.grey),
-          const SizedBox(height: 6),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.04),
           Text(
             title,
             style: const TextStyle(
