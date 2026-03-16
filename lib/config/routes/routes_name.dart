@@ -33,4 +33,6 @@ class RoutesName {
   static const String workerHelpSupportScreen = 'worker_help_support_screen';
   static const String workerTaskUpdateScreen = 'worker_task_update_screen';
   static const String completeTaskScreen = 'complete_task_screen';
+  static const String markAttendaceScreen = 'mark_attendance_screen';
+  static const String attendanceHistoryScreen = 'attendance_history_screen';
 }

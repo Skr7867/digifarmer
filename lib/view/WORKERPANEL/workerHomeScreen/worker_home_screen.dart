@@ -43,7 +43,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
         ],
         child: MultiBlocListener(
           listeners: [
-            /// ⭐ Start Task Listener
             BlocListener<StartTaskBloc, StartTaskState>(
               listener: (context, startState) {
                 if (startState.startTaskResponse.status == Status.loading) {
@@ -60,10 +59,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
                   final taskId = startState.startTaskResponse.data?.task?.id;
 
-                  /// ⭐ refresh dashboard
                   dashboardBloc.add(DashboardFetched());
 
-                  /// ⭐ navigate to task details
                   Navigator.pushNamed(
                     context,
                     RoutesName.workerTaskDetails,
@@ -863,7 +860,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       onPressed: () {
                         Navigator.pushNamed(
                           context,
-                          RoutesName.workerTaskDetails,
+                          RoutesName.workerTaskUpdateScreen,
                           arguments: {'landId': land.sId},
                         );
                       },
@@ -918,11 +915,38 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             crossAxisSpacing: 15,
             mainAxisSpacing: 15,
             childAspectRatio: 1.2,
-            children: const [
-              _QuickAction(title: "Mark Attendance", icon: Icons.check_circle),
-              _QuickAction(title: "Upload Photo", icon: Icons.photo_camera),
-              _QuickAction(title: "Daily Report", icon: Icons.description),
-              _QuickAction(title: "Contact Support", icon: Icons.support_agent),
+            children: [
+              _QuickAction(
+                title: "Mark Attendance",
+                icon: Icons.check_circle,
+                onTap: () {
+                  Navigator.pushNamed(context, RoutesName.markAttendaceScreen);
+                },
+              ),
+              _QuickAction(
+                title: "Attendance History",
+                icon: Icons.event_available,
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    RoutesName.attendanceHistoryScreen,
+                  );
+                },
+              ),
+              _QuickAction(
+                title: "Daily Report",
+                icon: Icons.description,
+                onTap: () {
+                  Navigator.pushNamed(context, RoutesName.markAttendaceScreen);
+                },
+              ),
+              _QuickAction(
+                title: "Contact Support",
+                icon: Icons.support_agent,
+                onTap: () {
+                  Navigator.pushNamed(context, RoutesName.markAttendaceScreen);
+                },
+              ),
             ],
           ),
         ),
@@ -1044,38 +1068,47 @@ class _TopStat extends StatelessWidget {
 class _QuickAction extends StatelessWidget {
   final String title;
   final IconData icon;
+  final VoidCallback onTap;
 
-  const _QuickAction({required this.title, required this.icon});
+  const _QuickAction({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: const Color(0xff2BB673), size: 28),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 13,
-              fontFamily: AppFonts.popins,
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: const Color(0xff2BB673), size: 28),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                fontFamily: AppFonts.popins,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

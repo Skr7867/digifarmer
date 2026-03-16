@@ -20,6 +20,8 @@ import 'package:digifarmer/repository/WORKERPANEL/workerdashboard/worker_dashboa
 import 'package:get_it/get_it.dart';
 
 import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
+import '../../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
+import '../../../blocs/WORKERPANEL/markAttendance/attendance_bloc.dart';
 import '../../../repository/INVESTORPANEL/chooseRole/choose_role_http_repository.dart';
 import '../../../repository/INVESTORPANEL/chooseRole/choose_role_repository.dart';
 import '../../../repository/INVESTORPANEL/invesmentPlan/all_investment_http_repository.dart';
@@ -35,6 +37,12 @@ import '../../../repository/INVESTORPANEL/userLogin/user_login_repository.dart';
 import '../../../repository/INVESTORPANEL/verifyOtp/verify_otp_http_repository.dart';
 import '../../../repository/INVESTORPANEL/verifyOtp/verify_otp_repository.dart';
 import '../../../repository/LANDOWNERPANEL/landImage/land_image_repository.dart';
+import '../../../repository/WORKERPANEL/attendance/workerCheckIn/worker_check_in_http_repository.dart';
+import '../../../repository/WORKERPANEL/attendance/workerCheckIn/worker_check_in_repository.dart';
+import '../../../repository/WORKERPANEL/attendance/workerCheckOut/worker_check_out_http_repository.dart';
+import '../../../repository/WORKERPANEL/attendance/workerCheckOut/worker_check_out_repository.dart';
+import '../../../repository/WORKERPANEL/attendanceHistory/attendance_history_http_repository.dart';
+import '../../../repository/WORKERPANEL/attendanceHistory/attendance_history_repository.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -100,5 +108,29 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<CompleteTaskRepository>(
     () => CompleteTaskHttpRepository(),
+  );
+
+  getIt.registerLazySingleton<WorkerCheckInRepository>(
+    () => WorkerCheckInHttpRepository(),
+  );
+
+  getIt.registerLazySingleton<WorkerCheckOutRepository>(
+    () => WorkerCheckOutHttpRepository(),
+  );
+
+  getIt.registerFactory<WorkerAttendanceBloc>(
+    () => WorkerAttendanceBloc(
+      checkInRepository: getIt<WorkerCheckInHttpRepository>(),
+      checkOutRepository: getIt<WorkerCheckOutHttpRepository>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<AttendanceHistoryRepository>(
+    () => AttendanceHistoryHttpRepository(),
+  );
+
+  getIt.registerFactory<AttendanceHistoryBloc>(
+    () =>
+        AttendanceHistoryBloc(repository: getIt<AttendanceHistoryRepository>()),
   );
 }

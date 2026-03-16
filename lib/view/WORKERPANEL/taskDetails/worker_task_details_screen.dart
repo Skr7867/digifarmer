@@ -655,9 +655,10 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
           ),
         if (!isCompleted) const SizedBox(width: 10),
         RoundButton(
+          width: 300,
           height: 40,
           buttonColor: AppColors.greenColor,
-          title: isCompleted ? 'View Summary' : 'Mark Complete',
+          title: isCompleted ? 'Task Completed' : 'Mark Complete',
           onPress: () {
             if (isCompleted) {
               // Navigate to summary screen

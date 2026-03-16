@@ -1,14 +1,17 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/attendanceHistory/attendance_history_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/completeTask/complete_task_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/helpAndSupport/help_and_support_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/markAttendance/mark_attendance_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/notification/worker_notification_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/setting/worker_setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/INVESTORPANEL/planPurchase/plan_purchase_bloc.dart';
+import '../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
 import '../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
 import '../../repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
@@ -139,6 +142,15 @@ class Routes {
           builder: (_) => WorkerCompleteTaskScreen(
             taskId: args?['taskId'] ?? '',
             taskTitle: args?['taskTitle'] ?? '',
+          ),
+        );
+      case RoutesName.markAttendaceScreen:
+        return MaterialPageRoute(builder: (context) => MarkAttendanceScreen());
+      case RoutesName.attendanceHistoryScreen:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider<AttendanceHistoryBloc>(
+            create: (_) => getIt<AttendanceHistoryBloc>(),
+            child: const AttendanceHistory(),
           ),
         );
       default:

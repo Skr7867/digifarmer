@@ -32,4 +32,11 @@ class ApiUrls {
       '$baseUrl/api/v1/worker/tasks/$taskId/progress';
   static String taskCompleteApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId/complete';
+
+  static String workerCheckInApi = '$baseUrl/api/v1/worker/attendance/checkin';
+  static String workerCheckOutApi =
+      '$baseUrl/api/v1/worker/attendance/checkout';
+
+  static String workerAttendanceHistoryApi =
+      '$baseUrl/api/v1/worker/attendance';
 }
