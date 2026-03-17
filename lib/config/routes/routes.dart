@@ -4,6 +4,7 @@ import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image
 import 'package:digifarmer/view/WORKERPANEL/attendanceHistory/attendance_history_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/completeTask/complete_task_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/helpAndSupport/help_and_support_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/landDetails/land_details_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/markAttendance/mark_attendance_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/notification/worker_notification_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/setting/worker_setting_screen.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/INVESTORPANEL/planPurchase/plan_purchase_bloc.dart';
 import '../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
+import '../../blocs/WORKERPANEL/landDetails/land_details_bloc.dart';
 import '../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
 import '../../repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
@@ -109,9 +111,7 @@ class Routes {
         );
       case RoutesName.workerTaskDetails:
         final args = settings.arguments as Map<String, dynamic>;
-
         final String taskId = args['leadId'];
-
         return MaterialPageRoute(
           builder: (context) => WorkerTaskDetailsScreen(taskId: taskId),
         );
@@ -153,6 +153,18 @@ class Routes {
             child: const AttendanceHistory(),
           ),
         );
+
+      case RoutesName.landDetailScreen:
+        return MaterialPageRoute(
+          builder: (context) {
+            final taskId = settings.arguments as String;
+            return BlocProvider<LandDetailsBloc>(
+              create: (_) => getIt<LandDetailsBloc>(),
+              child: LandDetailsScreen(taskId: taskId),
+            );
+          },
+        );
+
       default:
         return MaterialPageRoute(
           builder: (context) {

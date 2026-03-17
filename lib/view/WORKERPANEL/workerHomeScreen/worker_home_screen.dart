@@ -1,6 +1,7 @@
 import 'package:digifarmer/blocs/WORKERPANEL/workerdashboard/worker_dashboard_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/model/WORKERPANEL/dashboard/worker_dashboard_model.dart';
+import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:digifarmer/utils/enums.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/WORKERPANEL/startTask/start_task_bloc.dart';
 import '../../../config/component/internet_exception.dart';
 import '../../../main.dart';
+import '../../../res/color/app_colors.dart';
 
 class WorkerHomeScreen extends StatefulWidget {
   const WorkerHomeScreen({super.key});
@@ -798,6 +800,11 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           ...uniqueLands.values.map((landData) {
             final land = landData['land'] as Land;
             final taskCount = landData['taskCount'] as int;
+            final matchedLead = assignedLeads.firstWhere(
+              (lead) => lead.land?.sId == land.sId,
+              orElse: () => AssignedLeads(),
+            );
+            final taskId = matchedLead.id;
 
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -854,37 +861,23 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
+
+                  RoundButton(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          RoutesName.workerTaskUpdateScreen,
-                          arguments: {'landId': land.sId},
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xff2BB673),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: const Text(
-                        "View Land Details",
-                        style: TextStyle(
-                          fontFamily: AppFonts.popins,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+                    buttonColor: AppColors.greenColor,
+                    title: 'View Land Details',
+                    onPress: () {
+                      Navigator.pushNamed(
+                        context,
+                        RoutesName.landDetailScreen,
+                        arguments: taskId,
+                      );
+                    },
                   ),
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ],
     );

@@ -133,7 +133,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
           /// CONTACT (Static - keep as is)
           _contactCard(),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 10),
 
           /// ACTION BUTTONS
           _bottomButtons(context, task?.status, task),
@@ -617,8 +617,6 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
     );
   }
 
-  /// BUTTONS with status-based logic
-  /// BUTTONS with status-based logic
   Widget _bottomButtons(BuildContext context, String? status, Task? task) {
     bool isCompleted = status?.toUpperCase() == 'COMPLETED';
     bool isInProgress = status?.toUpperCase() == 'IN_PROGRESS';
@@ -655,7 +653,6 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
           ),
         if (!isCompleted) const SizedBox(width: 10),
         RoundButton(
-          width: 300,
           height: 40,
           buttonColor: AppColors.greenColor,
           title: isCompleted ? 'Task Completed' : 'Mark Complete',
@@ -663,7 +660,6 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
             if (isCompleted) {
               // Navigate to summary screen
             } else {
-              //Navigator.pushNamed(context, RoutesName.workerTaskSubmit);
               Navigator.pushNamed(
                 context,
                 RoutesName.completeTaskScreen,
@@ -672,6 +668,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
             }
           },
         ),
+        SizedBox(height: 100),
       ],
     );
   }

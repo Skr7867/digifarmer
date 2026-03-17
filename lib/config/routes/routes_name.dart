@@ -35,4 +35,5 @@ class RoutesName {
   static const String completeTaskScreen = 'complete_task_screen';
   static const String markAttendaceScreen = 'mark_attendance_screen';
   static const String attendanceHistoryScreen = 'attendance_history_screen';
+  static const String landDetailScreen = 'land_details_screen';
 }

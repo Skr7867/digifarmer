@@ -39,4 +39,7 @@ class ApiUrls {
 
   static String workerAttendanceHistoryApi =
       '$baseUrl/api/v1/worker/attendance';
+
+  static String landDetailsApi(String taskId) =>
+      '$baseUrl/api/v1/worker/tasks/$taskId';
 }

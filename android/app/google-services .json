@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "616380462295",
+    "project_id": "digifarmer-78965",
+    "storage_bucket": "digifarmer-78965.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:616380462295:android:7d97ec75c05ab782dcec92",
+        "android_client_info": {
+          "package_name": "com.devolyt.digifarmer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYucKpSiBZgHXqgevtIMCy-L8NXErttK4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

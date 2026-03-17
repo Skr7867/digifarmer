@@ -21,6 +21,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
 import '../../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
+import '../../../blocs/WORKERPANEL/landDetails/land_details_bloc.dart';
 import '../../../blocs/WORKERPANEL/markAttendance/attendance_bloc.dart';
 import '../../../repository/INVESTORPANEL/chooseRole/choose_role_http_repository.dart';
 import '../../../repository/INVESTORPANEL/chooseRole/choose_role_repository.dart';
@@ -43,6 +44,8 @@ import '../../../repository/WORKERPANEL/attendance/workerCheckOut/worker_check_o
 import '../../../repository/WORKERPANEL/attendance/workerCheckOut/worker_check_out_repository.dart';
 import '../../../repository/WORKERPANEL/attendanceHistory/attendance_history_http_repository.dart';
 import '../../../repository/WORKERPANEL/attendanceHistory/attendance_history_repository.dart';
+import '../../../repository/WORKERPANEL/landDetails/land_details_http_repository.dart';
+import '../../../repository/WORKERPANEL/landDetails/land_details_repository.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -132,5 +135,14 @@ Future<void> setupServiceLocator() async {
   getIt.registerFactory<AttendanceHistoryBloc>(
     () =>
         AttendanceHistoryBloc(repository: getIt<AttendanceHistoryRepository>()),
+  );
+
+  getIt.registerLazySingleton<LandDetailsRepository>(
+    () => LandDetailsHttpRepository(),
+  );
+
+  getIt.registerFactory<LandDetailsBloc>(
+    () =>
+        LandDetailsBloc(landDetailsRepository: getIt<LandDetailsRepository>()),
   );
 }

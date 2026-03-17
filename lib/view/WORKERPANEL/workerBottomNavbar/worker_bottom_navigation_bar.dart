@@ -1,8 +1,8 @@
 import 'package:digifarmer/view/WORKERPANEL/workerHomeScreen/worker_home_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../../INVESTORPANEL/portfolio/portfolio_screen.dart';
 import '../../INVESTORPANEL/wallet/wallet_screen.dart';
+import '../allTask/all_task_screen.dart';
 import '../profile/worker_profile_screen.dart';
 import 'worker_custom_nav_bar.dart';
 
@@ -19,7 +19,8 @@ class _WorkerBottomNavigationBarState extends State<WorkerBottomNavigationBar> {
 
   final List<Widget> screens = [
     WorkerHomeScreen(),
-    PortfolioScreen(),
+    AllTaskScreen(),
+    // PortfolioScreen(),
     WalletScreen(),
     WorkerProfileScreen(),
   ];
