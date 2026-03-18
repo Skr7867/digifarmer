@@ -4,9 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../blocs/LANDOWNERPANEL/landStatus/land_status_bloc.dart';
 import '../../../main.dart';
-import '../../INVESTORPANEL/portfolio/portfolio_screen.dart';
 import '../../INVESTORPANEL/profile/profile_screen.dart';
 import '../homeScreen/land_owner_home_screen.dart';
+import '../myLands/my_lands_screen.dart';
 import 'land_owner_custom_nav_bar.dart';
 
 class LandOwnerBottomNavigationBar extends StatefulWidget {
@@ -28,7 +28,12 @@ class _LandOwnerBottomNavigationBarState
             ..add(LandStatusFetched()),
       child: const LandOwnerHomeScreen(),
     ),
-    const PortfolioScreen(),
+    BlocProvider(
+      create: (context) =>
+          LandStatusBloc(landStatusRepository: getIt())
+            ..add(LandStatusFetched()),
+      child: MyLandsScreen(),
+    ),
     const LandStatusScreen(),
     const ProfileScreen(),
   ];

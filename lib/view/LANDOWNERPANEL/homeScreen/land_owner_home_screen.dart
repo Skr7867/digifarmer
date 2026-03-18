@@ -1,4 +1,6 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/res/color/app_colors.dart';
+import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -175,7 +177,11 @@ class LandOwnerHomeScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               "Quick Actions",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontFamily: AppFonts.popins,
+              ),
             ),
           ),
 
@@ -212,24 +218,23 @@ class LandOwnerHomeScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               "My Lands",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontFamily: AppFonts.popins,
+              ),
             ),
           ),
 
-          const SizedBox(height: 15),
-
           /// Dynamic Lands List
           ListView.builder(
-            itemCount: lands.length,
+            itemCount: 4,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               final land = lands[index];
               return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _landCard(land),
               );
             },
@@ -254,6 +259,13 @@ class LandOwnerHomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.blackColor.withValues(alpha: 0.35),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -263,7 +275,13 @@ class LandOwnerHomeScreen extends StatelessWidget {
               child: Icon(icon, color: const Color(0xff2BB673)),
             ),
             const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontFamily: AppFonts.popins,
+              ),
+            ),
           ],
         ),
       ),
@@ -273,9 +291,17 @@ class LandOwnerHomeScreen extends StatelessWidget {
   /// ================= LAND CARD =================
   static Widget _landCard(LandOwnerTimelineLand land) {
     return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.blackColor.withValues(alpha: 0.35),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,7 +327,10 @@ class LandOwnerHomeScreen extends StatelessWidget {
                   children: [
                     Text(
                       land.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: AppFonts.popins,
+                      ),
                     ),
 
                     Container(
@@ -318,6 +347,7 @@ class LandOwnerHomeScreen extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.green,
                           fontSize: 12,
+                          fontFamily: AppFonts.popins,
                         ),
                       ),
                     ),
@@ -328,29 +358,25 @@ class LandOwnerHomeScreen extends StatelessWidget {
 
                 Text(
                   land.location,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                    fontFamily: AppFonts.popins,
+                  ),
                 ),
 
                 const SizedBox(height: 10),
 
-                Text("Area: ${land.area}"),
-                Text("Land ID: ${land.landId}"),
+                Text(
+                  "Area: ${land.area}",
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
+                Text(
+                  "Land ID: ${land.landId},",
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
 
                 const SizedBox(height: 12),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff2BB673),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: const Text("View Details"),
-                  ),
-                ),
               ],
             ),
           ),
@@ -372,10 +398,21 @@ class _StatItem extends StatelessWidget {
       children: [
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            fontFamily: AppFonts.popins,
+          ),
         ),
         const SizedBox(height: 4),
-        Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+            fontFamily: AppFonts.popins,
+          ),
+        ),
       ],
     );
   }
