@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../../res/color/app_colors.dart';
 import '../../../res/fonts/app_fonts.dart';
@@ -39,7 +38,7 @@ class LandOwnerCustomNavBar extends StatelessWidget {
           unselectedLabelStyle: TextStyle(fontFamily: AppFonts.popins),
           backgroundColor: Colors.transparent,
           elevation: 0,
-          selectedItemColor: AppColors.buttonColor,
+          selectedItemColor: AppColors.greenColor,
           unselectedItemColor: Theme.of(context).textTheme.bodyLarge?.color,
           type: BottomNavigationBarType.fixed,
           selectedFontSize: 14,
@@ -47,24 +46,24 @@ class LandOwnerCustomNavBar extends StatelessWidget {
 
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.house),
-              activeIcon: Icon(PhosphorIconsFill.house),
+              icon: Icon(Icons.home),
+              activeIcon: Icon(Icons.home),
               label: 'Home',
             ),
 
             BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.lockLaminated),
-              activeIcon: Icon(PhosphorIconsFill.chartBar),
+              icon: Icon(Icons.yard),
+              activeIcon: Icon(Icons.yard),
               label: 'My Lands',
             ),
             BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.lampPendant),
-              activeIcon: Icon(PhosphorIconsFill.lampPendant),
+              icon: Icon(Icons.sensors),
+              activeIcon: Icon(Icons.sensors),
               label: 'Status',
             ),
             BottomNavigationBarItem(
-              icon: Icon(PhosphorIconsRegular.person),
-              activeIcon: Icon(PhosphorIconsFill.person),
+              icon: Icon(Icons.account_circle),
+              activeIcon: Icon(Icons.account_circle),
               label: 'profile',
             ),
           ],

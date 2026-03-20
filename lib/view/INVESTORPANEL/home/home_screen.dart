@@ -1,3 +1,4 @@
+import 'package:digifarmer/blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +18,27 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
+  void initState() {
+    super.initState();
+    // Fetch profile using the bloc provided by BottomnavBar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProfileBloc>().add(UserProfileFetched());
+    });
+  }
+
+  String _getInitials(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '?';
+    final parts = trimmed.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return trimmed.length >= 2
+        ? trimmed.substring(0, 2).toUpperCase()
+        : trimmed.toUpperCase();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -24,147 +46,209 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             /// ================= HEADER =================
-            Container(
-              padding: const EdgeInsets.fromLTRB(18, 50, 18, 20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: Theme.of(context).brightness == Brightness.dark
-                      ? [Colors.black87, Colors.black54]
-                      : [Color(0xff1C6C8C), Color(0xff2FA463)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: Column(
-                children: [
-                  /// Top Row
-                  Row(
+            BlocBuilder<UserProfileBloc, UserProfileState>(
+              builder: (context, profileState) {
+                final userName =
+                    profileState.userProfile.data?.user?.fullName ?? '';
+                final userInitials = _getInitials(userName);
+
+                return Container(
+                  padding: const EdgeInsets.fromLTRB(18, 50, 18, 20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: Theme.of(context).brightness == Brightness.dark
+                          ? [Colors.black87, Colors.black54]
+                          : [Color(0xff1C6C8C), Color(0xff2FA463)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Column(
                     children: [
-                      const CircleAvatar(
-                        radius: 18,
-                        backgroundImage: NetworkImage(
-                          "https://i.pravatar.cc/150?img=5",
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Welcome back,",
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
+                      /// Top Row
+                      Row(
+                        children: [
+                          /// Avatar with initials (same pattern as WorkerHomeScreen)
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.3,
                             ),
-                            Text(
-                              "Sarah Johnson",
-                              style: TextStyle(
-                                color: Theme.of(context).cardColor,
-                                fontSize: 16,
+                            child: Text(
+                              userInitials,
+                              style: const TextStyle(
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                fontFamily: AppFonts.popinsBold,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Welcome back,",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+
+                                /// Dynamic name — placeholder while loading
+                                userName.isEmpty
+                                    ? Container(
+                                        height: 16,
+                                        width: 110,
+                                        margin: const EdgeInsets.only(top: 3),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.25,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        userName,
+                                        style: TextStyle(
+                                          color: Theme.of(context).cardColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: AppFonts.popins,
+                                        ),
+                                      ),
+                              ],
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                RoutesName.workerNotification,
+                              );
+                            },
+                            child: Container(
+                              height: 38,
+                              width: 38,
+                              decoration: BoxDecoration(
+                                color: Colors.white24,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.notifications_none,
+                                color: Theme.of(context).cardColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Container(
-                        height: 38,
-                        width: 38,
-                        decoration: BoxDecoration(
-                          color: Colors.white24,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.notifications_none,
-                          color: Theme.of(context).cardColor,
+
+                      const SizedBox(height: 24),
+
+                      /// Portfolio Card
+                      InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            RoutesName.workerNotification,
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Total Portfolio Value",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontFamily: AppFonts.popins,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "₹2,45,000",
+                                style: TextStyle(
+                                  color: Theme.of(context).cardColor,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: AppFonts.popins,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                "+12.5% ↑",
+                                style: TextStyle(
+                                  color: Colors.lightGreenAccent,
+                                  fontFamily: AppFonts.popins,
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        "Active Investments",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontFamily: AppFonts.popins,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        "8",
+                                        style: TextStyle(
+                                          color: Theme.of(context).cardColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          fontFamily: AppFonts.popins,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        "Monthly Returns",
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                          fontFamily: AppFonts.popins,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        "₹12,400",
+                                        style: TextStyle(
+                                          color: Theme.of(context).cardColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          fontFamily: AppFonts.popins,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 24),
-
-                  /// Portfolio Card
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.12),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          "Total Portfolio Value",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "₹2,45,000",
-                          style: TextStyle(
-                            color: Theme.of(context).cardColor,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          "+12.5% ↑",
-                          style: TextStyle(color: Colors.lightGreenAccent),
-                        ),
-                        const SizedBox(height: 18),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  "Active Investments",
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  "8",
-                                  style: TextStyle(
-                                    color: Theme.of(context).cardColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  "Monthly Returns",
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  "₹12,400",
-                                  style: TextStyle(
-                                    color: Theme.of(context).cardColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
 
             /// ================= BODY =================
@@ -367,13 +451,26 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Icon(icon),
           const SizedBox(height: 10),
-          Text(title, style: const TextStyle(fontSize: 12)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 12, fontFamily: AppFonts.popins),
+          ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontFamily: AppFonts.popins,
+            ),
           ),
-          Text(percent, style: const TextStyle(color: Colors.green)),
+          Text(
+            percent,
+            style: const TextStyle(
+              color: Colors.green,
+              fontFamily: AppFonts.popins,
+            ),
+          ),
         ],
       ),
     );
@@ -401,11 +498,18 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontFamily: AppFonts.popins,
+                  ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontFamily: AppFonts.popins,
+                  ),
                 ),
               ],
             ),
@@ -414,7 +518,13 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(roi, style: const TextStyle(color: Colors.green)),
+              Text(
+                roi,
+                style: const TextStyle(
+                  color: Colors.green,
+                  fontFamily: AppFonts.popins,
+                ),
+              ),
             ],
           ),
         ],

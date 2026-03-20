@@ -39,7 +39,7 @@ class CustomBottomNavBar extends StatelessWidget {
           unselectedLabelStyle: TextStyle(fontFamily: AppFonts.popins),
           backgroundColor: Colors.transparent,
           elevation: 0,
-          selectedItemColor: AppColors.buttonColor,
+          selectedItemColor: AppColors.greenColor,
           unselectedItemColor: Theme.of(context).textTheme.bodyLarge?.color,
           type: BottomNavigationBarType.fixed,
           selectedFontSize: 14,

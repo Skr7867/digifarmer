@@ -87,10 +87,6 @@ class WorkerNotificationScreen extends StatelessWidget {
     'Tasks': const Color(0xFFED6A2E),
   };
 
-  // void _handleMarkAll() {
-  //   debugPrint('Mark all as read');
-  // }
-
   void _handleActionPress(String action, String id) {
     debugPrint('Action: $action on notification $id');
   }
@@ -107,12 +103,6 @@ class WorkerNotificationScreen extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         automaticallyImplyLeading: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: Row(children: [Text('Mark All')]),
-          ),
-        ],
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),

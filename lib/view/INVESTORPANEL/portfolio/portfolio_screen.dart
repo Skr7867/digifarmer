@@ -31,8 +31,14 @@ class _PortfolioState extends State<PortfolioScreen> {
                 /// Top Bar
                 Row(
                   children: [
-                    const Icon(Icons.arrow_back, color: Colors.white),
-                    const Spacer(),
+                    //  Icon(Icons.arrow_back, color: Colors.white),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.arrow_back, color: Colors.white),
+                    ),
+
                     const Text(
                       "My Portfolio",
                       style: TextStyle(
@@ -41,8 +47,6 @@ class _PortfolioState extends State<PortfolioScreen> {
                         fontSize: 18,
                       ),
                     ),
-                    const Spacer(),
-                    const Icon(Icons.filter_alt_outlined, color: Colors.white),
                   ],
                 ),
 

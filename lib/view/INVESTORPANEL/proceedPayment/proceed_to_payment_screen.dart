@@ -45,7 +45,7 @@ class ProceedToPaymentScreen extends StatelessWidget {
       },
 
       builder: (context, state) {
-        final isLoading = state.purchaseResponse.status == Status.loading;
+        // final isLoading = state.purchaseResponse.status == Status.loading;
 
         return Stack(
           children: [
@@ -101,11 +101,11 @@ class ProceedToPaymentScreen extends StatelessWidget {
 
                               const SizedBox(width: 12),
 
-                              const Column(
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Organic Rice Farm",
+                                    investment.plan.planName,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -113,7 +113,7 @@ class ProceedToPaymentScreen extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    "Maharashtra",
+                                    investment.plan.description,
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12,
@@ -122,10 +122,6 @@ class ProceedToPaymentScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-
-                              const Spacer(),
-
-                              const Icon(Icons.share, color: Colors.white),
                             ],
                           ),
 
@@ -410,7 +406,7 @@ class ProceedToPaymentScreen extends StatelessWidget {
             ),
 
             /// Loader Overlay
-            if (isLoading) const Center(child: CircularProgressIndicator()),
+            // if (isLoading) const Center(child: CircularProgressIndicator()),
           ],
         );
       },

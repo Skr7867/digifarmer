@@ -1,3 +1,4 @@
+import 'package:digifarmer/blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
 import 'package:digifarmer/blocs/WORKERPANEL/workerdashboard/worker_dashboard_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/model/WORKERPANEL/dashboard/worker_dashboard_model.dart';
@@ -26,6 +27,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   void initState() {
     super.initState();
     dashboardBloc = DashboardBloc(workerDashboardRepository: getIt());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProfileBloc>().add(UserProfileFetched());
+    });
   }
 
   @override
@@ -57,12 +61,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                 }
 
                 if (startState.startTaskResponse.status == Status.completed) {
-                  Navigator.pop(context); // close loader
-
+                  Navigator.pop(context);
                   final taskId = startState.startTaskResponse.data?.task?.id;
-
                   dashboardBloc.add(DashboardFetched());
-
                   Navigator.pushNamed(
                     context,
                     RoutesName.workerTaskDetails,
@@ -72,7 +73,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
                 if (startState.startTaskResponse.status == Status.error) {
                   Navigator.pop(context);
-
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -85,15 +85,12 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               },
             ),
           ],
-
           child: BlocBuilder<DashboardBloc, DashboardState>(
             builder: (BuildContext context, state) {
               switch (state.workerDashboard.status) {
-                /// ================= DASHBOARD LOADING =================
                 case Status.loading:
                   return const Center(child: CircularProgressIndicator());
 
-                /// ================= DASHBOARD ERROR =================
                 case Status.error:
                   if (state.workerDashboard.message ==
                       'No Internet Connection') {
@@ -112,7 +109,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     ),
                   );
 
-                /// ================= DASHBOARD COMPLETED =================
                 case Status.completed:
                   if (state.workerDashboard.data == null) {
                     return const Center(
@@ -122,11 +118,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       ),
                     );
                   }
-
                   final dashboardData = state.workerDashboard.data!;
                   return _buildDashboardContent(context, dashboardData);
 
-                /// ================= DEFAULT =================
                 case Status.initial:
                 default:
                   return const SizedBox();
@@ -146,14 +140,10 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     final taskStatus = dashboard?.taskStatus;
     final taskCounts = dashboard?.taskCounts;
 
-    // Get tasks from taskStatus (matches your screenshot structure)
     final inProgressTasks = taskStatus?.inProgressList ?? [];
     final completedTasks = taskStatus?.completedList ?? [];
-
-    // Get assigned lands
     final assignedLeads = dashboard?.assignedLeads ?? [];
 
-    // Calculate stats
     int totalTasksToday = taskCounts?.totalCount ?? 0;
     int completedCount = taskCounts?.completedCount ?? 0;
     int inProgressCount = taskCounts?.inProgressCount ?? 0;
@@ -162,34 +152,48 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// ================= HEADER =================
-          _buildHeader(
-            context,
-            dashboard?.today?.status ?? 'NOT_MARKED',
-            totalTasksToday,
-            completedCount,
-            inProgressCount,
+          /// Pass profile state into header via BlocBuilder
+          BlocBuilder<UserProfileBloc, UserProfileState>(
+            builder: (context, profileState) {
+              final userName =
+                  profileState.userProfile.data?.user?.fullName ?? '';
+              final userInitials = _getInitials(userName);
+
+              return _buildHeader(
+                context,
+                dashboard?.today?.status ?? 'NOT_MARKED',
+                totalTasksToday,
+                completedCount,
+                inProgressCount,
+                userName,
+                userInitials,
+              );
+            },
           ),
 
           const SizedBox(height: 20),
-
-          /// ================= TODAY'S TASKS SECTION =================
           _buildTodayTasksSection(context, inProgressTasks, completedTasks),
-
           const SizedBox(height: 20),
-
-          /// ================= ASSIGNED LANDS =================
           _buildAssignedLandsSection(context, assignedLeads),
-
           const SizedBox(height: 20),
-
-          /// ================= QUICK ACTIONS =================
           _buildQuickActionsSection(),
-
           const SizedBox(height: 20),
         ],
       ),
     );
+  }
+
+  /// Extract initials from full name
+  String _getInitials(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '?';
+    final parts = trimmed.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return trimmed.length >= 2
+        ? trimmed.substring(0, 2).toUpperCase()
+        : trimmed.toUpperCase();
   }
 
   Widget _buildHeader(
@@ -198,8 +202,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     int totalTasks,
     int completedTasks,
     int inProgressTasks,
+    String userName,
+    String userInitials,
   ) {
-    // Format status for display
     String displayStatus = status.replaceAll('_', ' ').toLowerCase();
     displayStatus =
         displayStatus.substring(0, 1).toUpperCase() +
@@ -219,13 +224,23 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Top Row with Profile and Notification
+          /// Top Row with Avatar and Notification
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const CircleAvatar(
+              /// Avatar: show initials while loading, real avatar when ready
+              CircleAvatar(
                 radius: 22,
-                backgroundImage: NetworkImage("https://i.pravatar.cc/100"),
+                backgroundColor: Colors.white.withValues(alpha: 0.3),
+                child: Text(
+                  userInitials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    fontFamily: AppFonts.popinsBold,
+                  ),
+                ),
               ),
               InkWell(
                 onTap: () {
@@ -248,19 +263,30 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               fontFamily: AppFonts.popins,
             ),
           ),
-          const Text(
-            "Rajesh Kumar",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              fontFamily: AppFonts.popins,
-            ),
-          ),
+
+          /// Dynamic user name — shows loading shimmer or actual name
+          userName.isEmpty
+              ? Container(
+                  height: 22,
+                  width: 120,
+                  margin: const EdgeInsets.only(top: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                )
+              : Text(
+                  userName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    fontFamily: AppFonts.popins,
+                  ),
+                ),
 
           const SizedBox(height: 20),
 
-          /// Stats from API
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -298,7 +324,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     List<InProgress> inProgressTasks,
     List<Completed> completedTasks,
   ) {
-    // Get today's date
     String todayDate = _getFormattedDate();
 
     return Column(
@@ -329,7 +354,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
           ),
         ),
 
-        /// In Progress Section
         if (inProgressTasks.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -365,15 +389,13 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             ),
           ),
           const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
-
-          ...inProgressTasks.map((task) {
-            return _buildInProgressTaskCard(context, task);
-          }),
+          ...inProgressTasks.map(
+            (task) => _buildInProgressTaskCard(context, task),
+          ),
         ],
 
         const SizedBox(height: 16),
 
-        /// Completed Section
         if (completedTasks.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -409,10 +431,9 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             ),
           ),
           const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
-
-          ...completedTasks.map((task) {
-            return _buildCompletedTaskCard(context, task);
-          }),
+          ...completedTasks.map(
+            (task) => _buildCompletedTaskCard(context, task),
+          ),
         ],
 
         if (inProgressTasks.isEmpty && completedTasks.isEmpty) ...[
@@ -434,16 +455,12 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Widget _buildInProgressTaskCard(BuildContext context, InProgress task) {
-    // Format time range
     String timeRange = _formatTimeRange(task.workday ?? 'Daily');
-
-    // Format due date if available
     String dueDateText = '';
     if (task.dueDate != null) {
       final dueDate = DateTime.parse(task.dueDate!);
       final now = DateTime.now();
       final difference = dueDate.difference(now).inDays;
-
       if (difference > 0) {
         dueDateText = 'Due in $difference day${difference > 1 ? 's' : ''}';
       } else if (difference == 0) {
@@ -489,8 +506,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             ),
           ),
           const SizedBox(height: 12),
-
-          /// Time and Area Row
           Row(
             children: [
               const Icon(Icons.access_time, size: 16, color: Colors.grey),
@@ -514,8 +529,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               ),
             ],
           ),
-
-          /// Started Time
           if (task.progress != null && task.progress! > 0) ...[
             const SizedBox(height: 8),
             Row(
@@ -537,8 +550,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               ],
             ),
           ],
-
-          /// Due Date
           if (dueDateText.isNotEmpty) ...[
             const SizedBox(height: 4),
             Row(
@@ -564,10 +575,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               ],
             ),
           ],
-
           const SizedBox(height: 12),
-
-          /// Continue Button
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
@@ -604,10 +612,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Widget _buildCompletedTaskCard(BuildContext context, Completed task) {
-    // Format time range
     String timeRange = _formatTimeRange(task.workday ?? 'Daily');
-
-    // Format completed time
     String completedTime = '';
     if (task.completedAt != null) {
       final completedAt = DateTime.parse(task.completedAt!);
@@ -649,8 +654,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             ),
           ),
           const SizedBox(height: 12),
-
-          /// Time and Area Row
           Row(
             children: [
               const Icon(Icons.access_time, size: 16, color: Colors.grey),
@@ -674,8 +677,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               ),
             ],
           ),
-
-          /// Completed Time
           if (completedTime.isNotEmpty) ...[
             const SizedBox(height: 8),
             Row(
@@ -697,10 +698,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               ],
             ),
           ],
-
           const SizedBox(height: 12),
-
-          /// View Button
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
@@ -740,9 +738,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     BuildContext context,
     List<AssignedLeads> assignedLeads,
   ) {
-    // Get unique lands from assigned leads
     final uniqueLands = <String, Map<String, dynamic>>{};
-
     for (var lead in assignedLeads) {
       if (lead.land != null && lead.land!.sId != null) {
         final landId = lead.land!.sId!;
@@ -782,8 +778,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             ],
           ),
         ),
-
-        if (uniqueLands.isEmpty) ...[
+        if (uniqueLands.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: Center(
@@ -795,8 +790,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                 ),
               ),
             ),
-          ),
-        ] else ...[
+          )
+        else
           ...uniqueLands.values.map((landData) {
             final land = landData['land'] as Land;
             final taskCount = landData['taskCount'] as int;
@@ -861,7 +856,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
                   RoundButton(
                     width: double.infinity,
                     buttonColor: AppColors.greenColor,
@@ -878,7 +872,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               ),
             );
           }),
-        ],
       ],
     );
   }
@@ -898,7 +891,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             ),
           ),
         ),
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GridView.count(
@@ -912,33 +904,34 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               _QuickAction(
                 title: "Mark Attendance",
                 icon: Icons.check_circle,
-                onTap: () {
-                  Navigator.pushNamed(context, RoutesName.markAttendaceScreen);
-                },
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  RoutesName.markAttendaceScreen,
+                ),
               ),
               _QuickAction(
                 title: "Attendance History",
                 icon: Icons.event_available,
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    RoutesName.attendanceHistoryScreen,
-                  );
-                },
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  RoutesName.attendanceHistoryScreen,
+                ),
               ),
               _QuickAction(
                 title: "Daily Report",
                 icon: Icons.description,
-                onTap: () {
-                  Navigator.pushNamed(context, RoutesName.markAttendaceScreen);
-                },
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  RoutesName.markAttendaceScreen,
+                ),
               ),
               _QuickAction(
                 title: "Contact Support",
                 icon: Icons.support_agent,
-                onTap: () {
-                  Navigator.pushNamed(context, RoutesName.markAttendaceScreen);
-                },
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  RoutesName.markAttendaceScreen,
+                ),
               ),
             ],
           ),
@@ -947,8 +940,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     );
   }
 
-  // Helper methods
-  // Helper methods - add all of these to your _WorkerHomeScreenState class
+  // ── Helper methods ──────────────────────────────────────────────────────────
 
   String _getFormattedDate() {
     final now = DateTime.now();
@@ -974,18 +966,11 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   String _formatTimeRange(String workday) {
-    // This is a simplified version - you might want to get actual start/end times from API
-    if (workday.toLowerCase() == 'daily') {
-      return '6:00 AM - 2:00 PM'; // Default timing
-    }
+    if (workday.toLowerCase() == 'daily') return '6:00 AM - 2:00 PM';
     return workday;
   }
 
-  String _formatStartTime(InProgress task) {
-    // This would come from actual task start time in API
-    // For now, return a formatted time based on task ID or current time
-    return '9:15 AM';
-  }
+  String _formatStartTime(InProgress task) => '9:15 AM';
 
   String _formatTime(DateTime time) {
     String minute = time.minute.toString().padLeft(2, '0');
@@ -996,34 +981,14 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     return '$hourIn12:$minute $period';
   }
 
-  String _getLocationFromLand(Land? land) {
-    // This would come from API if available
-    return 'Nashik, Maharashtra';
-  }
-
-  String _getLandLocation(Land land) {
-    // Return location for the land
-    // You can customize this based on your data structure
-    return 'Nashik, Maharashtra';
-  }
-
-  String _getLocationFromTask(dynamic task) {
-    // This would come from API if available
-    return 'Nashik, Maharashtra';
-  }
-
-  String _getAreaFromTask(InProgress task) {
-    // This would come from API if available
-    return '5.2 Acres';
-  }
-
-  String _getAreaFromCompletedTask(Completed task) {
-    // This would come from API if available
-    return '3.8 Acres';
-  }
+  String _getLocationFromLand(Land? land) => 'Nashik, Maharashtra';
+  String _getLandLocation(Land land) => 'Nashik, Maharashtra';
+  String _getLocationFromTask(dynamic task) => 'Nashik, Maharashtra';
+  String _getAreaFromTask(InProgress task) => '5.2 Acres';
+  String _getAreaFromCompletedTask(Completed task) => '3.8 Acres';
 }
 
-/// ================= SMALL WIDGETS =================
+// ── Small reusable widgets ───────────────────────────────────────────────────
 
 class _TopStat extends StatelessWidget {
   final String title;

@@ -2,6 +2,7 @@ import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/model/INVESTORPANEL/investmentPlan/all_investment_plan_model.dart';
 import 'package:digifarmer/res/color/app_colors.dart';
 import 'package:digifarmer/res/customeWidgets/custom_app_bar.dart';
+import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -59,7 +60,7 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
       backgroundColor: const Color(0xffF7F8FA),
 
       appBar: CustomAppBar(
-        title: 'Organic Rice form',
+        title: 'All Plan',
         automaticallyImplyLeading: true,
         gradient: const LinearGradient(
           colors: [Color(0xff34A853), Color(0xff0D47A1)],
@@ -83,6 +84,7 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                   children: [
                     Text(
                       state.allInvestmentPlan.message ?? "Something went wrong",
+                      style: TextStyle(fontFamily: AppFonts.popins),
                     ),
 
                     const SizedBox(height: 10),
@@ -93,7 +95,10 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                           PlanFetched(),
                         );
                       },
-                      child: const Text("Retry"),
+                      child: const Text(
+                        "Retry",
+                        style: TextStyle(fontFamily: AppFonts.popins),
+                      ),
                     ),
                   ],
                 ),
@@ -130,7 +135,11 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
           /// ENTER AMOUNT
           const Text(
             "Enter Investment Amount",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: AppFonts.popins,
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -143,7 +152,10 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
             ),
             child: Column(
               children: [
-                const Text("Investment Amount"),
+                const Text(
+                  "Investment Amount",
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
 
                 const SizedBox(height: 10),
 
@@ -161,6 +173,7 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    fontFamily: AppFonts.popins,
                   ),
                 ),
               ],
@@ -173,8 +186,14 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Minimum ${selectedPlan.minInvestmentFormatted}"),
-              Text("Maximum ${selectedPlan.maxInvestmentFormatted}"),
+              Text(
+                "Minimum ${selectedPlan.minInvestmentFormatted}",
+                style: TextStyle(fontFamily: AppFonts.popins),
+              ),
+              Text(
+                "Maximum ${selectedPlan.maxInvestmentFormatted}",
+                style: TextStyle(fontFamily: AppFonts.popins),
+              ),
             ],
           ),
 
@@ -198,7 +217,10 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                   ),
                   child: Text(
                     "₹${amount ~/ 1000}K",
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontFamily: AppFonts.popins,
+                    ),
                   ),
                 ),
               );
@@ -210,7 +232,11 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
           /// SELECT TENURE
           const Text(
             "Select Investment Tenure",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: AppFonts.popins,
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -270,12 +296,16 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
+                                    fontFamily: AppFonts.popins,
                                   ),
                                 ),
 
                                 Text(
                                   plan.durationFormatted,
-                                  style: const TextStyle(color: Colors.grey),
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontFamily: AppFonts.popins,
+                                  ),
                                 ),
                               ],
                             ),
@@ -290,9 +320,13 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                                   color: Colors.green,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
+                                  fontFamily: AppFonts.popins,
                                 ),
                               ),
-                              const Text("per annum"),
+                              const Text(
+                                "per annum",
+                                style: TextStyle(fontFamily: AppFonts.popins),
+                              ),
                             ],
                           ),
                         ],
@@ -313,7 +347,10 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text("Estimated Returns"),
+                                const Text(
+                                  "Estimated Returns",
+                                  style: TextStyle(fontFamily: AppFonts.popins),
+                                ),
                                 Text(
                                   formatCurrency(returnAmount),
                                   style: const TextStyle(
@@ -326,7 +363,10 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                const Text("Maturity Amount"),
+                                const Text(
+                                  "Maturity Amount",
+                                  style: TextStyle(fontFamily: AppFonts.popins),
+                                ),
                                 Text(
                                   formatCurrency(maturityAmount),
                                   style: const TextStyle(
@@ -354,7 +394,10 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
             children: [
               Text(
                 "Total Investment\n${formatCurrency(userAmount)}",
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: AppFonts.popins,
+                ),
               ),
 
               Text(
@@ -362,6 +405,7 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.green,
+                  fontFamily: AppFonts.popins,
                 ),
               ),
             ],
@@ -371,7 +415,11 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
 
           Text(
             "Maturity Amount: ${formatCurrency(maturity)}",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontFamily: AppFonts.popins,
+            ),
           ),
 
           const SizedBox(height: 20),
@@ -404,7 +452,11 @@ class _NewInvestmentScreenState extends State<NewInvestmentScreen> {
               ),
               child: const Text(
                 "Continue to Review →",
-                style: TextStyle(fontSize: 16, color: AppColors.whiteColor),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.whiteColor,
+                  fontFamily: AppFonts.popins,
+                ),
               ),
             ),
           ),

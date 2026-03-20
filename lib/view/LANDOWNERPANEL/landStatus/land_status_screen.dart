@@ -257,7 +257,6 @@ class _LandStatusScreenState extends State<LandStatusScreen> {
                             const SizedBox(height: 24),
                             const _ActionButtonsRow(),
                             const SizedBox(height: 24),
-                            const _FooterButtons(),
                           ],
                         ),
                       ),
@@ -969,7 +968,6 @@ class _ActionButtonsRow extends StatelessWidget {
         children: [
           _buildNeedHelpCard(context, isSmallScreen),
           const SizedBox(height: 12),
-          _buildUpdateInfoCard(context, isSmallScreen),
         ],
       );
     }
@@ -979,7 +977,6 @@ class _ActionButtonsRow extends StatelessWidget {
         children: [
           _buildNeedHelpCard(context, isSmallScreen),
           const SizedBox(height: 12),
-          _buildUpdateInfoCard(context, isSmallScreen),
         ],
       );
     }
@@ -988,7 +985,6 @@ class _ActionButtonsRow extends StatelessWidget {
       children: [
         Expanded(child: _buildNeedHelpCard(context, isSmallScreen)),
         const SizedBox(width: 16),
-        Expanded(child: _buildUpdateInfoCard(context, isSmallScreen)),
       ],
     );
   }
@@ -1056,281 +1052,6 @@ class _ActionButtonsRow extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF2563EB),
-                fontFamily: AppFonts.popins,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUpdateInfoCard(BuildContext context, bool isSmallScreen) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Color(0xFFEFF6FF),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.edit, size: 18, color: Color(0xFF2563EB)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Update Information',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Edit land details or upload photos',
-                  style: TextStyle(
-                    fontSize: isSmallScreen ? 11 : 12,
-                    color: const Color(0xFF64748B),
-                    fontFamily: AppFonts.popins,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: const Color(0xFFCBD5E1), width: 1),
-            ),
-            child: const Text(
-              'Edit',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF2563EB),
-                fontFamily: AppFonts.popins,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FooterButtons extends StatelessWidget {
-  const _FooterButtons();
-
-  @override
-  Widget build(BuildContext context) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
-    final isVerySmallScreen = MediaQuery.of(context).size.width < 400;
-
-    if (isVerySmallScreen) {
-      return Column(
-        children: [
-          _buildViewDocumentsButton(),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-                child: const Text(
-                  'Get Updates',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2563EB),
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                child: const Text(
-                  'Dashboard',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
-    if (isSmallScreen) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildViewDocumentsButton(),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () {},
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                ),
-                child: const Text(
-                  'Get Updates',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2563EB),
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                child: const Text(
-                  'Go to Dashboard',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildViewDocumentsButton(),
-        Row(
-          children: [
-            TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-              ),
-              child: const Text(
-                'Get Updates',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2563EB),
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: const Text(
-                'Go to Dashboard',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildViewDocumentsButton() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.description_outlined,
-            size: 18,
-            color: Color(0xFF475569),
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'View Documents',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
-              fontFamily: AppFonts.popins,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Text(
-              'View',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF475569),
                 fontFamily: AppFonts.popins,
               ),
             ),

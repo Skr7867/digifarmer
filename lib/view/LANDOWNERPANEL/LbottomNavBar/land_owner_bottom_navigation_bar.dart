@@ -2,8 +2,10 @@ import 'package:digifarmer/view/LANDOWNERPANEL/landStatus/land_status_screen.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
 import '../../../blocs/LANDOWNERPANEL/landStatus/land_status_bloc.dart';
 import '../../../main.dart';
+import '../../../repository/INVESTORPANEL/userProfile/user_profile_http_repository.dart';
 import '../../INVESTORPANEL/profile/profile_screen.dart';
 import '../homeScreen/land_owner_home_screen.dart';
 import '../myLands/my_lands_screen.dart';
@@ -22,20 +24,40 @@ class _LandOwnerBottomNavigationBarState
   int currentIndex = 0;
 
   final List<Widget> screens = [
-    BlocProvider(
-      create: (context) =>
-          LandStatusBloc(landStatusRepository: getIt())
-            ..add(LandStatusFetched()),
+    /// HOME — needs both LandStatusBloc + UserProfileBloc
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              LandStatusBloc(landStatusRepository: getIt())
+                ..add(LandStatusFetched()),
+        ),
+        BlocProvider(
+          create: (context) => UserProfileBloc(
+            userProfileRepository: UserProfileHttpRepository(),
+          ),
+        ),
+      ],
       child: const LandOwnerHomeScreen(),
     ),
+
+    /// MY LANDS — unchanged
     BlocProvider(
       create: (context) =>
           LandStatusBloc(landStatusRepository: getIt())
             ..add(LandStatusFetched()),
       child: MyLandsScreen(),
     ),
+
+    /// LAND STATUS — unchanged
     const LandStatusScreen(),
-    const ProfileScreen(),
+
+    /// PROFILE — unchanged
+    BlocProvider(
+      create: (context) =>
+          UserProfileBloc(userProfileRepository: UserProfileHttpRepository()),
+      child: const ProfileScreen(),
+    ),
   ];
 
   @override

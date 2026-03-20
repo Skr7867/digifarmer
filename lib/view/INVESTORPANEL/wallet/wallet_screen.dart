@@ -1,4 +1,8 @@
+import 'package:digifarmer/res/fonts/app_fonts.dart';
+import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
+
+import '../../../res/color/app_colors.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -116,7 +120,12 @@ class _WalletScreenState extends State<WalletScreen> {
 
             const SizedBox(height: 12),
 
-            _addNewBank(),
+            _addNewBank(() {
+              FlushBarHelper.flushBarSuccessMessage(
+                "This will Be work after integrating payment gateway",
+                context,
+              );
+            }),
 
             const SizedBox(height: 20),
 
@@ -250,18 +259,21 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _addNewBank() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade300),
-        color: Colors.white,
-      ),
-      child: const Center(
-        child: Text(
-          "+ Add New Bank Account",
-          style: TextStyle(color: Colors.grey),
+  Widget _addNewBank(VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade300),
+          color: Colors.white,
+        ),
+        child: const Center(
+          child: Text(
+            "+ Add New Bank Account",
+            style: TextStyle(color: Colors.grey),
+          ),
         ),
       ),
     );
@@ -312,8 +324,19 @@ class _WalletScreenState extends State<WalletScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: () {},
-            child: const Text("Proceed to Withdraw"),
+            onPressed: () {
+              FlushBarHelper.flushBarSuccessMessage(
+                "This will Be work after integrating payment gateway",
+                context,
+              );
+            },
+            child: Text(
+              "Proceed to Withdraw",
+              style: TextStyle(
+                fontFamily: AppFonts.popins,
+                color: AppColors.whiteColor,
+              ),
+            ),
           ),
         ),
       ],
