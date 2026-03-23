@@ -1,14 +1,15 @@
+import 'package:digifarmer/blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
+import 'package:digifarmer/main.dart';
 import 'package:digifarmer/model/INVESTORPANEL/userProfile/user_profile_model.dart';
 import 'package:digifarmer/res/color/app_colors.dart';
 import 'package:digifarmer/res/customeWidgets/custom_app_bar.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
+import 'package:digifarmer/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
 import '../../../config/routes/routes_name.dart';
 import '../../../service/storage/local_storage.dart';
-import '../../../utils/enums.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,10 +19,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  late UserProfileBloc userProfileBloc;
+
   @override
   void initState() {
     super.initState();
-    context.read<UserProfileBloc>().add(UserProfileFetched());
+    // Initialize bloc using getIt from main.dart
+    userProfileBloc = UserProfileBloc(userProfileRepository: getIt());
+  }
+
+  @override
+  void dispose() {
+    userProfileBloc.close();
+    super.dispose();
   }
 
   Future<void> _performLogout() async {
@@ -103,69 +113,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-
         actions: [
           IconButton(
             onPressed: () {
               _showLogoutDialog();
             },
-            icon: Icon(Icons.login, color: AppColors.redColor),
+            icon: Icon(Icons.logout, color: AppColors.redColor),
           ),
         ],
       ),
-      body: BlocBuilder<UserProfileBloc, UserProfileState>(
-        builder: (context, state) {
-          switch (state.userProfile.status) {
-            /// LOADING
-            case Status.loading:
-              return const Center(child: CircularProgressIndicator());
+      body: BlocProvider(
+        create: (_) => userProfileBloc..add(UserProfileFetched()),
+        child: BlocBuilder<UserProfileBloc, UserProfileState>(
+          builder: (BuildContext context, state) {
+            switch (state.userProfile.status) {
+              /// LOADING
+              case Status.loading:
+                return const Center(child: CircularProgressIndicator());
 
-            /// ERROR
-            case Status.error:
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: Colors.redAccent,
+              /// ERROR
+              case Status.error:
+                if (state.userProfile.message == 'No Internet Connection') {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.wifi_off,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No Internet Connection',
+                          style: TextStyle(
+                            fontFamily: AppFonts.popins,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            userProfileBloc.add(UserProfileFetched());
+                          },
+                          child: const Text(
+                            'Retry',
+                            style: TextStyle(fontFamily: AppFonts.popins),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      state.userProfile.message ?? "Something went wrong",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<UserProfileBloc>().add(
-                          UserProfileFetched(),
-                        );
-                      },
-                      child: const Text(
-                        "Retry",
-                        style: TextStyle(
-                          fontFamily: AppFonts.popins,
-                          fontWeight: FontWeight.bold,
+                  );
+                }
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Colors.redAccent,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        state.userProfile.message ?? "Something went wrong",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          userProfileBloc.add(UserProfileFetched());
+                        },
+                        child: const Text(
+                          "Retry",
+                          style: TextStyle(
+                            fontFamily: AppFonts.popins,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                );
+
+              /// SUCCESS
+              case Status.completed:
+                if (state.userProfile.data == null) {
+                  return const Center(
+                    child: Text(
+                      'No profile data found',
+                      style: TextStyle(fontFamily: AppFonts.popins),
                     ),
-                  ],
-                ),
-              );
+                  );
+                }
+                final UserProfileModel response = state.userProfile.data!;
+                final User user = response.user!;
+                return _buildBody(user);
 
-            /// SUCCESS
-            case Status.completed:
-              final UserProfileModel response = state.userProfile.data!;
-              final User user = response.user!;
-              return _buildBody(user);
-
-            default:
-              return const SizedBox();
-          }
-        },
+              default:
+                return const SizedBox();
+            }
+          },
+        ),
       ),
     );
   }
@@ -497,12 +547,11 @@ class _SectionCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEEEEEE), width: 0.5),
-
         boxShadow: [
           BoxShadow(
             color: AppColors.blackColor.withValues(alpha: 0.35),
             blurRadius: 10,
-            offset: Offset(0, 5),
+            offset: const Offset(0, 5),
           ),
         ],
       ),

@@ -12,6 +12,9 @@ class RoutesName {
   static const String proceedPaymentScreen = 'proceed_payment_screen';
   static const String paymentScreen = 'payment_screen';
   static const String loginOtpVerifyScreen = 'login_otp_verify_screen';
+  static const String activeInvestmentScreen = 'active_investment_screen';
+  static const String userProfileScreen = 'user_profile_screen';
+  static const String paymentSucessScreen = 'payment_sucess_screen';
 
   //*************************************************LAND OWNER SCREENS STARTED FROM HERE ***************************************/
 

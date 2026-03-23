@@ -1,3 +1,5 @@
+import 'package:digifarmer/repository/INVESTORPANEL/activeInvestment/active_investment_http_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/activeInvestment/active_investment_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_http_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/userProfile/user_profile_http_repository.dart';
@@ -64,6 +66,10 @@ Future<void> setupServiceLocator() async {
 
   getIt.registerLazySingleton<VerifyOtpRepository>(
     () => VerifyOtpHttpRepository(),
+  );
+
+  getIt.registerLazySingleton<ActiveInvestmentRepository>(
+    () => ActiveInvestmentHttpRepository(),
   );
 
   getIt.registerLazySingleton<ChooseRoleRepository>(

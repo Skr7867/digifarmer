@@ -9,6 +9,7 @@ class ApiUrls {
   static String loginVerifyOtp = '$baseUrl/api/v1/auth/login/verify-otp';
   static String allPlansApi = '$baseUrl/api/v1/admin/plans/active';
   static String userProfileApi = '$baseUrl/api/v1/auth/me';
+  static String activeInvestmentApi = '$baseUrl/api/v1/investor/investments';
 
   //*********************************Land owner panel api */
   static String landOwnerSaveBasicInfoApi =

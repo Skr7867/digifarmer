@@ -1,8 +1,4 @@
-import 'package:digifarmer/blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
-import 'package:digifarmer/repository/INVESTORPANEL/userProfile/user_profile_http_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../home/home_screen.dart';
 import '../portfolio/portfolio_screen.dart';
 import '../profile/profile_screen.dart';
@@ -28,35 +24,25 @@ class _BottomnavBarState extends State<BottomnavBar> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => UserProfileBloc(
-            userProfileRepository: UserProfileHttpRepository(),
-          ),
-        ),
-        // add your other blocs here if needed
-      ],
-      child: WillPopScope(
-        onWillPop: () async {
-          if (currentIndex != 0) {
+    return WillPopScope(
+      onWillPop: () async {
+        if (currentIndex != 0) {
+          setState(() {
+            currentIndex = 0;
+          });
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        body: IndexedStack(index: currentIndex, children: screens),
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: currentIndex,
+          onTap: (index) {
             setState(() {
-              currentIndex = 0;
+              currentIndex = index;
             });
-            return false;
-          }
-          return true;
-        },
-        child: Scaffold(
-          body: IndexedStack(index: currentIndex, children: screens),
-          bottomNavigationBar: CustomBottomNavBar(
-            currentIndex: currentIndex,
-            onTap: (index) {
-              setState(() {
-                currentIndex = index;
-              });
-            },
-          ),
+          },
         ),
       ),
     );

@@ -1,5 +1,7 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
+import 'package:digifarmer/view/INVESTORPANEL/activeInvestment/active_investment_screen.dart';
+import 'package:digifarmer/view/INVESTORPANEL/profile/profile_screen.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/attendanceHistory/attendance_history_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/completeTask/complete_task_screen.dart';
@@ -16,6 +18,7 @@ import '../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
 import '../../blocs/WORKERPANEL/landDetails/land_details_bloc.dart';
 import '../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
 import '../../repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
+import '../../view/INVESTORPANEL/paymentSuccess/payment_sucess_screen.dart';
 import '../../view/LANDOWNERPANEL/landStatus/land_status_screen.dart';
 import '../../view/WORKERPANEL/profile/worker_profile_screen.dart';
 import '../../view/WORKERPANEL/submitTask/submit_task_screen.dart';
@@ -30,6 +33,15 @@ class Routes {
         return MaterialPageRoute(builder: (context) => SplashScreen());
       case RoutesName.userRegisterScreen:
         return MaterialPageRoute(builder: (context) => UserRegisterScreen());
+      case RoutesName.userProfileScreen:
+        return MaterialPageRoute(builder: (context) => ProfileScreen());
+      case RoutesName.activeInvestmentScreen:
+        return MaterialPageRoute(
+          builder: (context) => ActiveInvestmentScreen(),
+        );
+
+      case RoutesName.paymentSucessScreen:
+        return MaterialPageRoute(builder: (context) => PaymentSuccessScreen());
       case RoutesName.otpVerifyScreen:
         final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(
