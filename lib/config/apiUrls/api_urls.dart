@@ -26,6 +26,8 @@ class ApiUrls {
   // ***************************workerApi from here ************************
 
   static String workerDashBoardDataApi = '$baseUrl/api/v1/worker/dashboard';
+
+  static String workerAllTaskApi = '$baseUrl/api/v1/worker/tasks';
   static String taskDetailsApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId/dashboard';
 

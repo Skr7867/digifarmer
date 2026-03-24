@@ -15,8 +15,11 @@ class RoutesName {
   static const String activeInvestmentScreen = 'active_investment_screen';
   static const String userProfileScreen = 'user_profile_screen';
   static const String paymentSucessScreen = 'payment_sucess_screen';
+  static const String investmentDetailsScreen = 'investment_details_screen';
+  static const String contractSignScreen = 'contract_sign_screen';
+  static const String withdrawScreen = 'withdraw_screen';
 
-  //*************************************************LAND OWNER SCREENS STARTED FROM HERE ***************************************/
+  //*************************************************LAND OWNER SCREENS STARTED FROM HERE   ********************************/
 
   static const String landOwnerBottomNavBar =
       'land_owner_bottom_nav_bar_screen';

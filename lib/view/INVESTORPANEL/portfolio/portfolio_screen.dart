@@ -1,6 +1,7 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/model/INVESTORPANEL/activeInvestment/active_investment_model.dart';
+import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:digifarmer/utils/enums.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../blocs/INVESTORPANEL/activeInvestment/active_investment_bloc.dart';
+import '../../../blocs/INVESTORPANEL/allInvestmentPlan/all_investment_plan_bloc.dart';
+import '../../../repository/INVESTORPANEL/invesmentPlan/all_investment_plan_repository.dart';
 import '../../../res/color/app_colors.dart';
+import '../newInvesment/new_investment_screen.dart';
 
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({super.key});
@@ -81,6 +85,27 @@ class _PortfolioState extends State<PortfolioScreen> {
                             ? _buildEmptyState(filters[selectedFilter])
                             : _buildInvestmentsList(filteredInvestments),
                         const SizedBox(height: 24),
+
+                        RoundButton(
+                          width: 350,
+                          title: '+ New Investment ',
+                          buttonColor: AppColors.greenColor,
+                          onPress: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => BlocProvider(
+                                  create: (context) => AllInvestmentPlanBloc(
+                                    allInvestmentPlanRepository:
+                                        getIt<AllInvestmentPlanRepository>(),
+                                  )..add(PlanFetched()),
+                                  child: const NewInvestmentScreen(),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 50),
                       ],
                     ),
                   ),
@@ -604,6 +629,20 @@ class PortfolioCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   fontFamily: AppFonts.popins,
                 ),
+              ),
+
+              RoundButton(
+                height: 40,
+                width: 90,
+                fontSize: 10,
+                buttonColor: AppColors.blueColor,
+                title: 'View Details',
+                onPress: () {
+                  Navigator.pushNamed(
+                    context,
+                    RoutesName.investmentDetailsScreen,
+                  );
+                },
               ),
               if (investment.applicationStatus?.toLowerCase() == 'pending' &&
                   investment.paymentStatus?.toLowerCase() == 'pending')

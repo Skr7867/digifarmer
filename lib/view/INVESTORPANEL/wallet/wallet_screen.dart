@@ -1,8 +1,11 @@
+import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 
 import '../../../res/color/app_colors.dart';
+import '../../../res/customeWidgets/custom_app_bar.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -25,11 +28,14 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: const Color(0xff1E8E5A),
-        title: const Text("Withdraw Funds"),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: 'Withdraw Funds',
+        automaticallyImplyLeading: true,
+        gradient: const LinearGradient(
+          colors: [Color(0xff34A853), Color(0xff0D47A1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -145,17 +151,38 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget _balanceCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xff1E8E5A), Color(0xff2BB673)],
+        gradient: LinearGradient(
+          colors: [Color(0xff1C5D9F), Color(0xff2FA463)],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text("Available Balance", style: TextStyle(color: Colors.white70)),
+        children: [
+          Row(
+            mainAxisAlignment: .spaceBetween,
+            children: [
+              Text(
+                "Available Balance",
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontFamily: AppFonts.popins,
+                ),
+              ),
+              RoundButton(
+                width: 70,
+                height: 30,
+                fontSize: 12,
+                buttonColor: AppColors.whiteColor.withValues(alpha: 0.2),
+                title: 'Status',
+                onPress: () {
+                  Navigator.pushNamed(context, RoutesName.withdrawScreen);
+                },
+              ),
+            ],
+          ),
           SizedBox(height: 6),
           Text(
             "₹1,24,500",
@@ -163,12 +190,17 @@ class _WalletScreenState extends State<WalletScreen> {
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              fontFamily: AppFonts.popins,
             ),
           ),
           SizedBox(height: 10),
           Text(
             "Locked Amount: ₹75,000\nWithdrawable: ₹49,500",
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontFamily: AppFonts.popins,
+            ),
           ),
         ],
       ),
@@ -196,6 +228,7 @@ class _WalletScreenState extends State<WalletScreen> {
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.black87,
             fontWeight: FontWeight.w500,
+            fontFamily: AppFonts.popins,
           ),
         ),
       ),
@@ -235,15 +268,25 @@ class _WalletScreenState extends State<WalletScreen> {
                 children: [
                   Text(
                     bankName,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontFamily: AppFonts.popins,
+                    ),
                   ),
-                  Text(account, style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    account,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontFamily: AppFonts.popins,
+                    ),
+                  ),
                   if (subtitle != null)
                     Text(
                       subtitle,
                       style: const TextStyle(
                         color: Color(0xff1E8E5A),
                         fontSize: 12,
+                        fontFamily: AppFonts.popins,
                       ),
                     ),
                 ],
@@ -272,7 +315,7 @@ class _WalletScreenState extends State<WalletScreen> {
         child: const Center(
           child: Text(
             "+ Add New Bank Account",
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: Colors.grey, fontFamily: AppFonts.popins),
           ),
         ),
       ),
@@ -292,14 +335,17 @@ class _WalletScreenState extends State<WalletScreen> {
         children: [
           Text(
             "Withdrawal Information",
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontFamily: AppFonts.popins,
+            ),
           ),
           SizedBox(height: 6),
           Text(
             "• Processing time: 2-3 business days\n"
             "• No withdrawal charges\n"
             "• Minimum withdrawal ₹500",
-            style: TextStyle(fontSize: 12),
+            style: TextStyle(fontSize: 12, fontFamily: AppFonts.popins),
           ),
         ],
       ),

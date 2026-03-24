@@ -764,6 +764,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void _openUpiApp(String appName) {
+    // ignore: unused_local_variable
     String upiUrl = "";
 
     switch (appName) {

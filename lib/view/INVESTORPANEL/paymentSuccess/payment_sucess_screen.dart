@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
+
+import '../../../res/color/app_colors.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   final Map<String, dynamic>? paymentDetails;
@@ -429,10 +432,10 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.download_outlined),
+                          :  Icon(Icons.download_outlined, color: AppColors.blueColor),
                       label: Text(
                         isDownloading ? 'Downloading...' : 'Download Receipt',
-                        style: const TextStyle(fontFamily: AppFonts.popins),
+                        style:  TextStyle(fontFamily: AppFonts.popins, color: AppColors.blueColor),
                       ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -446,10 +449,10 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _shareLink,
-                      icon: const Icon(Icons.share_outlined),
+                      icon: const Icon(Icons.share_outlined,color: AppColors.whiteColor),
                       label: const Text(
                         'Share',
-                        style: TextStyle(fontFamily: AppFonts.popins),
+                        style: TextStyle(fontFamily: AppFonts.popins, color: AppColors.whiteColor),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -473,21 +476,17 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      '/dashboard',
-                      (route) => false,
-                    );
+                  Navigator.pushNamed(context, RoutesName.bottomNavBar);
                   },
-                  child: const Text(
-                    'Go to Dashboard',
-                    style: TextStyle(fontFamily: AppFonts.popins),
-                  ),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                  ),
+                  child:  Text(
+                    'Go to Dashboard',
+                    style: TextStyle(fontFamily: AppFonts.popins),
                   ),
                 ),
               ),
