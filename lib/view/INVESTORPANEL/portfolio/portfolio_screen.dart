@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/model/INVESTORPANEL/activeInvestment/active_investment_model.dart';
@@ -7,9 +9,11 @@ import 'package:digifarmer/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../../../blocs/INVESTORPANEL/activeInvestment/active_investment_bloc.dart';
 import '../../../blocs/INVESTORPANEL/allInvestmentPlan/all_investment_plan_bloc.dart';
+import '../../../blocs/INVESTORPANEL/createPayment/create_payment_bloc.dart';
 import '../../../repository/INVESTORPANEL/invesmentPlan/all_investment_plan_repository.dart';
 import '../../../res/color/app_colors.dart';
 import '../newInvesment/new_investment_screen.dart';
@@ -24,6 +28,7 @@ class PortfolioScreen extends StatefulWidget {
 class _PortfolioState extends State<PortfolioScreen> {
   int selectedFilter = 0;
   late ActiveInvestmentBloc activeInvestmentBloc;
+  late Razorpay _razorpay;
 
   final filters = ["All", "Active", "Matured", "Pending"];
 
@@ -33,12 +38,130 @@ class _PortfolioState extends State<PortfolioScreen> {
     activeInvestmentBloc = ActiveInvestmentBloc(
       activeInvestmentRepository: getIt(),
     );
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
   @override
   void dispose() {
     activeInvestmentBloc.close();
+    _razorpay.clear();
     super.dispose();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    // Check if the widget is still mounted
+    if (!mounted) {
+      print('Widget not mounted when handling payment success');
+      return;
+    }
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Payment Successful! Payment ID: ${response.paymentId}',
+          style: const TextStyle(fontFamily: AppFonts.popins),
+        ),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+
+    // Refresh the investment list
+    if (activeInvestmentBloc.isClosed) {
+      print('Bloc is closed, cannot refresh');
+      return;
+    }
+    activeInvestmentBloc.add(ActiveInvestmentFetched());
+
+    // Don't pop here if we're coming back from Razorpay
+    // The Razorpay activity handles its own navigation
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Payment Failed: ${response.message}',
+          style: const TextStyle(fontFamily: AppFonts.popins),
+        ),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'External Wallet Selected: ${response.walletName}',
+          style: const TextStyle(fontFamily: AppFonts.popins),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _openRazorpayCheckout(CreatePaymentState state, String investmentId) {
+    // Check if we have all required data
+    if (state.keyId == null || state.orderId == null || state.amount == null) {
+      print(
+        'Missing payment data - KeyId: ${state.keyId}, OrderId: ${state.orderId}, Amount: ${state.amount}',
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Invalid payment data received',
+            style: TextStyle(fontFamily: AppFonts.popins),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    print(
+      'Opening Razorpay with - KeyId: ${state.keyId}, OrderId: ${state.orderId}, Amount: ${state.amount}',
+    );
+
+    var options = {
+      'key': state.keyId,
+      'amount': state.amount,
+      'name': 'DigiFarmer',
+      'description': 'Investment Payment - ${state.investmentNumber ?? ''}',
+      'order_id': state.orderId,
+      'prefill': {
+        'contact': 'YOUR_USER_MOBILE', // Replace with actual user mobile
+        'email': 'YOUR_USER_EMAIL', // Replace with actual user email
+      },
+      'external': {
+        'wallets': ['paytm'],
+      },
+      'theme': {'color': '#2FA463'},
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      debugPrint("Error opening Razorpay: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error opening payment gateway: $e',
+            style: const TextStyle(fontFamily: AppFonts.popins),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -120,6 +243,52 @@ class _PortfolioState extends State<PortfolioScreen> {
     );
   }
 
+  Widget _buildInvestmentsList(List<Investments> investments) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: investments.length,
+      itemBuilder: (context, index) {
+        final investment = investments[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: PortfolioCard(
+            investment: investment,
+            onPayNow: (investmentId) {
+              _handlePayNow(investmentId);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _handlePayNow(String investmentId) {
+    print('_handlePayNow called with investmentId: $investmentId');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return BlocProvider(
+          create: (context) => getIt<CreatePaymentBloc>(),
+          child: PaymentBottomSheet(
+            investmentId: investmentId,
+            onPaymentInitiated: (state) {
+              log('Payment initiated with orderId: ${state.orderId}');
+              _openRazorpayCheckout(state, investmentId);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  // ... (keep all existing helper methods like _buildHeader, _buildFilterChips, etc.)
   Widget _buildLoadingState() {
     return Column(
       children: [
@@ -173,22 +342,6 @@ class _PortfolioState extends State<PortfolioScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildInvestmentsList(List<Investments> investments) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: investments.length,
-      itemBuilder: (context, index) {
-        final investment = investments[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: PortfolioCard(investment: investment),
-        );
-      },
     );
   }
 
@@ -447,11 +600,140 @@ class _PortfolioState extends State<PortfolioScreen> {
   }
 }
 
-/// ================= PORTFOLIO CARD =================
+/// ================= PAYMENT BOTTOM SHEET =================
+/// ================= PAYMENT BOTTOM SHEET =================
+class PaymentBottomSheet extends StatefulWidget {
+  final String investmentId;
+  final Function(CreatePaymentState) onPaymentInitiated;
+
+  const PaymentBottomSheet({
+    super.key,
+    required this.investmentId,
+    required this.onPaymentInitiated,
+  });
+
+  @override
+  State<PaymentBottomSheet> createState() => _PaymentBottomSheetState();
+}
+
+class _PaymentBottomSheetState extends State<PaymentBottomSheet> {
+  bool _isProcessing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger payment creation when bottom sheet opens
+    Future.microtask(() {
+      if (!mounted) return;
+      final bloc = context.read<CreatePaymentBloc>();
+      bloc.add(CreatePaymentButtonPressed(investmentId: widget.investmentId));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<CreatePaymentBloc, CreatePaymentState>(
+      listener: (context, state) {
+        print('PaymentBottomSheet: State changed - ${state.postApiStatus}');
+        print('PaymentBottomSheet: OrderId - ${state.orderId}');
+
+        if (state.postApiStatus == PostApiStatus.success && !_isProcessing) {
+          _isProcessing = true;
+
+          // Close bottom sheet
+          Navigator.pop(context);
+
+          // Small delay to ensure bottom sheet is closed before opening Razorpay
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              widget.onPaymentInitiated(state);
+            }
+          });
+        } else if (state.postApiStatus == PostApiStatus.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.message,
+                style: const TextStyle(fontFamily: AppFonts.popins),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      },
+      builder: (context, state) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Processing Payment',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: AppFonts.popins,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              if (state.postApiStatus == PostApiStatus.loading) ...[
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                const Text(
+                  'Creating payment order...',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
+              ] else if (state.postApiStatus == PostApiStatus.error) ...[
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  state.message,
+                  style: const TextStyle(fontFamily: AppFonts.popins),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                RoundButton(
+                  title: 'Try Again',
+                  onPress: () {
+                    setState(() {
+                      _isProcessing = false;
+                    });
+                    context.read<CreatePaymentBloc>().add(
+                      CreatePaymentButtonPressed(
+                        investmentId: widget.investmentId,
+                      ),
+                    );
+                  },
+                ),
+              ] else if (state.postApiStatus == PostApiStatus.initial) ...[
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                const Text(
+                  'Initializing...',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
+              ],
+
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class PortfolioCard extends StatelessWidget {
   final Investments investment;
+  final Function(String investmentId) onPayNow;
 
-  const PortfolioCard({super.key, required this.investment});
+  const PortfolioCard({
+    super.key,
+    required this.investment,
+    required this.onPayNow,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -460,6 +742,14 @@ class PortfolioCard extends StatelessWidget {
     final progress = _calculateProgress(investment);
     final remainingTime = _getRemainingTime(investment);
     final currentValue = _calculateCurrentValue(investment);
+
+    // Get the correct investment ID - prefer 'id' over 'investmentId'
+    final investmentId = investment.id ?? investment.investmentId ?? '';
+
+    // Debug print to verify the ID
+    print('Investment ID being used: $investmentId');
+    print('Investment id field: ${investment.id}');
+    print('Investment investmentId field: ${investment.investmentId}');
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -505,7 +795,7 @@ class PortfolioCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'ID: ${investment.investmentId ?? 'N/A'}',
+                      'ID: ${investmentId.substring(0, investmentId.length > 8 ? 8 : investmentId.length)}...',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -630,25 +920,22 @@ class PortfolioCard extends StatelessWidget {
                   fontFamily: AppFonts.popins,
                 ),
               ),
-
-              RoundButton(
-                height: 40,
-                width: 90,
-                fontSize: 10,
-                buttonColor: AppColors.blueColor,
-                title: 'View Details',
-                onPress: () {
-                  Navigator.pushNamed(
-                    context,
-                    RoutesName.investmentDetailsScreen,
-                  );
-                },
-              ),
               if (investment.applicationStatus?.toLowerCase() == 'pending' &&
                   investment.paymentStatus?.toLowerCase() == 'pending')
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, RoutesName.paymentScreen);
+                    // Use investmentId which now contains the correct ID from 'id' field
+                    if (investmentId.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Invalid investment ID'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+                    print('Calling onPayNow with investmentId: $investmentId');
+                    onPayNow(investmentId);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange.shade600,
@@ -671,12 +958,20 @@ class PortfolioCard extends StatelessWidget {
                   ),
                 )
               else
-                const Text(
-                  "View Details",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: AppFonts.popins,
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      RoutesName.investmentDetailsScreen,
+                    );
+                  },
+                  child: const Text(
+                    "View Details",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: AppFonts.popins,
+                    ),
                   ),
                 ),
             ],
@@ -686,6 +981,7 @@ class PortfolioCard extends StatelessWidget {
     );
   }
 
+  // ... (keep all existing helper methods from your code)
   Widget _info(String title, String value, {Color? valueColor}) {
     return Expanded(
       child: Column(
@@ -755,7 +1051,6 @@ class PortfolioCard extends StatelessWidget {
     final expectedReturnPercent = investment.expectedReturnPercent ?? 0;
     final progress = _calculateProgress(investment);
 
-    // Calculate current value based on progress
     final totalExpectedReturn = invested * (expectedReturnPercent / 100);
     final currentReturn = totalExpectedReturn * progress;
 

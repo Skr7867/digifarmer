@@ -4,19 +4,15 @@ class WorkerDashBoardModel {
 
   WorkerDashBoardModel({this.success, this.dashboard});
 
-  factory WorkerDashBoardModel.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return WorkerDashBoardModel();
-
-    return WorkerDashBoardModel(
-      success: json['success'],
-      dashboard: json['dashboard'] != null
-          ? Dashboard.fromJson(json['dashboard'])
-          : null,
-    );
+  WorkerDashBoardModel.fromJson(Map<String, dynamic> json) {
+    success = json['success'];
+    dashboard = json['dashboard'] != null
+        ? Dashboard.fromJson(json['dashboard'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final data = <String, dynamic>{};
     data['success'] = success;
     if (dashboard != null) {
       data['dashboard'] = dashboard!.toJson();
@@ -35,148 +31,93 @@ class Dashboard {
   Contact? contact;
   Contract? contract;
 
-  Dashboard({
-    this.taskStatus,
-    this.assignedLeads,
-    this.taskCounts,
-    this.priority,
-    this.equipment,
-    this.today,
-    this.contact,
-    this.contract,
-  });
+  Dashboard.fromJson(Map<String, dynamic> json) {
+    taskStatus = json['taskStatus'] != null
+        ? TaskStatus.fromJson(json['taskStatus'])
+        : null;
 
-  factory Dashboard.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Dashboard();
+    if (json['assignedLeads'] != null) {
+      assignedLeads = (json['assignedLeads'] as List)
+          .map((e) => AssignedLeads.fromJson(e))
+          .toList();
+    }
 
-    return Dashboard(
-      taskStatus: json['taskStatus'] != null
-          ? TaskStatus.fromJson(json['taskStatus'])
-          : null,
-      assignedLeads: json['assignedLeads'] != null
-          ? List<AssignedLeads>.from(
-              json['assignedLeads'].map((x) => AssignedLeads.fromJson(x)),
-            )
-          : null,
-      taskCounts: json['taskCounts'] != null
-          ? TaskCounts.fromJson(json['taskCounts'])
-          : null,
-      priority: json['priority'] != null
-          ? Priority.fromJson(json['priority'])
-          : null,
-      equipment: json['equipment'] != null
-          ? Equipment.fromJson(json['equipment'])
-          : null,
-      today: json['today'] != null ? Today.fromJson(json['today']) : null,
-      contact: json['contact'] != null
-          ? Contact.fromJson(json['contact'])
-          : null,
-      contract: json['contract'] != null
-          ? Contract.fromJson(json['contract'])
-          : null,
-    );
+    taskCounts = json['taskCounts'] != null
+        ? TaskCounts.fromJson(json['taskCounts'])
+        : null;
+    priority = json['priority'] != null
+        ? Priority.fromJson(json['priority'])
+        : null;
+    equipment = json['equipment'] != null
+        ? Equipment.fromJson(json['equipment'])
+        : null;
+    today = json['today'] != null ? Today.fromJson(json['today']) : null;
+    contact = json['contact'] != null
+        ? Contact.fromJson(json['contact'])
+        : null;
+    contract = json['contract'] != null
+        ? Contract.fromJson(json['contract'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (taskStatus != null) {
-      data['taskStatus'] = taskStatus!.toJson();
-    }
+    final data = <String, dynamic>{};
+
+    if (taskStatus != null) data['taskStatus'] = taskStatus!.toJson();
     if (assignedLeads != null) {
-      data['assignedLeads'] = assignedLeads!.map((v) => v.toJson()).toList();
+      data['assignedLeads'] = assignedLeads!.map((e) => e.toJson()).toList();
     }
-    if (taskCounts != null) {
-      data['taskCounts'] = taskCounts!.toJson();
-    }
-    if (priority != null) {
-      data['priority'] = priority!.toJson();
-    }
-    if (equipment != null) {
-      data['equipment'] = equipment!.toJson();
-    }
-    if (today != null) {
-      data['today'] = today!.toJson();
-    }
-    if (contact != null) {
-      data['contact'] = contact!.toJson();
-    }
-    if (contract != null) {
-      data['contract'] = contract!.toJson();
-    }
+    if (taskCounts != null) data['taskCounts'] = taskCounts!.toJson();
+    if (priority != null) data['priority'] = priority!.toJson();
+    if (equipment != null) data['equipment'] = equipment!.toJson();
+    if (today != null) data['today'] = today!.toJson();
+    if (contact != null) data['contact'] = contact!.toJson();
+    if (contract != null) data['contract'] = contract!.toJson();
+
     return data;
   }
 }
 
 class TaskStatus {
   List<Completed>? completed;
-  List<InProgress>? inProgress;
-  List<dynamic>? pending;
+  List<dynamic>? inProgress;
+  List<Pending>? pending;
   List<dynamic>? onHold;
   List<dynamic>? cancelled;
 
-  TaskStatus({
-    this.completed,
-    this.inProgress,
-    this.pending,
-    this.onHold,
-    this.cancelled,
-  });
+  TaskStatus.fromJson(Map<String, dynamic> json) {
+    if (json['completed'] != null) {
+      completed = (json['completed'] as List)
+          .map((e) => Completed.fromJson(e))
+          .toList();
+    }
 
-  factory TaskStatus.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return TaskStatus();
+    inProgress = json['inProgress'];
+    onHold = json['onHold'];
+    cancelled = json['cancelled'];
 
-    return TaskStatus(
-      completed: json['completed'] != null
-          ? List<Completed>.from(
-              json['completed'].map((x) => Completed.fromJson(x)),
-            )
-          : null,
-      inProgress: json['inProgress'] != null
-          ? List<InProgress>.from(
-              json['inProgress'].map((x) => InProgress.fromJson(x)),
-            )
-          : null,
-      pending: json['pending'] != null
-          ? List<dynamic>.from(json['pending'])
-          : null,
-      onHold: json['onHold'] != null
-          ? List<dynamic>.from(json['onHold'])
-          : null,
-      cancelled: json['cancelled'] != null
-          ? List<dynamic>.from(json['cancelled'])
-          : null,
-    );
+    if (json['pending'] != null) {
+      pending = (json['pending'] as List)
+          .map((e) => Pending.fromJson(e))
+          .toList();
+    }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final data = <String, dynamic>{};
+
     if (completed != null) {
-      data['completed'] = completed!.map((v) => v.toJson()).toList();
+      data['completed'] = completed!.map((e) => e.toJson()).toList();
     }
-    if (inProgress != null) {
-      data['inProgress'] = inProgress!.map((v) => v.toJson()).toList();
-    }
+    data['inProgress'] = inProgress;
     if (pending != null) {
-      data['pending'] = pending!.toList();
+      data['pending'] = pending!.map((e) => e.toJson()).toList();
     }
-    if (onHold != null) {
-      data['onHold'] = onHold!.toList();
-    }
-    if (cancelled != null) {
-      data['cancelled'] = cancelled!.toList();
-    }
+    data['onHold'] = onHold;
+    data['cancelled'] = cancelled;
+
     return data;
   }
-
-  // Helper getters to safely access lists with empty fallback
-  List<Completed> get completedList => completed ?? [];
-  List<InProgress> get inProgressList => inProgress ?? [];
-  List<dynamic> get pendingList => pending ?? [];
-  List<dynamic> get onHoldList => onHold ?? [];
-  List<dynamic> get cancelledList => cancelled ?? [];
-
-  bool get hasCompleted => completed != null && completed!.isNotEmpty;
-  bool get hasInProgress => inProgress != null && inProgress!.isNotEmpty;
 }
 
 class Completed {
@@ -188,44 +129,28 @@ class Completed {
   String? isoStandard;
   String? completedAt;
 
-  Completed({
-    this.id,
-    this.taskTitle,
-    this.priority,
-    this.status,
-    this.workday,
-    this.isoStandard,
-    this.completedAt,
-  });
-
-  factory Completed.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Completed();
-
-    return Completed(
-      id: json['id'],
-      taskTitle: json['taskTitle'],
-      priority: json['priority'],
-      status: json['status'],
-      workday: json['workday'],
-      isoStandard: json['isoStandard'],
-      completedAt: json['completedAt'],
-    );
+  Completed.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    taskTitle = json['taskTitle'];
+    priority = json['priority'];
+    status = json['status'];
+    workday = json['workday'];
+    isoStandard = json['isoStandard'];
+    completedAt = json['completedAt'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['taskTitle'] = taskTitle;
-    data['priority'] = priority;
-    data['status'] = status;
-    data['workday'] = workday;
-    data['isoStandard'] = isoStandard;
-    data['completedAt'] = completedAt;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'taskTitle': taskTitle,
+    'priority': priority,
+    'status': status,
+    'workday': workday,
+    'isoStandard': isoStandard,
+    'completedAt': completedAt,
+  };
 }
 
-class InProgress {
+class Pending {
   String? id;
   String? taskTitle;
   String? priority;
@@ -233,68 +158,38 @@ class InProgress {
   Land? land;
   String? workday;
   String? dueDate;
-  int? progress;
 
-  InProgress({
-    this.id,
-    this.taskTitle,
-    this.priority,
-    this.status,
-    this.land,
-    this.workday,
-    this.dueDate,
-    this.progress,
-  });
-
-  factory InProgress.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return InProgress();
-
-    return InProgress(
-      id: json['id'],
-      taskTitle: json['taskTitle'],
-      priority: json['priority'],
-      status: json['status'],
-      land: json['land'] != null ? Land.fromJson(json['land']) : null,
-      workday: json['workday'],
-      dueDate: json['dueDate'],
-      progress: json['progress'],
-    );
+  Pending.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    taskTitle = json['taskTitle'];
+    priority = json['priority'];
+    status = json['status'];
+    land = json['land'] != null ? Land.fromJson(json['land']) : null;
+    workday = json['workday'];
+    dueDate = json['dueDate'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['taskTitle'] = taskTitle;
-    data['priority'] = priority;
-    data['status'] = status;
-    if (land != null) {
-      data['land'] = land!.toJson();
-    }
-    data['workday'] = workday;
-    data['dueDate'] = dueDate;
-    data['progress'] = progress;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'taskTitle': taskTitle,
+    'priority': priority,
+    'status': status,
+    'land': land?.toJson(),
+    'workday': workday,
+    'dueDate': dueDate,
+  };
 }
 
 class Land {
-  String? sId;
+  String? id;
   String? landTitle;
 
-  Land({this.sId, this.landTitle});
-
-  factory Land.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Land();
-
-    return Land(sId: json['_id'], landTitle: json['landTitle']);
+  Land.fromJson(Map<String, dynamic> json) {
+    id = json['_id'];
+    landTitle = json['landTitle'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = sId;
-    data['landTitle'] = landTitle;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {'_id': id, 'landTitle': landTitle};
 }
 
 class AssignedLeads {
@@ -305,40 +200,23 @@ class AssignedLeads {
   String? status;
   String? action;
 
-  AssignedLeads({
-    this.id,
-    this.taskTitle,
-    this.land,
-    this.workday,
-    this.status,
-    this.action,
-  });
-
-  factory AssignedLeads.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return AssignedLeads();
-
-    return AssignedLeads(
-      id: json['id'],
-      taskTitle: json['taskTitle'],
-      land: json['land'] != null ? Land.fromJson(json['land']) : null,
-      workday: json['workday'],
-      status: json['status'],
-      action: json['action'],
-    );
+  AssignedLeads.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    taskTitle = json['taskTitle'];
+    land = json['land'] != null ? Land.fromJson(json['land']) : null;
+    workday = json['workday'];
+    status = json['status'];
+    action = json['action'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['taskTitle'] = taskTitle;
-    if (land != null) {
-      data['land'] = land!.toJson();
-    }
-    data['workday'] = workday;
-    data['status'] = status;
-    data['action'] = action;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'taskTitle': taskTitle,
+    'land': land?.toJson(),
+    'workday': workday,
+    'status': status,
+    'action': action,
+  };
 }
 
 class TaskCounts {
@@ -348,47 +226,41 @@ class TaskCounts {
   int? pending;
   int? onHold;
   int? cancelled;
+  Breakdown? breakdown;
 
-  TaskCounts({
-    this.total,
-    this.completed,
-    this.inProgress,
-    this.pending,
-    this.onHold,
-    this.cancelled,
-  });
-
-  factory TaskCounts.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return TaskCounts();
-
-    return TaskCounts(
-      total: json['total'],
-      completed: json['completed'],
-      inProgress: json['inProgress'],
-      pending: json['pending'],
-      onHold: json['onHold'],
-      cancelled: json['cancelled'],
-    );
+  TaskCounts.fromJson(Map<String, dynamic> json) {
+    total = json['total'];
+    completed = json['completed'];
+    inProgress = json['inProgress'];
+    pending = json['pending'];
+    onHold = json['onHold'];
+    cancelled = json['cancelled'];
+    breakdown = json['breakdown'] != null
+        ? Breakdown.fromJson(json['breakdown'])
+        : null;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['total'] = total;
-    data['completed'] = completed;
-    data['inProgress'] = inProgress;
-    data['pending'] = pending;
-    data['onHold'] = onHold;
-    data['cancelled'] = cancelled;
-    return data;
+  Map<String, dynamic> toJson() => {
+    'total': total,
+    'completed': completed,
+    'inProgress': inProgress,
+    'pending': pending,
+    'onHold': onHold,
+    'cancelled': cancelled,
+    'breakdown': breakdown?.toJson(),
+  };
+}
+
+class Breakdown {
+  int? completed;
+  int? pending;
+
+  Breakdown.fromJson(Map<String, dynamic> json) {
+    completed = json['COMPLETED'];
+    pending = json['PENDING'];
   }
 
-  // Helper getters with default values
-  int get totalCount => total ?? 0;
-  int get completedCount => completed ?? 0;
-  int get inProgressCount => inProgress ?? 0;
-  int get pendingCount => pending ?? 0;
-  int get onHoldCount => onHold ?? 0;
-  int get cancelledCount => cancelled ?? 0;
+  Map<String, dynamic> toJson() => {'COMPLETED': completed, 'PENDING': pending};
 }
 
 class Priority {
@@ -398,130 +270,80 @@ class Priority {
   int? high;
   int? overdue;
 
-  Priority({
-    this.actions,
-    this.activities,
-    this.urgent,
-    this.high,
-    this.overdue,
-  });
-
-  factory Priority.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Priority();
-
-    return Priority(
-      actions: json['actions'],
-      activities: json['activities'],
-      urgent: json['urgent'],
-      high: json['high'],
-      overdue: json['overdue'],
-    );
+  Priority.fromJson(Map<String, dynamic> json) {
+    actions = json['actions'];
+    activities = json['activities'];
+    urgent = json['urgent'];
+    high = json['high'];
+    overdue = json['overdue'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['actions'] = actions;
-    data['activities'] = activities;
-    data['urgent'] = urgent;
-    data['high'] = high;
-    data['overdue'] = overdue;
-    return data;
-  }
-
-  // Helper getters with default values
-  int get actionsCount => actions ?? 0;
-  int get activitiesCount => activities ?? 0;
-  int get urgentCount => urgent ?? 0;
-  int get highCount => high ?? 0;
-  int get overdueCount => overdue ?? 0;
+  Map<String, dynamic> toJson() => {
+    'actions': actions,
+    'activities': activities,
+    'urgent': urgent,
+    'high': high,
+    'overdue': overdue,
+  };
 }
 
 class Equipment {
   int? maintenanceNeeded;
   int? totalAssigned;
 
-  Equipment({this.maintenanceNeeded, this.totalAssigned});
-
-  factory Equipment.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Equipment();
-
-    return Equipment(
-      maintenanceNeeded: json['maintenanceNeeded'],
-      totalAssigned: json['totalAssigned'],
-    );
+  Equipment.fromJson(Map<String, dynamic> json) {
+    maintenanceNeeded = json['maintenanceNeeded'];
+    totalAssigned = json['totalAssigned'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['maintenanceNeeded'] = maintenanceNeeded;
-    data['totalAssigned'] = totalAssigned;
-    return data;
-  }
-
-  // Helper getters with default values
-  int get maintenanceNeededCount => maintenanceNeeded ?? 0;
-  int get totalAssignedCount => totalAssigned ?? 0;
+  Map<String, dynamic> toJson() => {
+    'maintenanceNeeded': maintenanceNeeded,
+    'totalAssigned': totalAssigned,
+  };
 }
 
 class Today {
   String? status;
+  String? checkIn;
+  String? checkOut;
+  int? hours;
 
-  Today({this.status});
-
-  factory Today.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Today();
-
-    return Today(status: json['status']);
+  Today.fromJson(Map<String, dynamic> json) {
+    status = json['status'];
+    checkIn = json['checkIn'];
+    checkOut = json['checkOut'];
+    hours = json['hours'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+    'status': status,
+    'checkIn': checkIn,
+    'checkOut': checkOut,
+    'hours': hours,
+  };
 }
 
 class Contact {
   String? phone;
 
-  Contact({this.phone});
-
-  factory Contact.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Contact();
-
-    return Contact(phone: json['phone']);
+  Contact.fromJson(Map<String, dynamic> json) {
+    phone = json['phone'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['phone'] = phone;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {'phone': phone};
 }
 
 class Contract {
   bool? hasContract;
   bool? canCancel;
 
-  Contract({this.hasContract, this.canCancel});
-
-  factory Contract.fromJson(Map<String, dynamic>? json) {
-    if (json == null) return Contract();
-
-    return Contract(
-      hasContract: json['hasContract'],
-      canCancel: json['canCancel'],
-    );
+  Contract.fromJson(Map<String, dynamic> json) {
+    hasContract = json['hasContract'];
+    canCancel = json['canCancel'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['hasContract'] = hasContract;
-    data['canCancel'] = canCancel;
-    return data;
-  }
-
-  // Helper getters with default values
-  bool get hasActiveContract => hasContract ?? false;
-  bool get canCancelContract => canCancel ?? false;
+  Map<String, dynamic> toJson() => {
+    'hasContract': hasContract,
+    'canCancel': canCancel,
+  };
 }

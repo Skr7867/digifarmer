@@ -28,8 +28,8 @@ class ProceedToPaymentScreen extends StatelessWidget {
         if (state.purchaseResponse.status == Status.completed) {
           Navigator.pushNamed(
             context,
-            RoutesName.paymentScreen,
-            arguments: state.purchaseResponse.data,
+            RoutesName.portFolioScreen,
+            // arguments: state.purchaseResponse.data,
           );
         }
 

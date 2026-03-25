@@ -1,13 +1,12 @@
-import 'package:digifarmer/blocs/WORKERPANEL/workerdashboard/worker_dashboard_bloc.dart';
+import 'package:digifarmer/blocs/WORKERPANEL/alltask/all_task_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
-import 'package:digifarmer/model/WORKERPANEL/dashboard/worker_dashboard_model.dart';
+import 'package:digifarmer/model/WORKERPANEL/alltask/all_task_model.dart';
 import 'package:digifarmer/res/customeWidgets/custom_app_bar.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:digifarmer/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../blocs/WORKERPANEL/startTask/start_task_bloc.dart';
 import '../../../config/component/internet_exception.dart';
 import '../../../main.dart';
@@ -21,17 +20,17 @@ class AllTaskScreen extends StatefulWidget {
 }
 
 class _AllTaskScreenState extends State<AllTaskScreen> {
-  late DashboardBloc dashboardBloc;
+  late AllTaskBloc allTaskBloc;
 
   @override
   void initState() {
     super.initState();
-    dashboardBloc = DashboardBloc(workerDashboardRepository: getIt());
+    allTaskBloc = AllTaskBloc(allTaskRepository: getIt());
   }
 
   @override
   void dispose() {
-    dashboardBloc.close();
+    allTaskBloc.close();
     super.dispose();
   }
 
@@ -49,7 +48,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
       backgroundColor: const Color(0xffF4F6F9),
       body: MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => dashboardBloc..add(DashboardFetched())),
+          BlocProvider(create: (_) => allTaskBloc..add(AllTaskFetched())),
           BlocProvider(create: (context) => StartTaskBloc(repository: getIt())),
         ],
         child: MultiBlocListener(
@@ -70,7 +69,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
 
                   final taskId = startState.startTaskResponse.data?.task?.id;
 
-                  dashboardBloc.add(DashboardFetched());
+                  allTaskBloc.add(AllTaskFetched());
 
                   Navigator.pushNamed(
                     context,
@@ -94,36 +93,34 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
               },
             ),
           ],
-
-          child: BlocBuilder<DashboardBloc, DashboardState>(
+          child: BlocBuilder<AllTaskBloc, AllTaskState>(
             builder: (BuildContext context, state) {
-              switch (state.workerDashboard.status) {
-                /// ================= DASHBOARD LOADING =================
+              switch (state.allTask.status) {
+                /// ================= ALL TASK LOADING =================
                 case Status.loading:
                   return const Center(child: CircularProgressIndicator());
 
-                /// ================= DASHBOARD ERROR =================
+                /// ================= ALL TASK ERROR =================
                 case Status.error:
-                  if (state.workerDashboard.message ==
-                      'No Internet Connection') {
+                  if (state.allTask.message == 'No Internet Connection') {
                     return Center(
                       child: InternetException(
                         onPress: () {
-                          dashboardBloc.add(DashboardFetched());
+                          allTaskBloc.add(AllTaskFetched());
                         },
                       ),
                     );
                   }
                   return Center(
                     child: Text(
-                      state.workerDashboard.message.toString(),
+                      state.allTask.message.toString(),
                       style: const TextStyle(fontFamily: AppFonts.popins),
                     ),
                   );
 
-                /// ================= DASHBOARD COMPLETED =================
+                /// ================= ALL TASK COMPLETED =================
                 case Status.completed:
-                  if (state.workerDashboard.data == null) {
+                  if (state.allTask.data == null) {
                     return const Center(
                       child: Text(
                         'No data Found',
@@ -132,8 +129,8 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                     );
                   }
 
-                  final dashboardData = state.workerDashboard.data!;
-                  return _buildDashboardContent(context, dashboardData);
+                  final allTaskData = state.allTask.data!;
+                  return _buildTaskContent(context, allTaskData);
 
                 /// ================= DEFAULT =================
                 case Status.initial:
@@ -147,34 +144,44 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     );
   }
 
-  Widget _buildDashboardContent(
-    BuildContext context,
-    WorkerDashBoardModel dashboardData,
-  ) {
-    final dashboard = dashboardData.dashboard;
-    final taskStatus = dashboard?.taskStatus;
+  Widget _buildTaskContent(BuildContext context, AllTaskModel allTaskData) {
+    final tasks = allTaskData.tasks ?? [];
+    final stats = allTaskData.stats;
 
-    // Get tasks from taskStatus (matches your screenshot structure)
-    final inProgressTasks = taskStatus?.inProgressList ?? [];
-    final completedTasks = taskStatus?.completedList ?? [];
-
-    // Get assigned lands
-    final assignedLeads = dashboard?.assignedLeads ?? [];
+    // Separate tasks by status
+    final inProgressTasks = tasks
+        .where((task) => task.status == 'inProgress')
+        .toList();
+    final completedTasks = tasks
+        .where((task) => task.status == 'completed')
+        .toList();
+    final pendingTasks = tasks
+        .where((task) => task.status == 'pending')
+        .toList();
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// ================= HEADER =================
+          const SizedBox(height: 20),
+
+          /// ================= STATS SECTION =================
+          if (stats != null) _buildStatsSection(context, stats),
+
           const SizedBox(height: 20),
 
           /// ================= TODAY'S TASKS SECTION =================
-          _buildTodayTasksSection(context, inProgressTasks, completedTasks),
+          _buildTodayTasksSection(
+            context,
+            inProgressTasks,
+            completedTasks,
+            pendingTasks,
+          ),
 
           const SizedBox(height: 20),
 
-          /// ================= ASSIGNED LANDS =================
-          _buildAssignedLandsSection(context, assignedLeads),
+          /// ================= ASSIGNED LANDS SECTION =================
+          _buildAssignedLandsSection(context, tasks),
 
           const SizedBox(height: 20),
         ],
@@ -182,10 +189,63 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     );
   }
 
+  Widget _buildStatsSection(BuildContext context, Stats stats) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem('Total', stats.total ?? 0, Colors.blue),
+          _buildStatItem('In Progress', stats.inProgress ?? 0, Colors.orange),
+          _buildStatItem('Pending', stats.pending ?? 0, Colors.red),
+          _buildStatItem('Completed', stats.completed ?? 0, Colors.green),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, int count, Color color) {
+    return Column(
+      children: [
+        Text(
+          count.toString(),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: color,
+            fontFamily: AppFonts.popins,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontFamily: AppFonts.popins,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTodayTasksSection(
     BuildContext context,
-    List<InProgress> inProgressTasks,
-    List<Completed> completedTasks,
+    List<Tasks> inProgressTasks,
+    List<Tasks> completedTasks,
+    List<Tasks> pendingTasks,
   ) {
     // Get today's date
     String todayDate = _getFormattedDate();
@@ -243,7 +303,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                 ),
                 const Spacer(),
                 Text(
-                  "Priority: ${inProgressTasks.first.priority ?? 'MEDIUM'}",
+                  "${inProgressTasks.length} Tasks",
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.grey,
@@ -254,9 +314,51 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
             ),
           ),
           const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
-
           ...inProgressTasks.map((task) {
             return _buildInProgressTaskCard(context, task);
+          }),
+        ],
+
+        const SizedBox(height: 16),
+
+        /// Pending Section
+        if (pendingTasks.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  "Pending",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    fontFamily: AppFonts.popins,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  "${pendingTasks.length} Tasks",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontFamily: AppFonts.popins,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
+          ...pendingTasks.map((task) {
+            return _buildPendingTaskCard(context, task);
           }),
         ],
 
@@ -287,7 +389,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                 ),
                 const Spacer(),
                 Text(
-                  "Priority: ${completedTasks.isNotEmpty ? completedTasks.first.priority ?? 'MEDIUM' : 'MEDIUM'}",
+                  "${completedTasks.length} Tasks",
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.grey,
@@ -298,18 +400,19 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
             ),
           ),
           const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
-
           ...completedTasks.map((task) {
             return _buildCompletedTaskCard(context, task);
           }),
         ],
 
-        if (inProgressTasks.isEmpty && completedTasks.isEmpty) ...[
+        if (inProgressTasks.isEmpty &&
+            completedTasks.isEmpty &&
+            pendingTasks.isEmpty) ...[
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: Center(
               child: Text(
-                "No tasks for today",
+                "No tasks available",
                 style: TextStyle(
                   color: Colors.grey,
                   fontFamily: AppFonts.popins,
@@ -322,9 +425,9 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     );
   }
 
-  Widget _buildInProgressTaskCard(BuildContext context, InProgress task) {
-    // Format time range
-    String timeRange = _formatTimeRange(task.workday ?? 'Daily');
+  Widget _buildInProgressTaskCard(BuildContext context, Tasks task) {
+    // Format time range based on task type
+    String timeRange = _formatTimeRange(task.taskType ?? 'Daily');
 
     // Format due date if available
     String dueDateText = '';
@@ -360,26 +463,62 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            task.taskTitle ?? 'No Title',
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              fontFamily: AppFonts.popins,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  task.taskTitle ?? 'No Title',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    fontFamily: AppFonts.popins,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getPriorityColor(task.priority).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  task.priority?.toUpperCase() ?? 'MEDIUM',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: _getPriorityColor(task.priority),
+                    fontWeight: FontWeight.w500,
+                    fontFamily: AppFonts.popins,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            "${task.land?.landTitle ?? 'No Land'} - ${_getLocationFromLand(task.land)}",
+            task.land?.landTitle ?? 'No Land',
             style: const TextStyle(
               fontSize: 13,
               color: Colors.grey,
               fontFamily: AppFonts.popins,
             ),
           ),
+          if (task.land?.address != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              _getLocationFromLand(task.land),
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontFamily: AppFonts.popins,
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
 
-          /// Time and Area Row
+          /// Time and Type Row
           Row(
             children: [
               const Icon(Icons.access_time, size: 16, color: Colors.grey),
@@ -392,10 +531,10 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Icon(Icons.agriculture, size: 16, color: Colors.grey),
+              const Icon(Icons.category, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
               Text(
-                _getAreaFromTask(task),
+                task.taskType ?? 'Task',
                 style: const TextStyle(
                   fontSize: 13,
                   fontFamily: AppFonts.popins,
@@ -404,32 +543,9 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
             ],
           ),
 
-          /// Started Time
-          if (task.progress != null && task.progress! > 0) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.play_circle_outline,
-                  size: 16,
-                  color: Colors.green,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Started: ${_formatStartTime(task)}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.green,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ],
-            ),
-          ],
-
           /// Due Date
           if (dueDateText.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Icon(
@@ -492,16 +608,8 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     );
   }
 
-  Widget _buildCompletedTaskCard(BuildContext context, Completed task) {
-    // Format time range
-    String timeRange = _formatTimeRange(task.workday ?? 'Daily');
-
-    // Format completed time
-    String completedTime = '';
-    if (task.completedAt != null) {
-      final completedAt = DateTime.parse(task.completedAt!);
-      completedTime = _formatTime(completedAt);
-    }
+  Widget _buildPendingTaskCard(BuildContext context, Tasks task) {
+    String timeRange = _formatTimeRange(task.taskType ?? 'Daily');
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -520,17 +628,42 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            task.taskTitle ?? 'No Title',
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              fontFamily: AppFonts.popins,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  task.taskTitle ?? 'No Title',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    fontFamily: AppFonts.popins,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _getPriorityColor(task.priority).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  task.priority?.toUpperCase() ?? 'MEDIUM',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: _getPriorityColor(task.priority),
+                    fontWeight: FontWeight.w500,
+                    fontFamily: AppFonts.popins,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
-            "Plot ${task.id?.substring(0, 4) ?? 'Unknown'} - ${_getLocationFromTask(task)}",
+            task.land?.landTitle ?? 'No Land',
             style: const TextStyle(
               fontSize: 13,
               color: Colors.grey,
@@ -538,8 +671,6 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
             ),
           ),
           const SizedBox(height: 12),
-
-          /// Time and Area Row
           Row(
             children: [
               const Icon(Icons.access_time, size: 16, color: Colors.grey),
@@ -552,10 +683,10 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Icon(Icons.agriculture, size: 16, color: Colors.grey),
+              const Icon(Icons.category, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
               Text(
-                _getAreaFromCompletedTask(task),
+                task.taskType ?? 'Task',
                 style: const TextStyle(
                   fontSize: 13,
                   fontFamily: AppFonts.popins,
@@ -563,33 +694,129 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
               ),
             ],
           ),
-
-          /// Completed Time
-          if (completedTime.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.check_circle_outline,
-                  size: 16,
-                  color: Colors.green,
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.workerTaskDetails,
+                  arguments: {'leadId': task.id},
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(width: 4),
-                Text(
-                  'Completed at $completedTime',
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+              ),
+              child: const Text(
+                'Start',
+                style: TextStyle(
+                  fontFamily: AppFonts.popins,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompletedTaskCard(BuildContext context, Tasks task) {
+    String timeRange = _formatTimeRange(task.taskType ?? 'Daily');
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  task.taskTitle ?? 'No Title',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    fontFamily: AppFonts.popins,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'DONE',
+                  style: TextStyle(
+                    fontSize: 10,
                     color: Colors.green,
+                    fontWeight: FontWeight.w500,
                     fontFamily: AppFonts.popins,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            task.land?.landTitle ?? 'No Land',
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.grey,
+              fontFamily: AppFonts.popins,
             ),
-          ],
-
+          ),
           const SizedBox(height: 12),
-
-          /// View Button
+          Row(
+            children: [
+              const Icon(Icons.access_time, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(
+                timeRange,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontFamily: AppFonts.popins,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Icon(Icons.category, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(
+                task.taskType ?? 'Task',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontFamily: AppFonts.popins,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
@@ -625,18 +852,15 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     );
   }
 
-  Widget _buildAssignedLandsSection(
-    BuildContext context,
-    List<AssignedLeads> assignedLeads,
-  ) {
-    // Get unique lands from assigned leads
+  Widget _buildAssignedLandsSection(BuildContext context, List<Tasks> tasks) {
+    // Get unique lands from tasks
     final uniqueLands = <String, Map<String, dynamic>>{};
 
-    for (var lead in assignedLeads) {
-      if (lead.land != null && lead.land!.sId != null) {
-        final landId = lead.land!.sId!;
+    for (var task in tasks) {
+      if (task.land != null && task.land!.sId != null) {
+        final landId = task.land!.sId!;
         if (!uniqueLands.containsKey(landId)) {
-          uniqueLands[landId] = {'land': lead.land!, 'taskCount': 1};
+          uniqueLands[landId] = {'land': task.land!, 'taskCount': 1};
         } else {
           uniqueLands[landId]!['taskCount'] =
               uniqueLands[landId]!['taskCount'] + 1;
@@ -689,11 +913,11 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
           ...uniqueLands.values.map((landData) {
             final land = landData['land'] as Land;
             final taskCount = landData['taskCount'] as int;
-            final matchedLead = assignedLeads.firstWhere(
-              (lead) => lead.land?.sId == land.sId,
-              orElse: () => AssignedLeads(),
+            final matchedTask = tasks.firstWhere(
+              (task) => task.land?.sId == land.sId,
+              orElse: () => Tasks(),
             );
-            final taskId = matchedLead.id;
+            final taskId = matchedTask.id;
 
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -722,7 +946,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _getLandLocation(land),
+                    _getLocationFromLand(land),
                     style: const TextStyle(
                       fontSize: 13,
                       color: Colors.grey,
@@ -772,6 +996,19 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     );
   }
 
+  Color _getPriorityColor(String? priority) {
+    switch (priority?.toLowerCase()) {
+      case 'high':
+        return Colors.red;
+      case 'medium':
+        return Colors.orange;
+      case 'low':
+        return Colors.green;
+      default:
+        return Colors.orange;
+    }
+  }
+
   String _getFormattedDate() {
     final now = DateTime.now();
     return "${_getMonthAbbr(now.month)} ${now.day}, ${now.year}";
@@ -795,52 +1032,35 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     return months[month - 1];
   }
 
-  String _formatTimeRange(String workday) {
-    // This is a simplified version - you might want to get actual start/end times from API
-    if (workday.toLowerCase() == 'daily') {
-      return '6:00 AM - 2:00 PM'; // Default timing
+  String _formatTimeRange(String taskType) {
+    // You can customize this based on your task type
+    switch (taskType.toLowerCase()) {
+      case 'daily':
+        return '6:00 AM - 2:00 PM';
+      case 'weekly':
+        return '9:00 AM - 5:00 PM';
+      case 'monthly':
+        return 'Full Day';
+      default:
+        return '6:00 AM - 2:00 PM';
     }
-    return workday;
-  }
-
-  String _formatStartTime(InProgress task) {
-    // This would come from actual task start time in API
-    // For now, return a formatted time based on task ID or current time
-    return '9:15 AM';
-  }
-
-  String _formatTime(DateTime time) {
-    String minute = time.minute.toString().padLeft(2, '0');
-    String period = time.hour >= 12 ? 'PM' : 'AM';
-    int hourIn12 = time.hour > 12
-        ? time.hour - 12
-        : (time.hour == 0 ? 12 : time.hour);
-    return '$hourIn12:$minute $period';
   }
 
   String _getLocationFromLand(Land? land) {
-    // This would come from API if available
-    return 'Nashik, Maharashtra';
-  }
+    // Combine address components
+    List<String> locationParts = [];
+    if (land?.city != null && land!.city!.isNotEmpty) {
+      locationParts.add(land.city!);
+    }
+    if (land?.state != null && land!.state!.isNotEmpty) {
+      locationParts.add(land.state!);
+    }
+    if (land?.address != null && land!.address!.isNotEmpty) {
+      locationParts.add(land.address!);
+    }
 
-  String _getLandLocation(Land land) {
-    // Return location for the land
-    // You can customize this based on your data structure
-    return 'Nashik, Maharashtra';
-  }
-
-  String _getLocationFromTask(dynamic task) {
-    // This would come from API if available
-    return 'Nashik, Maharashtra';
-  }
-
-  String _getAreaFromTask(InProgress task) {
-    // This would come from API if available
-    return '5.2 Acres';
-  }
-
-  String _getAreaFromCompletedTask(Completed task) {
-    // This would come from API if available
-    return '3.8 Acres';
+    return locationParts.isNotEmpty
+        ? locationParts.join(', ')
+        : 'Location not specified';
   }
 }

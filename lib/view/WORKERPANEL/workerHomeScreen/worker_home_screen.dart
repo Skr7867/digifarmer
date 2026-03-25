@@ -139,14 +139,13 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     final dashboard = dashboardData.dashboard;
     final taskStatus = dashboard?.taskStatus;
     final taskCounts = dashboard?.taskCounts;
-
-    final inProgressTasks = taskStatus?.inProgressList ?? [];
-    final completedTasks = taskStatus?.completedList ?? [];
+    final inProgressTasks = taskStatus?.pending ?? [];
+    final completedTasks = taskStatus?.completed ?? [];
     final assignedLeads = dashboard?.assignedLeads ?? [];
 
-    int totalTasksToday = taskCounts?.totalCount ?? 0;
-    int completedCount = taskCounts?.completedCount ?? 0;
-    int inProgressCount = taskCounts?.inProgressCount ?? 0;
+    int totalTasksToday = taskCounts?.total ?? 0;
+    int completedCount = taskCounts?.completed ?? 0;
+    int inProgressCount = taskCounts?.inProgress ?? 0;
 
     return SingleChildScrollView(
       child: Column(
@@ -321,7 +320,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
   Widget _buildTodayTasksSection(
     BuildContext context,
-    List<InProgress> inProgressTasks,
+    List<Pending> inProgressTasks,
     List<Completed> completedTasks,
   ) {
     String todayDate = _getFormattedDate();
@@ -454,7 +453,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     );
   }
 
-  Widget _buildInProgressTaskCard(BuildContext context, InProgress task) {
+  Widget _buildInProgressTaskCard(BuildContext context, Pending task) {
     String timeRange = _formatTimeRange(task.workday ?? 'Daily');
     String dueDateText = '';
     if (task.dueDate != null) {
@@ -529,27 +528,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
               ),
             ],
           ),
-          if (task.progress != null && task.progress! > 0) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.play_circle_outline,
-                  size: 16,
-                  color: Colors.green,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Started: ${_formatStartTime(task)}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.green,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ],
-            ),
-          ],
+
           if (dueDateText.isNotEmpty) ...[
             const SizedBox(height: 4),
             Row(
@@ -740,10 +719,10 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   ) {
     final uniqueLands = <String, Map<String, dynamic>>{};
     for (var lead in assignedLeads) {
-      if (lead.land != null && lead.land!.sId != null) {
-        final landId = lead.land!.sId!;
+      if (lead.land != null && lead.land!.id != null) {
+        final landId = lead.land!.id;
         if (!uniqueLands.containsKey(landId)) {
-          uniqueLands[landId] = {'land': lead.land!, 'taskCount': 1};
+          uniqueLands[landId.toString()] = {'land': lead.land!, 'taskCount': 1};
         } else {
           uniqueLands[landId]!['taskCount'] =
               uniqueLands[landId]!['taskCount'] + 1;
@@ -796,8 +775,8 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             final land = landData['land'] as Land;
             final taskCount = landData['taskCount'] as int;
             final matchedLead = assignedLeads.firstWhere(
-              (lead) => lead.land?.sId == land.sId,
-              orElse: () => AssignedLeads(),
+              (lead) => lead.land?.id == land.id,
+              // orElse: () => AssignedLeads(),
             );
             final taskId = matchedLead.id;
 
@@ -970,7 +949,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
     return workday;
   }
 
-  String _formatStartTime(InProgress task) => '9:15 AM';
+  String _getAreaFromTask(Pending task) => '3.8 Acres';
 
   String _formatTime(DateTime time) {
     String minute = time.minute.toString().padLeft(2, '0');
@@ -984,7 +963,6 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   String _getLocationFromLand(Land? land) => 'Nashik, Maharashtra';
   String _getLandLocation(Land land) => 'Nashik, Maharashtra';
   String _getLocationFromTask(dynamic task) => 'Nashik, Maharashtra';
-  String _getAreaFromTask(InProgress task) => '5.2 Acres';
   String _getAreaFromCompletedTask(Completed task) => '3.8 Acres';
 }
 

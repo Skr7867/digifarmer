@@ -10,6 +10,8 @@ class ApiUrls {
   static String allPlansApi = '$baseUrl/api/v1/admin/plans/active';
   static String userProfileApi = '$baseUrl/api/v1/auth/me';
   static String activeInvestmentApi = '$baseUrl/api/v1/investor/investments';
+  static String createPayment(String planId) =>
+      '$baseUrl/api/v1/investor/payments/create-order/$planId';
 
   //*********************************Land owner panel api */
   static String landOwnerSaveBasicInfoApi =
@@ -30,22 +32,17 @@ class ApiUrls {
   static String workerAllTaskApi = '$baseUrl/api/v1/worker/tasks';
   static String taskDetailsApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId/dashboard';
-
   static String startTaskApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId/start';
-
   static String taskUpdateApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId/progress';
   static String taskCompleteApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId/complete';
-
   static String workerCheckInApi = '$baseUrl/api/v1/worker/attendance/checkin';
   static String workerCheckOutApi =
       '$baseUrl/api/v1/worker/attendance/checkout';
-
   static String workerAttendanceHistoryApi =
       '$baseUrl/api/v1/worker/attendance';
-
   static String landDetailsApi(String taskId) =>
       '$baseUrl/api/v1/worker/tasks/$taskId';
 }

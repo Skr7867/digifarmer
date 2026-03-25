@@ -1,5 +1,7 @@
 import 'package:digifarmer/repository/INVESTORPANEL/activeInvestment/active_investment_http_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/activeInvestment/active_investment_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/createPayment/create_payment_http_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/createPayment/create_payment_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_http_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/userProfile/user_profile_http_repository.dart';
@@ -11,6 +13,8 @@ import 'package:digifarmer/repository/LANDOWNERPANEL/landStatus/land_status_http
 import 'package:digifarmer/repository/LANDOWNERPANEL/landStatus/land_status_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/saveBasicInfo/save_basic_info_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/allTask/all_task_http_repository.dart';
+import 'package:digifarmer/repository/WORKERPANEL/allTask/all_task_repository.dart';
 import 'package:digifarmer/repository/WORKERPANEL/completeTask/complete_task_http_repository.dart';
 import 'package:digifarmer/repository/WORKERPANEL/completeTask/complete_task_repository.dart';
 import 'package:digifarmer/repository/WORKERPANEL/startTask/start_task_http_repository.dart';
@@ -24,6 +28,7 @@ import 'package:digifarmer/repository/WORKERPANEL/workerdashboard/worker_dashboa
 import 'package:get_it/get_it.dart';
 
 import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
+import '../../../blocs/INVESTORPANEL/createPayment/create_payment_bloc.dart';
 import '../../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
 import '../../../blocs/WORKERPANEL/landDetails/land_details_bloc.dart';
 import '../../../blocs/WORKERPANEL/markAttendance/attendance_bloc.dart';
@@ -111,6 +116,15 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<TaskDetailsRepository>(
     () => TaskDetailsHttpRepository(),
   );
+  getIt.registerLazySingleton<CreatePaymentRepository>(
+    () => CreatePaymentHttpRepository(),
+  );
+
+  getIt.registerFactory<CreatePaymentBloc>(
+    () => CreatePaymentBloc(
+      createPaymentRepository: getIt<CreatePaymentRepository>(),
+    ),
+  );
   getIt.registerLazySingleton<StartTaskRepository>(
     () => StartTaskHttpRepository(),
   );
@@ -152,6 +166,7 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<LandDetailsRepository>(
     () => LandDetailsHttpRepository(),
   );
+  getIt.registerLazySingleton<AllTaskRepository>(() => AllTaskHttpRepository());
 
   getIt.registerFactory<LandDetailsBloc>(
     () =>
