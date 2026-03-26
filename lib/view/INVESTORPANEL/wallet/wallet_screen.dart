@@ -371,9 +371,9 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
             ),
             onPressed: () {
-              FlushBarHelper.flushBarSuccessMessage(
-                "This will Be work after integrating payment gateway",
+              Navigator.pushNamed(
                 context,
+                RoutesName.identityVerificationScreen,
               );
             },
             child: Text(

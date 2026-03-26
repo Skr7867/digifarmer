@@ -1,9 +1,13 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/view/INVESTORPANEL/activeInvestment/active_investment_screen.dart';
+import 'package:digifarmer/view/INVESTORPANEL/bankDetails/bank_details_screen.dart';
 import 'package:digifarmer/view/INVESTORPANEL/contractSign/contract_sign_screen.dart';
+import 'package:digifarmer/view/INVESTORPANEL/identityVerification/identity_verification_screen.dart';
 import 'package:digifarmer/view/INVESTORPANEL/investmentDetails/investment_details_screen.dart';
+import 'package:digifarmer/view/INVESTORPANEL/kycVerificationStatus/kyc_verification_status_screen.dart';
 import 'package:digifarmer/view/INVESTORPANEL/profile/profile_screen.dart';
+import 'package:digifarmer/view/INVESTORPANEL/uploadDocuments/upload_documents_screen.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/allLands/all_land_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/allTask/all_task_screen.dart';
@@ -49,18 +53,15 @@ class Routes {
           builder: (context) => WithdrawalStatusScreen(),
         );
       case RoutesName.investmentDetailsScreen:
-  final investmentId = settings.arguments as String;
-  return MaterialPageRoute(
-    builder: (context) => InvestmentDetailsScreen(investmentId: investmentId),
-  );
-         case RoutesName.allTaskScreen:
+        final investmentId = settings.arguments as String;
         return MaterialPageRoute(
-          builder: (context) => AllTaskScreen(),
+          builder: (context) =>
+              InvestmentDetailsScreen(investmentId: investmentId),
         );
-         case RoutesName.allLandsScreen:
-        return MaterialPageRoute(
-          builder: (context) => AllLandScreen(),
-        );
+      case RoutesName.allTaskScreen:
+        return MaterialPageRoute(builder: (context) => AllTaskScreen());
+      case RoutesName.allLandsScreen:
+        return MaterialPageRoute(builder: (context) => AllLandScreen());
       case RoutesName.contractSignScreen:
         return MaterialPageRoute(builder: (context) => ContractSignScreen());
 
@@ -93,6 +94,18 @@ class Routes {
         return MaterialPageRoute(builder: (context) => NewInvestmentScreen());
       case RoutesName.portFolioScreen:
         return MaterialPageRoute(builder: (context) => PortfolioScreen());
+      case RoutesName.identityVerificationScreen:
+        return MaterialPageRoute(
+          builder: (context) => IdentityVerificationScreen(),
+        );
+      case RoutesName.bankDetailsScreen:
+        return MaterialPageRoute(builder: (context) => BankDetailsScreen());
+      case RoutesName.uploadDocumentScreen:
+        return MaterialPageRoute(builder: (context) => UploadDocumentsScreen());
+      case RoutesName.kycVerificationStatusScreen:
+        return MaterialPageRoute(
+          builder: (context) => KYCVerificationStatusScreen(),
+        );
       case RoutesName.proceedPaymentScreen:
         final investment = settings.arguments as InvestmentSelectionModel;
 

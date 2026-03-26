@@ -22,12 +22,28 @@ class InvestmentDetailsModel {
 }
 
 class Investment {
+  double? _toDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
   String? id;
   String? investmentId;
   String? investmentType;
   int? investmentAmount;
   int? durationMonths;
-  double? expectedReturnPercent;
+  num? expectedReturnPercent;
   String? applicationStatus;
   String? paymentStatus;
   String? paymentMethod;
@@ -61,104 +77,117 @@ class Investment {
   Allocations? allocations;
   PoolInfo? poolInfo;
 
-  Investment(
-      {this.id,
-      this.investmentId,
-      this.investmentType,
-      this.investmentAmount,
-      this.durationMonths,
-      this.expectedReturnPercent,
-      this.applicationStatus,
-      this.paymentStatus,
-      this.paymentMethod,
-      this.paidAmount,
-      this.paidAt,
-      this.paymentReference,
-      this.razorpayOrderId,
-      this.razorpayPaymentId,
-      this.planId,
-      this.selectedDuration,
-      this.roiFrequency,
-      this.roiAmount,
-      this.totalRoiExpected,
-      this.totalROIPaid,
-      this.pendingROI,
-      this.startDate,
-      this.endDate,
-      this.maturityDate,
-      this.lockInPeriodMonths,
-      this.prematureExitAllowed,
-      this.riskLevel,
-      this.agreementPdfUrl,
-      this.documents,
-      this.statusTimeline,
-      this.adminRemarks,
-      this.adminNotes,
-      this.approvedBy,
-      this.approvedAt,
-      this.createdAt,
-      this.updatedAt,
-      this.allocations,
-      this.poolInfo});
+  Investment({
+    this.id,
+    this.investmentId,
+    this.investmentType,
+    this.investmentAmount,
+    this.durationMonths,
+    this.expectedReturnPercent,
+    this.applicationStatus,
+    this.paymentStatus,
+    this.paymentMethod,
+    this.paidAmount,
+    this.paidAt,
+    this.paymentReference,
+    this.razorpayOrderId,
+    this.razorpayPaymentId,
+    this.planId,
+    this.selectedDuration,
+    this.roiFrequency,
+    this.roiAmount,
+    this.totalRoiExpected,
+    this.totalROIPaid,
+    this.pendingROI,
+    this.startDate,
+    this.endDate,
+    this.maturityDate,
+    this.lockInPeriodMonths,
+    this.prematureExitAllowed,
+    this.riskLevel,
+    this.agreementPdfUrl,
+    this.documents,
+    this.statusTimeline,
+    this.adminRemarks,
+    this.adminNotes,
+    this.approvedBy,
+    this.approvedAt,
+    this.createdAt,
+    this.updatedAt,
+    this.allocations,
+    this.poolInfo,
+  });
 
   Investment.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     investmentId = json['investmentId'];
     investmentType = json['investmentType'];
-    investmentAmount = json['investmentAmount'];
-    durationMonths = json['durationMonths'];
-    expectedReturnPercent = json['expectedReturnPercent'];
+
+    // Convert to int with proper handling
+    investmentAmount = _toInt(json['investmentAmount']);
+    durationMonths = _toInt(json['durationMonths']);
+    paidAmount = _toInt(json['paidAmount']);
+    selectedDuration = _toInt(json['selectedDuration']);
+    roiAmount = _toInt(json['roiAmount']);
+    totalRoiExpected = _toInt(json['totalRoiExpected']);
+    totalROIPaid = _toInt(json['totalROIPaid']);
+    pendingROI = _toInt(json['pendingROI']);
+    lockInPeriodMonths = _toInt(json['lockInPeriodMonths']);
+
+    expectedReturnPercent = _toDouble(json['expectedReturnPercent']);
+
     applicationStatus = json['applicationStatus'];
     paymentStatus = json['paymentStatus'];
     paymentMethod = json['paymentMethod'];
-    paidAmount = json['paidAmount'];
     paidAt = json['paidAt'];
     paymentReference = json['paymentReference'];
     razorpayOrderId = json['razorpayOrderId'];
     razorpayPaymentId = json['razorpayPaymentId'];
-    planId =
-        json['planId'] != null ? new PlanId.fromJson(json['planId']) : null;
-    selectedDuration = json['selectedDuration'];
+
+    planId = json['planId'] != null ? PlanId.fromJson(json['planId']) : null;
+
     roiFrequency = json['roiFrequency'];
-    roiAmount = json['roiAmount'];
-    totalRoiExpected = json['totalRoiExpected'];
-    totalROIPaid = json['totalROIPaid'];
-    pendingROI = json['pendingROI'];
     startDate = json['startDate'];
     endDate = json['endDate'];
     maturityDate = json['maturityDate'];
-    lockInPeriodMonths = json['lockInPeriodMonths'];
     prematureExitAllowed = json['prematureExitAllowed'];
     riskLevel = json['riskLevel'];
     agreementPdfUrl = json['agreementPdfUrl'];
+
     if (json['documents'] != null) {
       documents = <Documents>[];
       json['documents'].forEach((v) {
-        documents!.add(new Documents.fromJson(v));
+        documents!.add(Documents.fromJson(v));
       });
     }
+
     if (json['statusTimeline'] != null) {
       statusTimeline = <StatusTimeline>[];
       json['statusTimeline'].forEach((v) {
-        statusTimeline!.add(new StatusTimeline.fromJson(v));
+        statusTimeline!.add(StatusTimeline.fromJson(v));
       });
     }
+
     adminRemarks = json['adminRemarks'];
+
     if (json['adminNotes'] != null) {
       adminNotes = <Null>[];
-     
     }
+
     approvedBy = json['approvedBy'] != null
-        ? new ApprovedBy.fromJson(json['approvedBy'])
+        ? ApprovedBy.fromJson(json['approvedBy'])
         : null;
+
     approvedAt = json['approvedAt'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
+
     allocations = json['allocations'] != null
-        ? new Allocations.fromJson(json['allocations'])
+        ? Allocations.fromJson(json['allocations'])
         : null;
+
     poolInfo = json['poolInfo'] != null
-        ? new PoolInfo.fromJson(json['poolInfo'])
+        ? PoolInfo.fromJson(json['poolInfo'])
         : null;
   }
 
@@ -198,11 +227,12 @@ class Investment {
       data['documents'] = this.documents!.map((v) => v.toJson()).toList();
     }
     if (this.statusTimeline != null) {
-      data['statusTimeline'] =
-          this.statusTimeline!.map((v) => v.toJson()).toList();
+      data['statusTimeline'] = this.statusTimeline!
+          .map((v) => v.toJson())
+          .toList();
     }
     data['adminRemarks'] = this.adminRemarks;
-   
+
     if (this.approvedBy != null) {
       data['approvedBy'] = this.approvedBy!.toJson();
     }
@@ -226,12 +256,13 @@ class PlanId {
   int? maxInvestment;
   int? returnPercent;
 
-  PlanId(
-      {this.sId,
-      this.planName,
-      this.minInvestment,
-      this.maxInvestment,
-      this.returnPercent});
+  PlanId({
+    this.sId,
+    this.planName,
+    this.minInvestment,
+    this.maxInvestment,
+    this.returnPercent,
+  });
 
   PlanId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -341,7 +372,6 @@ class Allocations {
     }
     if (json['crops'] != null) {
       crops = <Null>[];
-      
     }
     allocatedAt = json['allocatedAt'];
     allocatedBy = json['allocatedBy'];
@@ -352,7 +382,7 @@ class Allocations {
     if (this.lands != null) {
       data['lands'] = this.lands!.map((v) => v.toJson()).toList();
     }
-    
+
     data['allocatedAt'] = this.allocatedAt;
     data['allocatedBy'] = this.allocatedBy;
     return data;
@@ -366,16 +396,18 @@ class Lands {
   LandDetails? landDetails;
   List<Crops>? crops;
 
-  Lands(
-      {this.landId,
-      this.allocatedAmount,
-      this.allocationPercent,
-      this.landDetails,
-      this.crops});
+  Lands({
+    this.landId,
+    this.allocatedAmount,
+    this.allocationPercent,
+    this.landDetails,
+    this.crops,
+  });
 
   Lands.fromJson(Map<String, dynamic> json) {
-    landId =
-        json['landId'] != null ? new LandId.fromJson(json['landId']) : null;
+    landId = json['landId'] != null
+        ? new LandId.fromJson(json['landId'])
+        : null;
     allocatedAmount = json['allocatedAmount'];
     allocationPercent = json['allocationPercent'];
     landDetails = json['landDetails'] != null
@@ -418,17 +450,18 @@ class LandId {
   String? city;
   String? state;
 
-  LandId(
-      {this.sId,
-      this.landTitle,
-      this.surveyNumber,
-      this.areaUnit,
-      this.totalSize,
-      this.description,
-      this.landImages,
-      this.address,
-      this.city,
-      this.state});
+  LandId({
+    this.sId,
+    this.landTitle,
+    this.surveyNumber,
+    this.areaUnit,
+    this.totalSize,
+    this.description,
+    this.landImages,
+    this.address,
+    this.city,
+    this.state,
+  });
 
   LandId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
@@ -494,8 +527,13 @@ class Crops {
   int? expectedReturn;
   String? season;
 
-  Crops(
-      {this.type, this.amount, this.percent, this.expectedReturn, this.season});
+  Crops({
+    this.type,
+    this.amount,
+    this.percent,
+    this.expectedReturn,
+    this.season,
+  });
 
   Crops.fromJson(Map<String, dynamic> json) {
     type = json['type'];
@@ -522,11 +560,12 @@ class PoolInfo {
   int? remainingAmount;
   List<Null>? allocatedLands;
 
-  PoolInfo(
-      {this.poolName,
-      this.totalPoolSize,
-      this.remainingAmount,
-      this.allocatedLands});
+  PoolInfo({
+    this.poolName,
+    this.totalPoolSize,
+    this.remainingAmount,
+    this.allocatedLands,
+  });
 
   PoolInfo.fromJson(Map<String, dynamic> json) {
     poolName = json['poolName'];
@@ -534,7 +573,6 @@ class PoolInfo {
     remainingAmount = json['remainingAmount'];
     if (json['allocatedLands'] != null) {
       allocatedLands = <Null>[];
-      
     }
   }
 
@@ -543,7 +581,7 @@ class PoolInfo {
     data['poolName'] = this.poolName;
     data['totalPoolSize'] = this.totalPoolSize;
     data['remainingAmount'] = this.remainingAmount;
-    
+
     return data;
   }
 }

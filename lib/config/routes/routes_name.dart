@@ -18,6 +18,12 @@ class RoutesName {
   static const String investmentDetailsScreen = 'investment_details_screen';
   static const String contractSignScreen = 'contract_sign_screen';
   static const String withdrawScreen = 'withdraw_screen';
+  static const String identityVerificationScreen =
+      'identity_verification_screen';
+  static const String bankDetailsScreen = 'bank_details_screen';
+  static const String uploadDocumentScreen = 'upload_documents_screen';
+  static const String kycVerificationStatusScreen =
+      'kyc_verification_status_screen';
 
   //*************************************************LAND OWNER SCREENS STARTED FROM HERE   ********************************/
 
@@ -42,6 +48,6 @@ class RoutesName {
   static const String markAttendaceScreen = 'mark_attendance_screen';
   static const String attendanceHistoryScreen = 'attendance_history_screen';
   static const String landDetailScreen = 'land_details_screen';
-  static const String allTaskScreen  = 'all_task_screen';
-  static const String allLandsScreen  = 'all_lands_screen';
+  static const String allTaskScreen = 'all_task_screen';
+  static const String allLandsScreen = 'all_lands_screen';
 }

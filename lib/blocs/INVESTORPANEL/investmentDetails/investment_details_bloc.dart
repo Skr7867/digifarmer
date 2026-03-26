@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -13,9 +15,7 @@ class InvestmentDetailsBloc
   final InvestmentDetailsRepository investmentDetailsRepository;
 
   InvestmentDetailsBloc({required this.investmentDetailsRepository})
-      : super(InvestmentDetailsState(
-          investmentDetails: ApiResponse.loading(),
-        )) {
+    : super(InvestmentDetailsState(investmentDetails: ApiResponse.loading())) {
     on<InvestmentDetailsFetched>(_fetchInvestmentDetailsApi);
   }
 
@@ -31,10 +31,12 @@ class InvestmentDetailsBloc
       );
 
       emit(state.copyWith(investmentDetails: ApiResponse.completed(response)));
-    } catch (error) {
-      emit(state.copyWith(
-        investmentDetails: ApiResponse.error(error.toString()),
-      ));
+    } catch (error, stacktrace) {
+      log('stackTrace: $stacktrace');
+      log(error.toString());
+      emit(
+        state.copyWith(investmentDetails: ApiResponse.error(error.toString())),
+      );
     }
   }
 }

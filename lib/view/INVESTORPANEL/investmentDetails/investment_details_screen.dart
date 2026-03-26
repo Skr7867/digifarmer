@@ -1,14 +1,16 @@
 import 'dart:io';
+
 import 'package:digifarmer/blocs/INVESTORPANEL/investmentDetails/investment_details_bloc.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/model/INVESTORPANEL/investmentDetails/investment_details_model.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:http/http.dart' as http;
+
 import '../../../config/routes/routes_name.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../res/customeWidgets/custom_app_bar.dart';
@@ -59,56 +61,56 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
   }
 
   Future<void> _openPdf(String url, String fileName) async {
-  try {
-    // Show loading
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
+    try {
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
 
-    // Download PDF
-    final response = await http.get(Uri.parse(url));
-    
-    // Check if the request was successful
-    if (response.statusCode != 200) {
-      throw Exception('Failed to download PDF: ${response.statusCode}');
-    }
-    
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/$fileName';
-    final file = File(filePath);
-    
-    // Use response.bodyBytes instead of response.body
-    await file.writeAsBytes(response.bodyBytes);
+      // Download PDF
+      final response = await http.get(Uri.parse(url));
 
-    // Close loading dialog
-    if (mounted) {
-      Navigator.pop(context);
-    }
+      // Check if the request was successful
+      if (response.statusCode != 200) {
+        throw Exception('Failed to download PDF: ${response.statusCode}');
+      }
 
-    // Open PDF
-    final result = await OpenFile.open(filePath);
-    if (result.type != ResultType.done) {
-      throw Exception('Failed to open PDF');
-    }
-  } catch (e) {
-    // Close loading dialog if it's still showing
-    if (mounted) {
-      Navigator.pop(context);
-    }
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Failed to open PDF: $e',
-          style: const TextStyle(fontFamily: AppFonts.popins),
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+
+      // Use response.bodyBytes instead of response.body
+      await file.writeAsBytes(response.bodyBytes);
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      // Open PDF
+      final result = await OpenFile.open(filePath);
+      if (result.type != ResultType.done) {
+        throw Exception('Failed to open PDF');
+      }
+    } catch (e) {
+      // Close loading dialog if it's still showing
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to open PDF: $e',
+            style: const TextStyle(fontFamily: AppFonts.popins),
+          ),
+          backgroundColor: Colors.red,
         ),
-        backgroundColor: Colors.red,
-      ),
-    );
+      );
+    }
   }
-}
 
   String _formatDate(String? dateStr) {
     if (dateStr == null) return 'N/A';
@@ -311,8 +313,10 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
                 ],
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -401,8 +405,12 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color textColor,
-      {Color? valueColor}) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    Color textColor, {
+    Color? valueColor,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -410,7 +418,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
           title,
           style: TextStyle(
             color: textColor.withOpacity(0.8),
-            fontSize: 12,
+            fontSize: 10,
             fontFamily: AppFonts.popins,
           ),
         ),
@@ -428,8 +436,12 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
     );
   }
 
-  Widget _buildHeaderInfo(String label, String value, IconData icon,
-      {Color? valueColor}) {
+  Widget _buildHeaderInfo(
+    String label,
+    String value,
+    IconData icon, {
+    Color? valueColor,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 16, color: Colors.white70),
@@ -443,13 +455,14 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
                 color: Colors.white70,
                 fontSize: 10,
                 fontFamily: AppFonts.popins,
+                fontWeight: .bold,
               ),
             ),
             Text(
               value,
               style: TextStyle(
                 color: valueColor ?? Colors.white,
-                fontSize: 12,
+                fontSize: 8,
                 fontWeight: FontWeight.w600,
                 fontFamily: AppFonts.popins,
               ),
@@ -663,8 +676,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.green.shade100,
                   borderRadius: BorderRadius.circular(12),
@@ -713,8 +725,10 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
               spacing: 8,
               children: land.crops!.map((crop) {
                 return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.shade100,
                     borderRadius: BorderRadius.circular(12),
@@ -825,19 +839,11 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
                   color: statusColor,
                 ),
                 child: const Center(
-                  child: Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 14,
-                  ),
+                  child: Icon(Icons.check, color: Colors.white, size: 14),
                 ),
               ),
               if (!isLast)
-                Container(
-                  width: 2,
-                  height: 40,
-                  color: Colors.grey.shade300,
-                ),
+                Container(width: 2, height: 40, color: Colors.grey.shade300),
             ],
           ),
           const SizedBox(width: 12),
@@ -1040,12 +1046,16 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
                   );
                 }
               },
-              icon: Icon(Icons.picture_as_pdf_outlined,
-                  color: AppColors.greenColor),
+              icon: Icon(
+                Icons.picture_as_pdf_outlined,
+                color: AppColors.greenColor,
+              ),
               label: Text(
                 'View Agreement',
-                style:
-                    TextStyle(fontFamily: AppFonts.popins, color: AppColors.greenColor),
+                style: TextStyle(
+                  fontFamily: AppFonts.popins,
+                  color: AppColors.greenColor,
+                ),
               ),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1068,7 +1078,9 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
               label: const Text(
                 'Contact Support',
                 style: TextStyle(
-                    fontFamily: AppFonts.popins, color: Colors.white),
+                  fontFamily: AppFonts.popins,
+                  color: Colors.white,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
