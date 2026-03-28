@@ -90,7 +90,7 @@ class _IdentityVerificationScreenState
         ),
         const SizedBox(height: 8),
         Text(
-          'Step 2 of 4 • 50%',
+          'Step 1 of 2 • 50%',
           style: TextStyle(
             fontSize: 14,
             color: Colors.grey.shade600,

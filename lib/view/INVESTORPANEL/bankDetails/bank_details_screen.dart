@@ -1,11 +1,11 @@
-
-import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/blocs/INVESTORPANEL/submitBankDetails/submit_bank_details_bloc.dart';
+import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/submitBankDetails/submit_bank_details_http_repository.dart';
 import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../res/customeWidgets/custom_app_bar.dart';
 import '../../../utils/enums.dart';
 
@@ -28,7 +28,8 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
   final _upiIdFocusNode = FocusNode();
 
   // Text editing controllers
-  final TextEditingController _accountNumberController = TextEditingController();
+  final TextEditingController _accountNumberController =
+      TextEditingController();
   final TextEditingController _confirmAccountNumberController =
       TextEditingController();
   final TextEditingController _ifscCodeController = TextEditingController();
@@ -61,7 +62,9 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     super.initState();
     // Add focus listeners for validation on unfocus
     _accountNumberFocusNode.addListener(_onAccountNumberFocusChange);
-    _confirmAccountNumberFocusNode.addListener(_onConfirmAccountNumberFocusChange);
+    _confirmAccountNumberFocusNode.addListener(
+      _onConfirmAccountNumberFocusChange,
+    );
     _ifscCodeFocusNode.addListener(_onIfscCodeFocusChange);
     _accountHolderNameFocusNode.addListener(_onAccountHolderNameFocusChange);
     _upiIdFocusNode.addListener(_onUpiIdFocusChange);
@@ -71,35 +74,35 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     if (!_accountNumberFocusNode.hasFocus && mounted) {
       // Use context from the widget tree
       final bloc = context.read<SubmitBankDetailsBloc>();
-      bloc.add( AccountNumberUnfocused());
+      bloc.add(AccountNumberUnfocused());
     }
   }
 
   void _onConfirmAccountNumberFocusChange() {
     if (!_confirmAccountNumberFocusNode.hasFocus && mounted) {
       final bloc = context.read<SubmitBankDetailsBloc>();
-      bloc.add( ConfirmAccountNumberUnfocused());
+      bloc.add(ConfirmAccountNumberUnfocused());
     }
   }
 
   void _onIfscCodeFocusChange() {
     if (!_ifscCodeFocusNode.hasFocus && mounted) {
       final bloc = context.read<SubmitBankDetailsBloc>();
-      bloc.add( IfscCodeUnfocused());
+      bloc.add(IfscCodeUnfocused());
     }
   }
 
   void _onAccountHolderNameFocusChange() {
     if (!_accountHolderNameFocusNode.hasFocus && mounted) {
       final bloc = context.read<SubmitBankDetailsBloc>();
-      bloc.add( AccountHolderNameUnfocused());
+      bloc.add(AccountHolderNameUnfocused());
     }
   }
 
   void _onUpiIdFocusChange() {
     if (!_upiIdFocusNode.hasFocus && mounted) {
       final bloc = context.read<SubmitBankDetailsBloc>();
-      bloc.add( UpiIdUnfocused());
+      bloc.add(UpiIdUnfocused());
     }
   }
 
@@ -107,11 +110,13 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
   void dispose() {
     // Remove focus listeners
     _accountNumberFocusNode.removeListener(_onAccountNumberFocusChange);
-    _confirmAccountNumberFocusNode.removeListener(_onConfirmAccountNumberFocusChange);
+    _confirmAccountNumberFocusNode.removeListener(
+      _onConfirmAccountNumberFocusChange,
+    );
     _ifscCodeFocusNode.removeListener(_onIfscCodeFocusChange);
     _accountHolderNameFocusNode.removeListener(_onAccountHolderNameFocusChange);
     _upiIdFocusNode.removeListener(_onUpiIdFocusChange);
-    
+
     // Dispose focus nodes
     _accountNumberFocusNode.dispose();
     _confirmAccountNumberFocusNode.dispose();
@@ -119,7 +124,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     _bankNameFocusNode.dispose();
     _accountHolderNameFocusNode.dispose();
     _upiIdFocusNode.dispose();
-    
+
     // Dispose controllers
     _accountNumberController.dispose();
     _confirmAccountNumberController.dispose();
@@ -134,32 +139,25 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(
-            title: 'Bank Details',
-            automaticallyImplyLeading: true,
-            gradient: const LinearGradient(
-              colors: [Color(0xff34A853), Color(0xff0D47A1)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),),
-      body: BlocProvider(
-        create: (_) => SubmitBankDetailsBloc(
-          SubmitBankDetailsHttpRepository(),
+        title: 'Bank Details',
+        automaticallyImplyLeading: true,
+        gradient: const LinearGradient(
+          colors: [Color(0xff34A853), Color(0xff0D47A1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+      ),
+      body: BlocProvider(
+        create: (_) => SubmitBankDetailsBloc(SubmitBankDetailsHttpRepository()),
         child: BlocListener<SubmitBankDetailsBloc, SubmitBankDetailsState>(
           listenWhen: (previous, current) =>
               previous.postApiStatus != current.postApiStatus,
           listener: (context, state) {
             if (state.postApiStatus == PostApiStatus.error) {
-              FlushBarHelper.flushBarErrorMessage(
-                state.messages,
-                context,
-              );
+              FlushBarHelper.flushBarErrorMessage(state.messages, context);
             }
             if (state.postApiStatus == PostApiStatus.success) {
-              FlushBarHelper.flushBarSuccessMessage(
-                state.messages,
-                context,
-              );
+              FlushBarHelper.flushBarSuccessMessage(state.messages, context);
               // Navigate to next screen after successful submission
               Navigator.pushNamed(context, RoutesName.uploadDocumentScreen);
             }
@@ -243,7 +241,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Step 4 of 4 • 100%',
+          'Step 2 of 2 • 100%',
           style: TextStyle(
             fontSize: 14,
             color: Colors.green,
@@ -254,7 +252,10 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     );
   }
 
-  Widget _buildBankDetailsForm(SubmitBankDetailsState state, BuildContext context) {
+  Widget _buildBankDetailsForm(
+    SubmitBankDetailsState state,
+    BuildContext context,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -354,10 +355,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
                 ),
               ),
               items: _bankNames.map((String bank) {
-                return DropdownMenuItem<String>(
-                  value: bank,
-                  child: Text(bank),
-                );
+                return DropdownMenuItem<String>(value: bank, child: Text(bank));
               }).toList(),
               onChanged: (value) {
                 setState(() {
@@ -454,7 +452,10 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     );
   }
 
-  Widget _buildUpiDetailsSection(SubmitBankDetailsState state, BuildContext context) {
+  Widget _buildUpiDetailsSection(
+    SubmitBankDetailsState state,
+    BuildContext context,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -611,7 +612,10 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
     );
   }
 
-  Widget _buildSubmitButton(SubmitBankDetailsState state, BuildContext context) {
+  Widget _buildSubmitButton(
+    SubmitBankDetailsState state,
+    BuildContext context,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -622,8 +626,8 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
                 if (_formKey.currentState?.validate() ?? false) {
                   // Trigger form submission
                   context.read<SubmitBankDetailsBloc>().add(
-                         SubmitBankDetailsApi(),
-                      );
+                    SubmitBankDetailsApi(),
+                  );
                 }
               },
         style: ElevatedButton.styleFrom(
