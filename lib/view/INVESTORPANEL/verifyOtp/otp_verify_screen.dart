@@ -61,8 +61,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void dispose() {
     timer?.cancel();
     _verifyOtpBloc.close();
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 

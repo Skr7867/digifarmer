@@ -7,15 +7,15 @@ class InvestmentDetailsModel {
   InvestmentDetailsModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     investment = json['investment'] != null
-        ? new Investment.fromJson(json['investment'])
+        ? Investment.fromJson(json['investment'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    if (this.investment != null) {
-      data['investment'] = this.investment!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    if (investment != null) {
+      data['investment'] = investment!.toJson();
     }
     return data;
   }
@@ -192,58 +192,58 @@ class Investment {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['investmentId'] = this.investmentId;
-    data['investmentType'] = this.investmentType;
-    data['investmentAmount'] = this.investmentAmount;
-    data['durationMonths'] = this.durationMonths;
-    data['expectedReturnPercent'] = this.expectedReturnPercent;
-    data['applicationStatus'] = this.applicationStatus;
-    data['paymentStatus'] = this.paymentStatus;
-    data['paymentMethod'] = this.paymentMethod;
-    data['paidAmount'] = this.paidAmount;
-    data['paidAt'] = this.paidAt;
-    data['paymentReference'] = this.paymentReference;
-    data['razorpayOrderId'] = this.razorpayOrderId;
-    data['razorpayPaymentId'] = this.razorpayPaymentId;
-    if (this.planId != null) {
-      data['planId'] = this.planId!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['investmentId'] = investmentId;
+    data['investmentType'] = investmentType;
+    data['investmentAmount'] = investmentAmount;
+    data['durationMonths'] = durationMonths;
+    data['expectedReturnPercent'] = expectedReturnPercent;
+    data['applicationStatus'] = applicationStatus;
+    data['paymentStatus'] = paymentStatus;
+    data['paymentMethod'] = paymentMethod;
+    data['paidAmount'] = paidAmount;
+    data['paidAt'] = paidAt;
+    data['paymentReference'] = paymentReference;
+    data['razorpayOrderId'] = razorpayOrderId;
+    data['razorpayPaymentId'] = razorpayPaymentId;
+    if (planId != null) {
+      data['planId'] = planId!.toJson();
     }
-    data['selectedDuration'] = this.selectedDuration;
-    data['roiFrequency'] = this.roiFrequency;
-    data['roiAmount'] = this.roiAmount;
-    data['totalRoiExpected'] = this.totalRoiExpected;
-    data['totalROIPaid'] = this.totalROIPaid;
-    data['pendingROI'] = this.pendingROI;
-    data['startDate'] = this.startDate;
-    data['endDate'] = this.endDate;
-    data['maturityDate'] = this.maturityDate;
-    data['lockInPeriodMonths'] = this.lockInPeriodMonths;
-    data['prematureExitAllowed'] = this.prematureExitAllowed;
-    data['riskLevel'] = this.riskLevel;
-    data['agreementPdfUrl'] = this.agreementPdfUrl;
-    if (this.documents != null) {
-      data['documents'] = this.documents!.map((v) => v.toJson()).toList();
+    data['selectedDuration'] = selectedDuration;
+    data['roiFrequency'] = roiFrequency;
+    data['roiAmount'] = roiAmount;
+    data['totalRoiExpected'] = totalRoiExpected;
+    data['totalROIPaid'] = totalROIPaid;
+    data['pendingROI'] = pendingROI;
+    data['startDate'] = startDate;
+    data['endDate'] = endDate;
+    data['maturityDate'] = maturityDate;
+    data['lockInPeriodMonths'] = lockInPeriodMonths;
+    data['prematureExitAllowed'] = prematureExitAllowed;
+    data['riskLevel'] = riskLevel;
+    data['agreementPdfUrl'] = agreementPdfUrl;
+    if (documents != null) {
+      data['documents'] = documents!.map((v) => v.toJson()).toList();
     }
-    if (this.statusTimeline != null) {
-      data['statusTimeline'] = this.statusTimeline!
+    if (statusTimeline != null) {
+      data['statusTimeline'] = statusTimeline!
           .map((v) => v.toJson())
           .toList();
     }
-    data['adminRemarks'] = this.adminRemarks;
+    data['adminRemarks'] = adminRemarks;
 
-    if (this.approvedBy != null) {
-      data['approvedBy'] = this.approvedBy!.toJson();
+    if (approvedBy != null) {
+      data['approvedBy'] = approvedBy!.toJson();
     }
-    data['approvedAt'] = this.approvedAt;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    if (this.allocations != null) {
-      data['allocations'] = this.allocations!.toJson();
+    data['approvedAt'] = approvedAt;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    if (allocations != null) {
+      data['allocations'] = allocations!.toJson();
     }
-    if (this.poolInfo != null) {
-      data['poolInfo'] = this.poolInfo!.toJson();
+    if (poolInfo != null) {
+      data['poolInfo'] = poolInfo!.toJson();
     }
     return data;
   }
@@ -273,12 +273,12 @@ class PlanId {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['planName'] = this.planName;
-    data['minInvestment'] = this.minInvestment;
-    data['maxInvestment'] = this.maxInvestment;
-    data['returnPercent'] = this.returnPercent;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['_id'] = sId;
+    data['planName'] = planName;
+    data['minInvestment'] = minInvestment;
+    data['maxInvestment'] = maxInvestment;
+    data['returnPercent'] = returnPercent;
     return data;
   }
 }
@@ -299,11 +299,11 @@ class Documents {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['type'] = this.type;
-    data['url'] = this.url;
-    data['name'] = this.name;
-    data['uploadedAt'] = this.uploadedAt;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['type'] = type;
+    data['url'] = url;
+    data['name'] = name;
+    data['uploadedAt'] = uploadedAt;
     return data;
   }
 }
@@ -324,11 +324,11 @@ class StatusTimeline {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['note'] = this.note;
-    data['updatedAt'] = this.updatedAt;
-    data['updatedBy'] = this.updatedBy;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['note'] = note;
+    data['updatedAt'] = updatedAt;
+    data['updatedBy'] = updatedBy;
     return data;
   }
 }
@@ -347,10 +347,10 @@ class ApprovedBy {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['mobileNumber'] = this.mobileNumber;
-    data['fullName'] = this.fullName;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['_id'] = sId;
+    data['mobileNumber'] = mobileNumber;
+    data['fullName'] = fullName;
     return data;
   }
 }
@@ -367,7 +367,7 @@ class Allocations {
     if (json['lands'] != null) {
       lands = <Lands>[];
       json['lands'].forEach((v) {
-        lands!.add(new Lands.fromJson(v));
+        lands!.add(Lands.fromJson(v));
       });
     }
     if (json['crops'] != null) {
@@ -378,13 +378,13 @@ class Allocations {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.lands != null) {
-      data['lands'] = this.lands!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (lands != null) {
+      data['lands'] = lands!.map((v) => v.toJson()).toList();
     }
 
-    data['allocatedAt'] = this.allocatedAt;
-    data['allocatedBy'] = this.allocatedBy;
+    data['allocatedAt'] = allocatedAt;
+    data['allocatedBy'] = allocatedBy;
     return data;
   }
 }
@@ -406,33 +406,33 @@ class Lands {
 
   Lands.fromJson(Map<String, dynamic> json) {
     landId = json['landId'] != null
-        ? new LandId.fromJson(json['landId'])
+        ? LandId.fromJson(json['landId'])
         : null;
     allocatedAmount = json['allocatedAmount'];
     allocationPercent = json['allocationPercent'];
     landDetails = json['landDetails'] != null
-        ? new LandDetails.fromJson(json['landDetails'])
+        ? LandDetails.fromJson(json['landDetails'])
         : null;
     if (json['crops'] != null) {
       crops = <Crops>[];
       json['crops'].forEach((v) {
-        crops!.add(new Crops.fromJson(v));
+        crops!.add(Crops.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.landId != null) {
-      data['landId'] = this.landId!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (landId != null) {
+      data['landId'] = landId!.toJson();
     }
-    data['allocatedAmount'] = this.allocatedAmount;
-    data['allocationPercent'] = this.allocationPercent;
-    if (this.landDetails != null) {
-      data['landDetails'] = this.landDetails!.toJson();
+    data['allocatedAmount'] = allocatedAmount;
+    data['allocationPercent'] = allocationPercent;
+    if (landDetails != null) {
+      data['landDetails'] = landDetails!.toJson();
     }
-    if (this.crops != null) {
-      data['crops'] = this.crops!.map((v) => v.toJson()).toList();
+    if (crops != null) {
+      data['crops'] = crops!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -477,17 +477,17 @@ class LandId {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['landTitle'] = this.landTitle;
-    data['surveyNumber'] = this.surveyNumber;
-    data['areaUnit'] = this.areaUnit;
-    data['totalSize'] = this.totalSize;
-    data['description'] = this.description;
-    data['landImages'] = this.landImages;
-    data['address'] = this.address;
-    data['city'] = this.city;
-    data['state'] = this.state;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['_id'] = sId;
+    data['landTitle'] = landTitle;
+    data['surveyNumber'] = surveyNumber;
+    data['areaUnit'] = areaUnit;
+    data['totalSize'] = totalSize;
+    data['description'] = description;
+    data['landImages'] = landImages;
+    data['address'] = address;
+    data['city'] = city;
+    data['state'] = state;
     return data;
   }
 }
@@ -510,12 +510,12 @@ class LandDetails {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['title'] = this.title;
-    data['location'] = this.location;
-    data['area'] = this.area;
-    data['unit'] = this.unit;
-    data['images'] = this.images;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['title'] = title;
+    data['location'] = location;
+    data['area'] = area;
+    data['unit'] = unit;
+    data['images'] = images;
     return data;
   }
 }
@@ -544,12 +544,12 @@ class Crops {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['type'] = this.type;
-    data['amount'] = this.amount;
-    data['percent'] = this.percent;
-    data['expectedReturn'] = this.expectedReturn;
-    data['season'] = this.season;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['type'] = type;
+    data['amount'] = amount;
+    data['percent'] = percent;
+    data['expectedReturn'] = expectedReturn;
+    data['season'] = season;
     return data;
   }
 }
@@ -577,10 +577,10 @@ class PoolInfo {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['poolName'] = this.poolName;
-    data['totalPoolSize'] = this.totalPoolSize;
-    data['remainingAmount'] = this.remainingAmount;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['poolName'] = poolName;
+    data['totalPoolSize'] = totalPoolSize;
+    data['remainingAmount'] = remainingAmount;
 
     return data;
   }

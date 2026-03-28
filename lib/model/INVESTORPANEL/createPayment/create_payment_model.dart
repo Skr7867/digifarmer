@@ -28,21 +28,21 @@ class CreatePaymentModel {
     investmentId = json['investmentId'];
     investmentNumber = json['investmentNumber'];
     planDetails = json['planDetails'] != null
-        ? new PlanDetails.fromJson(json['planDetails'])
+        ? PlanDetails.fromJson(json['planDetails'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['orderId'] = this.orderId;
-    data['amount'] = this.amount;
-    data['currency'] = this.currency;
-    data['keyId'] = this.keyId;
-    data['investmentId'] = this.investmentId;
-    data['investmentNumber'] = this.investmentNumber;
-    if (this.planDetails != null) {
-      data['planDetails'] = this.planDetails!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['orderId'] = orderId;
+    data['amount'] = amount;
+    data['currency'] = currency;
+    data['keyId'] = keyId;
+    data['investmentId'] = investmentId;
+    data['investmentNumber'] = investmentNumber;
+    if (planDetails != null) {
+      data['planDetails'] = planDetails!.toJson();
     }
     return data;
   }
@@ -62,10 +62,10 @@ class PlanDetails {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['returnPercent'] = this.returnPercent;
-    data['durationMonths'] = this.durationMonths;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['name'] = name;
+    data['returnPercent'] = returnPercent;
+    data['durationMonths'] = durationMonths;
     return data;
   }
 }

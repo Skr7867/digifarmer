@@ -1,6 +1,8 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 
+import '../../../res/customeWidgets/custom_app_bar.dart';
+
 class IdentityVerificationScreen extends StatefulWidget {
   const IdentityVerificationScreen({super.key});
 
@@ -15,22 +17,14 @@ class _IdentityVerificationScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+      appBar: CustomAppBar(
+        title: 'Identity Verification',
+        automaticallyImplyLeading: true,
+        gradient: const LinearGradient(
+          colors: [Color(0xff34A853), Color(0xff0D47A1)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        title: const Text(
-          'Identity Verification',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -74,27 +68,25 @@ class _IdentityVerificationScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
+        Container(
+          height: 4,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft, // ✅ force start from left
+            child: FractionallySizedBox(
+              widthFactor: 0.5, // 50%
               child: Container(
-                height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
+                  color: Colors.green,
                   borderRadius: BorderRadius.circular(2),
-                ),
-                child: FractionallySizedBox(
-                  widthFactor: 0.5,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
                 ),
               ),
             ),
-          ],
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -269,8 +261,7 @@ class _IdentityVerificationScreenState
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () {
-              // Handle skip for now
-              _skipVerification();
+              Navigator.pop(context);
             },
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Colors.grey.shade300),
@@ -348,33 +339,33 @@ class _IdentityVerificationScreenState
     );
   }
 
-  void _skipVerification() {
-    // Show confirmation dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Skip Verification?'),
-        content: const Text(
-          'You can complete verification later, but some features may be limited until your identity is verified.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to dashboard or next screen
-              // Navigator.pushReplacementNamed(context, RoutesName.dashboard);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            child: const Text('Skip'),
-          ),
-        ],
-      ),
-    );
-  }
+  // void _skipVerification() {
+  //   // Show confirmation dialog
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Skip Verification?'),
+  //       content: const Text(
+  //         'You can complete verification later, but some features may be limited until your identity is verified.',
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: const Text('Cancel'),
+  //         ),
+  //         ElevatedButton(
+  //           onPressed: () {
+  //             Navigator.pop(context);
+  //             // Navigate to dashboard or next screen
+  //             // Navigator.pushReplacementNamed(context, RoutesName.dashboard);
+  //           },
+  //           style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+  //           child: const Text('Skip'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void _showWhyWeNeedThis() {
     showDialog(

@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
 import '../../../blocs/LANDOWNERPANEL/landStatus/land_status_bloc.dart';
 import '../../../main.dart';
-import '../../../repository/INVESTORPANEL/userProfile/user_profile_http_repository.dart';
+import '../../../utils/enums.dart';
 import '../../INVESTORPANEL/profile/profile_screen.dart';
 import '../homeScreen/land_owner_home_screen.dart';
 import '../myLands/my_lands_screen.dart';
@@ -22,52 +22,48 @@ class LandOwnerBottomNavigationBar extends StatefulWidget {
 class _LandOwnerBottomNavigationBarState
     extends State<LandOwnerBottomNavigationBar> {
   int currentIndex = 0;
+  late final List<Widget> screens;
 
-  final List<Widget> screens = [
-    /// HOME — needs both LandStatusBloc + UserProfileBloc
-    MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) =>
-              LandStatusBloc(landStatusRepository: getIt())
-                ..add(LandStatusFetched()),
-        ),
-        BlocProvider(
-          create: (context) => UserProfileBloc(
-            userProfileRepository: UserProfileHttpRepository(),
-          ),
-        ),
-      ],
-      child: const LandOwnerHomeScreen(),
-    ),
+  @override
+  void initState() {
+    super.initState();
 
-    /// MY LANDS — unchanged
-    BlocProvider(
-      create: (context) =>
-          LandStatusBloc(landStatusRepository: getIt())
-            ..add(LandStatusFetched()),
-      child: MyLandsScreen(),
-    ),
+    final landStatusBloc = getIt<LandStatusBloc>();
+    final userProfileBloc = getIt<UserProfileBloc>();
+    if (landStatusBloc.state.landStatus.status != Status.completed) {
+      landStatusBloc.add(const LandStatusFetched());
+    }
+    if (userProfileBloc.state.userProfile.status != Status.completed) {
+      userProfileBloc.add(UserProfileFetched());
+    }
 
-    /// LAND STATUS — unchanged
-    const LandStatusScreen(),
-
-    /// PROFILE — unchanged
-    BlocProvider(
-      create: (context) =>
-          UserProfileBloc(userProfileRepository: UserProfileHttpRepository()),
-      child: const ProfileScreen(),
-    ),
-  ];
+    // ✅ Screens created ONCE — blocs injected via .value (no new instances)
+    screens = [
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<LandStatusBloc>.value(value: landStatusBloc),
+          BlocProvider<UserProfileBloc>.value(value: userProfileBloc),
+        ],
+        child: const LandOwnerHomeScreen(),
+      ),
+      BlocProvider<LandStatusBloc>.value(
+        value: landStatusBloc,
+        child: const MyLandsScreen(),
+      ),
+      const LandStatusScreen(),
+      BlocProvider<UserProfileBloc>.value(
+        value: userProfileBloc,
+        child: const ProfileScreen(),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         if (currentIndex != 0) {
-          setState(() {
-            currentIndex = 0;
-          });
+          setState(() => currentIndex = 0);
           return false;
         }
         return true;
@@ -76,11 +72,7 @@ class _LandOwnerBottomNavigationBarState
         body: IndexedStack(index: currentIndex, children: screens),
         bottomNavigationBar: LandOwnerCustomNavBar(
           currentIndex: currentIndex,
-          onTap: (index) {
-            setState(() {
-              currentIndex = index;
-            });
-          },
+          onTap: (index) => setState(() => currentIndex = index),
         ),
       ),
     );

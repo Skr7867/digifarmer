@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:digifarmer/blocs/INVESTORPANEL/investmentDetails/investment_details_bloc.dart';
 import 'package:digifarmer/main.dart';
 import 'package:digifarmer/model/INVESTORPANEL/investmentDetails/investment_details_model.dart';
+import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -242,9 +243,11 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
                             investment.allocations!.lands != null &&
                             investment.allocations!.lands!.isNotEmpty)
                           _buildLandAllocationCard(investment),
+                        SizedBox(height: 16),
                         if (investment.statusTimeline != null &&
                             investment.statusTimeline!.isNotEmpty)
                           _buildTimelineCard(investment),
+                        SizedBox(height: 16),
                         _buildInvestmentDetailsCard(investment),
                         const SizedBox(height: 16),
                         _buildActionButtons(investment),
@@ -590,9 +593,10 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
     );
   }
 
+  // _buildLandAllocationCard method to pass images
+
   Widget _buildLandAllocationCard(Investment investment) {
     final lands = investment.allocations!.lands!;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -601,7 +605,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -610,13 +614,72 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Land Allocation',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              fontFamily: AppFonts.popins,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Land Allocation',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: AppFonts.popins,
+                ),
+              ),
+              // Only show Photos button if there are lands with images
+              if (lands.any(
+                (land) =>
+                    (land.landId?.landImages != null &&
+                        land.landId!.landImages!.isNotEmpty) ||
+                    (land.landDetails?.images != null &&
+                        land.landDetails!.images!.isNotEmpty),
+              ))
+                RoundButton(
+                  fontSize: 10,
+                  height: 20,
+                  width: 60,
+                  buttonColor: AppColors.greenColor,
+                  title: 'Photos',
+                  onPress: () {
+                    // Collect all images from all lands
+                    final allImages = <String>[];
+                    String? landTitle;
+
+                    for (var land in lands) {
+                      // Get images from landId
+                      if (land.landId?.landImages != null) {
+                        allImages.addAll(land.landId!.landImages!);
+                        landTitle ??= land.landId?.landTitle;
+                      }
+                      // Get images from landDetails
+                      if (land.landDetails?.images != null) {
+                        allImages.addAll(land.landDetails!.images!);
+                        landTitle ??= land.landDetails?.title;
+                      }
+                    }
+
+                    // Navigate to LandImagesScreen with all images
+                    if (allImages.isNotEmpty) {
+                      Navigator.pushNamed(
+                        context,
+                        RoutesName.landImagesScreen,
+                        arguments: {
+                          'images': allImages,
+                          'landTitle': landTitle ?? 'Land Images',
+                          'initialIndex': 0,
+                        },
+                      );
+                    } else {
+                      // Show message if no images
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('No images available for this land'),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    }
+                  },
+                ),
+            ],
           ),
           const SizedBox(height: 16),
           ...lands.map((land) => _buildLandCard(land)),

@@ -1,11 +1,13 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
-import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../blocs/INVESTORPANEL/kycStatus/kyc_status_bloc.dart';
+import '../../../repository/INVESTORPANEL/kycStatus/kyc_status_http_repository.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../res/customeWidgets/custom_app_bar.dart';
+import '../../../utils/enums.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -21,8 +23,24 @@ class _WalletScreenState extends State<WalletScreen> {
 
   int selectedBankIndex = 0;
   int selectedQuickAmount = -1;
+  late KycStatusBloc kycStatusBloc;
 
   final List<int> quickAmounts = [5000, 10000, 25000, 50000];
+
+  @override
+  void initState() {
+    super.initState();
+    kycStatusBloc = KycStatusBloc(
+      kycStatusRepository: KycStatusHttpRepository(),
+    )..add(KycStatusFetched());
+  }
+
+  @override
+  void dispose() {
+    kycStatusBloc.close();
+    _amountController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,112 +55,93 @@ class _WalletScreenState extends State<WalletScreen> {
           end: Alignment.bottomRight,
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// Balance Card
-            _balanceCard(),
+      body: BlocProvider(
+        create: (_) => kycStatusBloc,
+        child: BlocBuilder<KycStatusBloc, KycStatusState>(
+          builder: (BuildContext context, state) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Balance Card
+                  _balanceCard(),
 
-            const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-            /// Withdrawal Amount
-            const Text(
-              "Withdrawal Amount",
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                prefixText: "₹ ",
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
-                  "Min: ₹500",
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                Text(
-                  "Withdraw Max",
-                  style: TextStyle(
-                    color: Color(0xff1E8E5A),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                  /// Withdrawal Amount
+                  const Text(
+                    "Withdrawal Amount",
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(height: 8),
 
-            const SizedBox(height: 20),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setState(() {});
+                    },
+                    decoration: InputDecoration(
+                      prefixText: "₹ ",
+                      filled: true,
+                      fillColor: Colors.grey.shade200,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
 
-            /// Quick Select
-            const Text(
-              "Quick Select",
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 10),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text(
+                        "Min: ₹500",
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      Text(
+                        "Withdraw Max",
+                        style: TextStyle(
+                          color: Color(0xff1E8E5A),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
 
-            Wrap(
-              spacing: 10,
-              children: List.generate(
-                quickAmounts.length,
-                (index) => _quickAmountButton(index),
+                  const SizedBox(height: 20),
+
+                  /// Quick Select
+                  const Text(
+                    "Quick Select",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 10),
+
+                  Wrap(
+                    spacing: 10,
+                    children: List.generate(
+                      quickAmounts.length,
+                      (index) => _quickAmountButton(index),
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  const SizedBox(height: 20),
+
+                  /// Info Box
+                  _infoBox(),
+
+                  const SizedBox(height: 20),
+                  _bottomSection(state),
+                ],
               ),
-            ),
-
-            const SizedBox(height: 25),
-
-            /// Bank Selection
-            const Text(
-              "Select Bank Account",
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 12),
-
-            _bankTile(
-              index: 0,
-              bankName: "HDFC Bank",
-              account: "**** 4567",
-              subtitle: "Primary Account",
-            ),
-
-            const SizedBox(height: 12),
-
-            _bankTile(index: 1, bankName: "ICICI Bank", account: "**** 8901"),
-
-            const SizedBox(height: 12),
-
-            _addNewBank(() {
-              FlushBarHelper.flushBarSuccessMessage(
-                "This will Be work after integrating payment gateway",
-                context,
-              );
-            }),
-
-            const SizedBox(height: 20),
-
-            /// Info Box
-            _infoBox(),
-
-            const SizedBox(height: 20),
-
-            /// Bottom Section
-            _bottomSection(),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -153,7 +152,7 @@ class _WalletScreenState extends State<WalletScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xff1C5D9F), Color(0xff2FA463)],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -162,9 +161,9 @@ class _WalletScreenState extends State<WalletScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: .spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 "Available Balance",
                 style: TextStyle(
                   color: Colors.white70,
@@ -178,13 +177,15 @@ class _WalletScreenState extends State<WalletScreen> {
                 buttonColor: AppColors.whiteColor.withValues(alpha: 0.2),
                 title: 'Status',
                 onPress: () {
+                  // Refresh KYC status when clicking status button
+                  // kycStatusBloc.add(KycStatusFetched());
                   Navigator.pushNamed(context, RoutesName.withdrawScreen);
                 },
               ),
             ],
           ),
-          SizedBox(height: 6),
-          Text(
+          const SizedBox(height: 6),
+          const Text(
             "₹1,24,500",
             style: TextStyle(
               color: Colors.white,
@@ -193,8 +194,8 @@ class _WalletScreenState extends State<WalletScreen> {
               fontFamily: AppFonts.popins,
             ),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          const Text(
             "Locked Amount: ₹75,000\nWithdrawable: ₹49,500",
             style: TextStyle(
               color: Colors.white70,
@@ -235,95 +236,9 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _bankTile({
-    required int index,
-    required String bankName,
-    required String account,
-    String? subtitle,
-  }) {
-    final isSelected = selectedBankIndex == index;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedBankIndex = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.green.shade50 : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isSelected ? const Color(0xff1E8E5A) : Colors.grey.shade300,
-          ),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.account_balance, color: Colors.blueGrey),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    bankName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontFamily: AppFonts.popins,
-                    ),
-                  ),
-                  Text(
-                    account,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontFamily: AppFonts.popins,
-                    ),
-                  ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        color: Color(0xff1E8E5A),
-                        fontSize: 12,
-                        fontFamily: AppFonts.popins,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Icon(
-              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isSelected ? const Color(0xff1E8E5A) : Colors.grey,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _addNewBank(VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey.shade300),
-          color: Colors.white,
-        ),
-        child: const Center(
-          child: Text(
-            "+ Add New Bank Account",
-            style: TextStyle(color: Colors.grey, fontFamily: AppFonts.popins),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _infoBox() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
@@ -352,14 +267,146 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _bottomSection() {
+  Widget _bottomSection(KycStatusState state) {
+    final amount = int.tryParse(_amountController.text) ?? 0;
+    final receiveAmount = amount;
+    bool isKycCompleted = false;
+    String buttonText = "Proceed to Withdraw";
+    VoidCallback? onPressed;
+
+    if (state.kycStatus.status == Status.completed &&
+        state.kycStatus.data != null) {
+      final kycStatus = state.kycStatus.data!.data?.kycStatus ?? 'NOT_STARTED';
+
+      isKycCompleted = (kycStatus == 'COMPLETED' || kycStatus == 'VERIFIED');
+
+      if (isKycCompleted) {
+        // ✅ KYC completed
+        buttonText = "Proceed to Withdraw";
+
+        onPressed = () {
+          if (amount >= 500) {
+            Navigator.pushNamed(context, RoutesName.identityVerificationScreen);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Minimum withdrawal amount is ₹500'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        };
+      } else {
+        if (kycStatus == "DOCUMENTS_PENDING") {
+          buttonText = "Upload Your Documents";
+        } else if (kycStatus == "UNDER_REVIEW") {
+          buttonText = "Check Your KYC Verification Status";
+        } else {
+          buttonText = "Complete Your KYC";
+        }
+
+        onPressed = () {
+          if (kycStatus == "DOCUMENTS_PENDING") {
+            Navigator.pushNamed(context, RoutesName.uploadDocumentScreen);
+          } else if (kycStatus == "UNDER_REVIEW") {
+            Navigator.pushNamed(
+              context,
+              RoutesName.kycVerificationStatusScreen,
+            );
+          } else {
+            Navigator.pushNamed(context, RoutesName.identityVerificationScreen);
+          }
+        };
+      }
+    } else if (state.kycStatus.status == Status.loading) {
+      buttonText = "Verifying KYC...";
+      onPressed = null;
+    } else if (state.kycStatus.status == Status.error) {
+      buttonText = "Retry KYC Verification";
+      onPressed = () {
+        kycStatusBloc.add(KycStatusFetched());
+      };
+    } else {
+      buttonText = "Complete Your KYC";
+      onPressed = () {
+        Navigator.pushNamed(context, RoutesName.identityVerificationScreen);
+      };
+    }
+
     return Column(
       children: [
-        const Row(
+        SizedBox(height: 50),
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text("You will receive"), Text("₹0")],
+          children: [
+            const Text(
+              "You will receive",
+              style: TextStyle(fontWeight: .bold, fontSize: 16),
+            ),
+            Text(
+              "₹$receiveAmount",
+              style: TextStyle(fontWeight: .bold, fontSize: 16),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
+
+        // Show warning message for insufficient amount
+        if (amount < 500 && amount > 0)
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 16,
+                  color: Colors.orange.shade700,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Minimum withdrawal amount is ₹500',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        // Show KYC warning message if not completed
+        if (!isKycCompleted && state.kycStatus.status == Status.completed)
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 16,
+                  color: Colors.orange.shade700,
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'KYC verification required to withdraw funds',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         SizedBox(
           width: double.infinity,
           height: 50,
@@ -370,14 +417,9 @@ class _WalletScreenState extends State<WalletScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                RoutesName.identityVerificationScreen,
-              );
-            },
+            onPressed: onPressed,
             child: Text(
-              "Proceed to Withdraw",
+              buttonText,
               style: TextStyle(
                 fontFamily: AppFonts.popins,
                 color: AppColors.whiteColor,

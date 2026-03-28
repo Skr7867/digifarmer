@@ -6,6 +6,7 @@ import 'package:digifarmer/view/INVESTORPANEL/contractSign/contract_sign_screen.
 import 'package:digifarmer/view/INVESTORPANEL/identityVerification/identity_verification_screen.dart';
 import 'package:digifarmer/view/INVESTORPANEL/investmentDetails/investment_details_screen.dart';
 import 'package:digifarmer/view/INVESTORPANEL/kycVerificationStatus/kyc_verification_status_screen.dart';
+import 'package:digifarmer/view/INVESTORPANEL/landImages/land_images_screen.dart';
 import 'package:digifarmer/view/INVESTORPANEL/profile/profile_screen.dart';
 import 'package:digifarmer/view/INVESTORPANEL/uploadDocuments/upload_documents_screen.dart';
 import 'package:digifarmer/view/LANDOWNERPANEL/uploadLandImage/upload_land_image_screen.dart';
@@ -90,6 +91,15 @@ class Routes {
         return MaterialPageRoute(builder: (context) => HomeScreen());
       case RoutesName.bottomNavBar:
         return MaterialPageRoute(builder: (context) => BottomnavBar());
+       case RoutesName.landImagesScreen:
+      final args = settings.arguments as Map<String, dynamic>?;
+      return MaterialPageRoute(
+        builder: (context) => LandImagesScreen(
+          images: args?['images'] as List<String>?,
+          landTitle: args?['landTitle'] as String?,
+          initialIndex: args?['initialIndex'] as int? ?? 0,
+        ),
+      );
       case RoutesName.newInvestmentScreen:
         return MaterialPageRoute(builder: (context) => NewInvestmentScreen());
       case RoutesName.portFolioScreen:

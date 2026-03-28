@@ -12,9 +12,17 @@ class ApiUrls {
   static String activeInvestmentApi = '$baseUrl/api/v1/investor/investments';
   static String createPayment(String planId) =>
       '$baseUrl/api/v1/investor/payments/create-order/$planId';
-  static String updateProfileApi = '$baseUrl/api/v1/auth/profile'   ; 
-  static String verifyPayment= '$baseUrl/api/v1/investor/payments/verify';
-  static String investmentDetailsApi(String planId) => '$baseUrl/api/v1/investor/investments/$planId';
+  static String updateProfileApi = '$baseUrl/api/v1/auth/profile';
+  static String verifyPayment = '$baseUrl/api/v1/investor/payments/verify';
+  static String investmentDetailsApi(String planId) =>
+      '$baseUrl/api/v1/investor/investments/$planId';
+  static String kycStatusApi = '$baseUrl/api/v1/kyc/status';
+  static String submitBankDetailsApi = '$baseUrl/api/v1/kyc/bank-details';
+
+  static String uploadPanUrl = '$baseUrl/api/v1/kyc/upload/pan';
+  static String uploadAadhaarUrl = '$baseUrl/api/v1/kyc/upload/aadhaar';
+  static String uploadSelfieUrl = '$baseUrl/api/v1/kyc/upload/selfie';
+  static String submitKycDocumentsApi = '$baseUrl/api/v1/kyc/submit';
 
   //*********************************Land owner panel api */
   static String landOwnerSaveBasicInfoApi =

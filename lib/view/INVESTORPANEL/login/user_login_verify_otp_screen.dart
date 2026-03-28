@@ -1035,7 +1035,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
             const SizedBox(height: 10),
             GestureDetector(
               onTap: isEnabled
-                  ? () => _bloc.add(ResendOtpEvent(widget.mobileNumber))
+                  ? () => Navigator.pushNamed(context, RoutesName.userLoginScreen)
                   : null,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),

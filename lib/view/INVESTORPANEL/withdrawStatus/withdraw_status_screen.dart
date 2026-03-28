@@ -101,7 +101,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                 showReceiptButton: item.showReceiptButton,
               ),
             );
-          }).toList(),
+          }),
 
           if (_selectedTab == 'Approved' ||
               (_selectedTab == 'Pending' && _filteredWithdrawals.isNotEmpty))

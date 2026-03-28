@@ -128,6 +128,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
           /// CONTACT (Static - keep as is)
           // _contactCard(),
           const SizedBox(height: 10),
+
           /// ACTION BUTTONS
           _bottomButtons(context, task?.status, task),
         ],
@@ -489,72 +490,72 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
   }
 
   /// PROGRESS with API data
-// Widget _progressCard(TaskSummary? summary) {
-//     double progressValue = summary?.completionPercentage != null
-//         ? summary!.completionPercentage! / 100
-//         : 0.25;
+  // Widget _progressCard(TaskSummary? summary) {
+  //     double progressValue = summary?.completionPercentage != null
+  //         ? summary!.completionPercentage! / 100
+  //         : 0.25;
 
-//     int completed = summary?.completedItems ?? 0;
-//     int total = summary?.totalItems ?? 0;
-//     int hoursWorked = summary?.totalHoursWorked ?? 0;
+  //     int completed = summary?.completedItems ?? 0;
+  //     int total = summary?.totalItems ?? 0;
+  //     int hoursWorked = summary?.totalHoursWorked ?? 0;
 
-//     return Container(
-//       padding: const EdgeInsets.all(16),
-//       decoration: _cardDecoration(),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               const Text(
-//                 "Progress",
-//                 style: TextStyle(
-//                   fontWeight: FontWeight.bold,
-//                   fontFamily: AppFonts.popins,
-//                 ),
-//               ),
-//               Text(
-//                 "${summary?.completionPercentage ?? 25}%",
-//                 style: const TextStyle(
-//                   color: Colors.green,
-//                   fontFamily: AppFonts.popins,
-//                 ),
-//               ),
-//             ],
-//           ),
+  //     return Container(
+  //       padding: const EdgeInsets.all(16),
+  //       decoration: _cardDecoration(),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: [
+  //               const Text(
+  //                 "Progress",
+  //                 style: TextStyle(
+  //                   fontWeight: FontWeight.bold,
+  //                   fontFamily: AppFonts.popins,
+  //                 ),
+  //               ),
+  //               Text(
+  //                 "${summary?.completionPercentage ?? 25}%",
+  //                 style: const TextStyle(
+  //                   color: Colors.green,
+  //                   fontFamily: AppFonts.popins,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
 
-//           const SizedBox(height: 8),
+  //           const SizedBox(height: 8),
 
-//           LinearProgressIndicator(
-//             value: progressValue,
-//             backgroundColor: const Color(0xffE5E7EB),
-//             color: Colors.green,
-//           ),
+  //           LinearProgressIndicator(
+  //             value: progressValue,
+  //             backgroundColor: const Color(0xffE5E7EB),
+  //             color: Colors.green,
+  //           ),
 
-//           const SizedBox(height: 16),
+  //           const SizedBox(height: 16),
 
-//           if (summary != null) ...[
-//             _progressItem(
-//               "Completed Items",
-//               "$completed/$total",
-//               completed == total ? Colors.green : Colors.orange,
-//             ),
-//             _progressItem(
-//               "Hours Worked",
-//               "$hoursWorked hrs",
-//               hoursWorked > 0 ? Colors.green : Colors.grey,
-//             ),
-//           ] else ...[
-//             _progressItem("Initial inspection", "Completed", Colors.green),
-//             _progressItem("Pressure testing", "In Progress", Colors.orange),
-//             _progressItem("Sprinkler adjustment", "Pending", Colors.grey),
-//             _progressItem("Documentation", "Pending", Colors.grey),
-//           ],
-//         ],
-//       ),
-//     );
-//   }
+  //           if (summary != null) ...[
+  //             _progressItem(
+  //               "Completed Items",
+  //               "$completed/$total",
+  //               completed == total ? Colors.green : Colors.orange,
+  //             ),
+  //             _progressItem(
+  //               "Hours Worked",
+  //               "$hoursWorked hrs",
+  //               hoursWorked > 0 ? Colors.green : Colors.grey,
+  //             ),
+  //           ] else ...[
+  //             _progressItem("Initial inspection", "Completed", Colors.green),
+  //             _progressItem("Pressure testing", "In Progress", Colors.orange),
+  //             _progressItem("Sprinkler adjustment", "Pending", Colors.grey),
+  //             _progressItem("Documentation", "Pending", Colors.grey),
+  //           ],
+  //         ],
+  //       ),
+  //     );
+  //   }
 
   /// CONTACT (Static - unchanged but with font family)
   // static Widget _contactCard() {
@@ -612,7 +613,7 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
 
   Widget _bottomButtons(BuildContext context, String? status, Task? task) {
     bool isCompleted = status?.toUpperCase() == 'COMPLETED';
-    bool isInProgress = status?.toUpperCase() == 'IN_PROGRESS';
+    // bool isInProgress = status?.toUpperCase() == 'IN_PROGRESS';
 
     // Get the task ID from the task object
     String taskId = task?.id ?? ''; // or task?.taskId based on your model
@@ -624,8 +625,8 @@ class _WorkerTaskDetailsScreenState extends State<WorkerTaskDetailsScreen> {
         if (!isCompleted)
           RoundButton(
             height: 40,
-            buttonColor: AppColors.redColor,
-            title: isInProgress ? 'Update Task' : 'Start Task',
+            buttonColor: AppColors.buttonColor,
+            title: 'Update Task',
             onPress: () {
               if (taskId.isNotEmpty) {
                 Navigator.pushNamed(

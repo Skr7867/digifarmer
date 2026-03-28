@@ -9,16 +9,16 @@ class WorkerCheckInModel {
     success = json['success'];
     message = json['message'];
     attendance = json['attendance'] != null
-        ? new Attendance.fromJson(json['attendance'])
+        ? Attendance.fromJson(json['attendance'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    if (this.attendance != null) {
-      data['attendance'] = this.attendance!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['message'] = message;
+    if (attendance != null) {
+      data['attendance'] = attendance!.toJson();
     }
     return data;
   }
@@ -40,11 +40,11 @@ class Attendance {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['checkIn'] = this.checkIn;
-    data['date'] = this.date;
-    data['status'] = this.status;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['checkIn'] = checkIn;
+    data['date'] = date;
+    data['status'] = status;
     return data;
   }
 }

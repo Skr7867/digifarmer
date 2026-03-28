@@ -214,7 +214,7 @@ class _AttendanceHistoryState extends State<AttendanceHistory>
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: records.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) =>
                       _buildAttendanceCard(records[index], index, isTablet),
                 ),
@@ -789,7 +789,7 @@ class _AttendanceHistoryState extends State<AttendanceHistory>
       tween: Tween(begin: 0.4, end: 1.0),
       duration: const Duration(milliseconds: 900),
       curve: Curves.easeInOut,
-      builder: (_, val, __) => Opacity(
+      builder: (_, val, _) => Opacity(
         opacity: val,
         child: Container(
           height: height,

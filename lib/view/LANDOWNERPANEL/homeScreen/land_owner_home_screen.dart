@@ -17,12 +17,32 @@ class LandOwnerHomeScreen extends StatefulWidget {
 }
 
 class _LandOwnerHomeScreenState extends State<LandOwnerHomeScreen> {
+  late LandStatusBloc landStatusBloc;
+  late UserProfileBloc userProfileBloc;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserProfileBloc>().add(UserProfileFetched());
+      landStatusBloc = context.read<LandStatusBloc>();
+      userProfileBloc = context.read<UserProfileBloc>();
+      if (userProfileBloc.state.userProfile.status != Status.completed) {
+        userProfileBloc.add(UserProfileFetched());
+      }
     });
+  }
+
+  Future<void> _onRefresh() async {
+    landStatusBloc.add(const LandStatusFetched());
+    userProfileBloc.add(UserProfileFetched());
+
+    await Future.wait([
+      landStatusBloc.stream.firstWhere(
+        (s) => s.landStatus.status != Status.loading,
+      ),
+      userProfileBloc.stream.firstWhere(
+        (s) => s.userProfile.status != Status.loading,
+      ),
+    ]);
   }
 
   String _getInitials(String name) {
@@ -109,70 +129,75 @@ class _LandOwnerHomeScreenState extends State<LandOwnerHomeScreen> {
     int pendingCount,
     int liveCount,
   ) {
-    return CustomScrollView(
-      slivers: [
-        /// ===== HEADER =====
-        SliverToBoxAdapter(
-          child: BlocBuilder<UserProfileBloc, UserProfileState>(
-            builder: (context, profileState) {
-              final userName =
-                  profileState.userProfile.data?.user?.fullName ?? '';
-              final userInitials = _getInitials(userName);
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: const Color(0xff34A853),
+      child: CustomScrollView(
+        slivers: [
+          /// ===== HEADER =====
+          SliverToBoxAdapter(
+            child: BlocBuilder<UserProfileBloc, UserProfileState>(
+              builder: (context, profileState) {
+                final userName =
+                    profileState.userProfile.data?.user?.fullName ?? '';
+                final userInitials = _getInitials(userName);
 
-              return _Header(
-                totalCount: totalCount,
-                activeCount: activeCount,
-                pendingCount: pendingCount,
-                liveCount: liveCount,
-                userName: userName,
-                userInitials: userInitials,
-                profileImage: profileState.userProfile.data?.user?.profileImage,
-              );
-            },
-          ),
-        ),
-
-        /// ===== ACTIVITY SUMMARY STRIP =====
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-            child: _ActivityStrip(lands: lands),
-          ),
-        ),
-
-        /// ===== QUICK ACTIONS =====
-        const SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 22, 16, 10),
-            child: _SectionTitle(title: "Quick Actions"),
-          ),
-        ),
-
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _QuickActions(context: context),
-          ),
-        ),
-
-        /// ===== MY LANDS =====
-        const SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(16, 24, 16, 10),
-            child: _SectionTitle(title: "My Lands"),
-          ),
-        ),
-
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 30),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => _LandCard(land: lands[index]),
-              childCount: lands.length.clamp(0, 4),
+                return _Header(
+                  totalCount: totalCount,
+                  activeCount: activeCount,
+                  pendingCount: pendingCount,
+                  liveCount: liveCount,
+                  userName: userName,
+                  userInitials: userInitials,
+                  profileImage:
+                      profileState.userProfile.data?.user?.profileImage,
+                );
+              },
             ),
           ),
-        ),
-      ],
+
+          /// ===== ACTIVITY SUMMARY STRIP =====
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              child: _ActivityStrip(lands: lands),
+            ),
+          ),
+
+          /// ===== QUICK ACTIONS =====
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 22, 16, 10),
+              child: _SectionTitle(title: "Quick Actions"),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _QuickActions(context: context),
+            ),
+          ),
+
+          /// ===== MY LANDS =====
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 24, 16, 10),
+              child: _SectionTitle(title: "My Lands"),
+            ),
+          ),
+
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 30),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _LandCard(land: lands[index]),
+                childCount: lands.length.clamp(0, 4),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -755,7 +780,7 @@ class _LandCard extends StatelessWidget {
                   height: 145,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 145,
                     color: Colors.grey.shade200,
                     child: const Icon(

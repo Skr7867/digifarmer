@@ -3,6 +3,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -101,7 +102,10 @@ class _WorkerCompleteTaskScreenState extends State<WorkerCompleteTaskScreen> {
                   : 'Task completed successfully!',
               context,
             );
-            Navigator.pop(context);
+            Future.delayed(const Duration(seconds: 2), () {
+              // if (mounted) Navigator.pop(context);
+              Navigator.pushNamed(context, RoutesName.workerBottomNavBar);
+            });
           } else if (state.postApiStatus == PostApiStatus.error) {
             FlushBarHelper.flushBarErrorMessage(
               state.message.isNotEmpty

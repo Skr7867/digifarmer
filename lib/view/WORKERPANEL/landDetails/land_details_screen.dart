@@ -807,7 +807,7 @@ class _LandDetailsScreenState extends State<LandDetailsScreen>
       tween: Tween(begin: 0.3, end: 0.8),
       duration: const Duration(milliseconds: 900),
       curve: Curves.easeInOut,
-      builder: (_, val, __) => Opacity(
+      builder: (_, val, _) => Opacity(
         opacity: val,
         child: Container(
           height: height,

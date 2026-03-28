@@ -652,7 +652,7 @@ class _WorkerTaskUpdateScreenState extends State<WorkerTaskUpdateScreen> {
 
               // Issue Type
               DropdownButtonFormField<String>(
-                value: issue['type']?.isNotEmpty == true ? issue['type'] : null,
+                initialValue: issue['type']?.isNotEmpty == true ? issue['type'] : null,
                 hint: const Text(
                   'Select Issue Type *',
                   style: TextStyle(fontFamily: AppFonts.popins, fontSize: 12),
@@ -722,7 +722,7 @@ class _WorkerTaskUpdateScreenState extends State<WorkerTaskUpdateScreen> {
 
               // Severity
               DropdownButtonFormField<String>(
-                value: issue['severity'],
+                initialValue: issue['severity'],
                 items: _severityOptions.map((severity) {
                   return DropdownMenuItem(
                     value: severity,
@@ -915,7 +915,7 @@ class _WorkerTaskUpdateScreenState extends State<WorkerTaskUpdateScreen> {
                   Expanded(
                     flex: 1,
                     child: DropdownButtonFormField<String>(
-                      value: resource['unit'],
+                      initialValue: resource['unit'],
                       items: _unitOptions.map((unit) {
                         return DropdownMenuItem(value: unit, child: Text(unit));
                       }).toList(),

@@ -8,15 +8,15 @@ class UpdateProfileModel {
   UpdateProfileModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
-    user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    user = json['user'] != null ? User.fromJson(json['user']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    if (this.user != null) {
-      data['user'] = this.user!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['message'] = message;
+    if (user != null) {
+      data['user'] = user!.toJson();
     }
     return data;
   }
@@ -66,7 +66,7 @@ class User {
     panNumber = json['panNumber'];
     aadhaarNumber = json['aadhaarNumber'];
     address =
-        json['address'] != null ? new Address.fromJson(json['address']) : null;
+        json['address'] != null ? Address.fromJson(json['address']) : null;
     profileImage = json['profileImage'];
     status = json['status'];
     isApproved = json['isApproved'];
@@ -76,24 +76,24 @@ class User {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['mobileNumber'] = this.mobileNumber;
-    data['email'] = this.email;
-    data['role'] = this.role;
-    data['fullName'] = this.fullName;
-    data['dateOfBirth'] = this.dateOfBirth;
-    data['panNumber'] = this.panNumber;
-    data['aadhaarNumber'] = this.aadhaarNumber;
-    if (this.address != null) {
-      data['address'] = this.address!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['mobileNumber'] = mobileNumber;
+    data['email'] = email;
+    data['role'] = role;
+    data['fullName'] = fullName;
+    data['dateOfBirth'] = dateOfBirth;
+    data['panNumber'] = panNumber;
+    data['aadhaarNumber'] = aadhaarNumber;
+    if (address != null) {
+      data['address'] = address!.toJson();
     }
-    data['profileImage'] = this.profileImage;
-    data['status'] = this.status;
-    data['isApproved'] = this.isApproved;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['requiresAdminApproval'] = this.requiresAdminApproval;
+    data['profileImage'] = profileImage;
+    data['status'] = status;
+    data['isApproved'] = isApproved;
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    data['requiresAdminApproval'] = requiresAdminApproval;
     return data;
   }
 }
@@ -127,14 +127,14 @@ class Address {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['houseNumber'] = this.houseNumber;
-    data['street'] = this.street;
-    data['area'] = this.area;
-    data['city'] = this.city;
-    data['state'] = this.state;
-    data['pinCode'] = this.pinCode;
-    data['_id'] = this.sId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['houseNumber'] = houseNumber;
+    data['street'] = street;
+    data['area'] = area;
+    data['city'] = city;
+    data['state'] = state;
+    data['pinCode'] = pinCode;
+    data['_id'] = sId;
     return data;
   }
 }

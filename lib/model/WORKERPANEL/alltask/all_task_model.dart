@@ -23,27 +23,27 @@ class AllTaskModel {
     page = json['page'];
     limit = json['limit'];
     totalPages = json['totalPages'];
-    stats = json['stats'] != null ? new Stats.fromJson(json['stats']) : null;
+    stats = json['stats'] != null ? Stats.fromJson(json['stats']) : null;
     if (json['tasks'] != null) {
       tasks = <Tasks>[];
       json['tasks'].forEach((v) {
-        tasks!.add(new Tasks.fromJson(v));
+        tasks!.add(Tasks.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['total'] = this.total;
-    data['page'] = this.page;
-    data['limit'] = this.limit;
-    data['totalPages'] = this.totalPages;
-    if (this.stats != null) {
-      data['stats'] = this.stats!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['total'] = total;
+    data['page'] = page;
+    data['limit'] = limit;
+    data['totalPages'] = totalPages;
+    if (stats != null) {
+      data['stats'] = stats!.toJson();
     }
-    if (this.tasks != null) {
-      data['tasks'] = this.tasks!.map((v) => v.toJson()).toList();
+    if (tasks != null) {
+      data['tasks'] = tasks!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -67,12 +67,12 @@ class Stats {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.nId;
-    data['total'] = this.total;
-    data['completed'] = this.completed;
-    data['pending'] = this.pending;
-    data['inProgress'] = this.inProgress;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['_id'] = nId;
+    data['total'] = total;
+    data['completed'] = completed;
+    data['pending'] = pending;
+    data['inProgress'] = inProgress;
     return data;
   }
 }
@@ -108,7 +108,7 @@ class Tasks {
     taskTitle = json['taskTitle'];
     taskDescription = json['taskDescription'];
     taskType = json['taskType'];
-    land = json['land'] != null ? new Land.fromJson(json['land']) : null;
+    land = json['land'] != null ? Land.fromJson(json['land']) : null;
     status = json['status'];
     priority = json['priority'];
     startDate = json['startDate'];
@@ -116,19 +116,19 @@ class Tasks {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['taskId'] = this.taskId;
-    data['taskTitle'] = this.taskTitle;
-    data['taskDescription'] = this.taskDescription;
-    data['taskType'] = this.taskType;
-    if (this.land != null) {
-      data['land'] = this.land!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['taskId'] = taskId;
+    data['taskTitle'] = taskTitle;
+    data['taskDescription'] = taskDescription;
+    data['taskType'] = taskType;
+    if (land != null) {
+      data['land'] = land!.toJson();
     }
-    data['status'] = this.status;
-    data['priority'] = this.priority;
-    data['startDate'] = this.startDate;
-    data['dueDate'] = this.dueDate;
+    data['status'] = status;
+    data['priority'] = priority;
+    data['startDate'] = startDate;
+    data['dueDate'] = dueDate;
     return data;
   }
 }
@@ -151,12 +151,12 @@ class Land {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['landTitle'] = this.landTitle;
-    data['address'] = this.address;
-    data['city'] = this.city;
-    data['state'] = this.state;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['_id'] = sId;
+    data['landTitle'] = landTitle;
+    data['address'] = address;
+    data['city'] = city;
+    data['state'] = state;
     return data;
   }
 }

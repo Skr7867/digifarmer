@@ -24,6 +24,7 @@ class RoutesName {
   static const String uploadDocumentScreen = 'upload_documents_screen';
   static const String kycVerificationStatusScreen =
       'kyc_verification_status_screen';
+  static const String landImagesScreen = 'land_images_screen';
 
   //*************************************************LAND OWNER SCREENS STARTED FROM HERE   ********************************/
 

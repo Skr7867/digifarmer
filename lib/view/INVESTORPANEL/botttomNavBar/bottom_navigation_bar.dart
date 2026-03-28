@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../home/home_screen.dart';
 import '../portfolio/portfolio_screen.dart';
 import '../profile/profile_screen.dart';
@@ -14,22 +15,26 @@ class BottomnavBar extends StatefulWidget {
 
 class _BottomnavBarState extends State<BottomnavBar> {
   int currentIndex = 0;
+  late final List<Widget> screens; // ✅ late final — created once
 
-  final List<Widget> screens = [
-    HomeScreen(),
-    PortfolioScreen(),
-    WalletScreen(),
-    ProfileScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    screens = [
+      const HomeScreen(),
+      const PortfolioScreen(),
+      const WalletScreen(),
+      const ProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
         if (currentIndex != 0) {
-          setState(() {
-            currentIndex = 0;
-          });
+          setState(() => currentIndex = 0);
           return false;
         }
         return true;
@@ -38,11 +43,7 @@ class _BottomnavBarState extends State<BottomnavBar> {
         body: IndexedStack(index: currentIndex, children: screens),
         bottomNavigationBar: CustomBottomNavBar(
           currentIndex: currentIndex,
-          onTap: (index) {
-            setState(() {
-              currentIndex = index;
-            });
-          },
+          onTap: (index) => setState(() => currentIndex = index),
         ),
       ),
     );

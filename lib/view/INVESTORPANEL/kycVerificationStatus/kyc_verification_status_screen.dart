@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:digifarmer/blocs/INVESTORPANEL/kycStatus/kyc_status_bloc.dart';
+import 'package:digifarmer/config/routes/routes_name.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/kycStatus/kyc_status_http_repository.dart';
+import 'package:digifarmer/utils/enums.dart';
+import 'package:digifarmer/utils/flush_bar_helper.dart';
 
-import '../../../config/routes/routes_name.dart';
+import '../../../model/INVESTORPANEL/kycStatus/kyc_status_model.dart';
+import '../../../res/customeWidgets/custom_app_bar.dart';
 
 class KYCVerificationStatusScreen extends StatefulWidget {
   const KYCVerificationStatusScreen({super.key});
@@ -13,71 +20,186 @@ class KYCVerificationStatusScreen extends StatefulWidget {
 
 class _KYCVerificationStatusScreenState
     extends State<KYCVerificationStatusScreen> {
-  final DateTime _submittedDate = DateTime(2024, 12, 29, 14, 30);
+  late KycStatusBloc kycStatusBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    kycStatusBloc = KycStatusBloc(
+      kycStatusRepository: KycStatusHttpRepository(),
+    )..add(KycStatusFetched());
+  }
+
+  @override
+  void dispose() {
+    kycStatusBloc.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'KYC Verification',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: false,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Status Card
-              _buildStatusCard(),
-              const SizedBox(height: 24),
+      appBar: CustomAppBar(
+            title: 'Verification Status ',
+            automaticallyImplyLeading: true,
+            gradient: const LinearGradient(
+              colors: [Color(0xff34A853), Color(0xff0D47A1)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),),
+      body: BlocProvider(
+        create: (_) => kycStatusBloc,
+        child: BlocListener<KycStatusBloc, KycStatusState>(
+          listener: (context, state) {
+            if (state.kycStatus.status == Status.error) {
+              FlushBarHelper.flushBarErrorMessage(
+                state.kycStatus.message ?? 'Error fetching KYC status',
+                context,
+              );
+            }
+          },
+          child: BlocBuilder<KycStatusBloc, KycStatusState>(
+            builder: (context, state) {
+              switch (state.kycStatus.status) {
+                case Status.loading:
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                case Status.error:
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          state.kycStatus.message ?? 'Failed to load KYC status',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<KycStatusBloc>().add(KycStatusFetched());
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                case Status.completed:
+                  if (state.kycStatus.data == null) {
+                    return const Center(
+                      child: Text('No KYC data found'),
+                    );
+                  }
+                  final kycStatusModel = state.kycStatus.data!;
+                  final data = kycStatusModel.data;
+                  
+                  if (data == null) {
+                    return const Center(
+                      child: Text('No KYC data found'),
+                    );
+                  }
+                  
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Status Card
+                          _buildStatusCard(data),
+                          const SizedBox(height: 24),
 
-              // Verification Steps
-              _buildVerificationSteps(),
-              const SizedBox(height: 24),
+                          // Verification Steps
+                          if (data.verificationSteps != null && data.verificationSteps!.isNotEmpty)
+                            _buildVerificationSteps(data.verificationSteps!),
+                          const SizedBox(height: 24),
 
-              // Submitted Documents
-              _buildSubmittedDocuments(),
-              const SizedBox(height: 24),
+                          // Submitted Documents
+                          _buildSubmittedDocuments(data),
+                          const SizedBox(height: 24),
 
-              // Need Help Section
-              _buildNeedHelpSection(),
-              const SizedBox(height: 32),
+                          // Need Help Section
+                          _buildNeedHelpSection(),
+                          const SizedBox(height: 32),
 
-              // Back to Home Button
-              _buildBackToHomeButton(),
-              const SizedBox(height: 20),
-            ],
+                          // Back to Home Button
+                          _buildBackToHomeButton(),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  );
+                default:
+                  return const SizedBox();
+              }
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildStatusCard() {
+  Widget _buildStatusCard(Data data) {
+    final kycStatus = data.kycStatus ?? 'NOT_STARTED';
+    final submittedAt = data.submittedAt != null
+        ? DateTime.parse(data.submittedAt!)
+        : DateTime.now();
+
+    // Determine status color and icon
+    Color statusColor;
+    IconData statusIcon;
+    String statusText;
+    String statusSubtext;
+
+    switch (kycStatus) {
+      case 'UNDER_REVIEW':
+        statusColor = Colors.orange;
+        statusIcon = Icons.pending_actions;
+        statusText = 'Under Review';
+        statusSubtext = 'Verification in Progress';
+        break;
+      case 'VERIFIED':
+      case 'COMPLETED':
+        statusColor = Colors.green;
+        statusIcon = Icons.verified;
+        statusText = 'Verified';
+        statusSubtext = 'KYC Verification Completed';
+        break;
+      case 'REJECTED':
+        statusColor = Colors.red;
+        statusIcon = Icons.cancel;
+        statusText = 'Rejected';
+        statusSubtext = 'Verification Failed';
+        break;
+      case 'NOT_STARTED':
+      default:
+        statusColor = Colors.grey;
+        statusIcon = Icons.error_outline;
+        statusText = 'Not Started';
+        statusSubtext = 'Please submit your documents';
+        break;
+    }
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.orange.shade50, Colors.orange.shade100],
+          colors: [statusColor.withOpacity(0.1), statusColor.withOpacity(0.2)],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.orange.shade200, width: 1),
+        border: Border.all(color: statusColor.withOpacity(0.3), width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -89,12 +211,12 @@ class _KYCVerificationStatusScreenState
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade200,
+                    color: statusColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.pending_actions,
-                    color: Colors.orange.shade800,
+                    statusIcon,
+                    color: statusColor,
                     size: 28,
                   ),
                 ),
@@ -103,16 +225,16 @@ class _KYCVerificationStatusScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Under Review',
+                      Text(
+                        statusText,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: statusColor,
                         ),
                       ),
                       Text(
-                        'Verification in Progress',
+                        statusSubtext,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade700,
@@ -134,49 +256,57 @@ class _KYCVerificationStatusScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Your documents are being reviewed by our verification team. This usually takes 24-48 hours.',
+                    kycStatus == 'UNDER_REVIEW'
+                        ? 'Your documents are being reviewed by our verification team. This usually takes 24-48 hours.'
+                        : kycStatus == 'VERIFIED'
+                        ? 'Congratulations! Your KYC verification has been completed successfully.'
+                        : kycStatus == 'REJECTED'
+                        ? 'Your KYC verification was rejected. Please contact support for more information.'
+                        : 'Please complete your KYC verification to start investing.',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade800,
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Submitted on',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        DateFormat('MMM dd, yyyy').format(_submittedDate),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade800,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'at ${DateFormat('h:mm a').format(_submittedDate)}',
-                        style: TextStyle(
-                          fontSize: 12,
+                  if (data.submittedAt != null) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 14,
                           color: Colors.grey.shade600,
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Submitted on',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat('MMM dd, yyyy').format(submittedAt),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade800,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'at ${DateFormat('h:mm a').format(submittedAt)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -186,7 +316,7 @@ class _KYCVerificationStatusScreenState
     );
   }
 
-  Widget _buildVerificationSteps() {
+  Widget _buildVerificationSteps(List<VerificationSteps> steps) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -207,37 +337,45 @@ class _KYCVerificationStatusScreenState
               ),
             ),
             const SizedBox(height: 20),
-            _buildStepItem(
-              title: 'Documents Submitted',
-              status: 'All required documents uploaded successfully',
-              isCompleted: true,
-              isInProgress: false,
-            ),
-            const SizedBox(height: 16),
-            _buildStepItem(
-              title: 'Document Verification',
-              status: 'Our team is reviewing your documents',
-              isCompleted: false,
-              isInProgress: true,
-            ),
-            const SizedBox(height: 16),
-            _buildStepItem(
-              title: 'Identity Verification',
-              status: 'Verifying identity details with authorities',
-              isCompleted: false,
-              isInProgress: false,
-            ),
-            const SizedBox(height: 16),
-            _buildStepItem(
-              title: 'Approval',
-              status: 'Final approval and account activation',
-              isCompleted: false,
-              isInProgress: false,
-            ),
+            ...steps.map((step) {
+              final isCompleted = step.status == 'COMPLETED';
+              final isInProgress = step.status == 'IN_PROGRESS';
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildStepItem(
+                  title: step.name ?? '',
+                  status: _getStepStatusMessage(step.name ?? '', step.status ?? ''),
+                  isCompleted: isCompleted,
+                  isInProgress: isInProgress,
+                  completedAt: step.completedAt,
+                ),
+              );
+            }),
           ],
         ),
       ),
     );
+  }
+
+  String _getStepStatusMessage(String stepName, String status) {
+    switch (status) {
+      case 'COMPLETED':
+        return 'Completed successfully';
+      case 'IN_PROGRESS':
+        if (stepName == 'Document Verification') {
+          return 'Our team is reviewing your documents';
+        } else if (stepName == 'Identity Verification') {
+          return 'Verifying identity details with authorities';
+        }
+        return 'In progress';
+      case 'PENDING':
+        if (stepName == 'Approved') {
+          return 'Final approval and account activation';
+        }
+        return 'Waiting to start';
+      default:
+        return 'Pending';
+    }
   }
 
   Widget _buildStepItem({
@@ -245,6 +383,7 @@ class _KYCVerificationStatusScreenState
     required String status,
     required bool isCompleted,
     required bool isInProgress,
+    String? completedAt,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,6 +435,16 @@ class _KYCVerificationStatusScreenState
                   height: 1.3,
                 ),
               ),
+              if (completedAt != null && isCompleted) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Completed: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(completedAt))}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.green.shade600,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -339,7 +488,7 @@ class _KYCVerificationStatusScreenState
     );
   }
 
-  Widget _buildSubmittedDocuments() {
+  Widget _buildSubmittedDocuments(Data data) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -360,75 +509,329 @@ class _KYCVerificationStatusScreenState
               ),
             ),
             const SizedBox(height: 20),
-            _buildDocumentItem(
-              title: 'PAN Card',
-              detail: '4BCDE1234F',
-              icon: Icons.credit_card,
-              iconColor: Colors.orange,
-            ),
-            const SizedBox(height: 16),
-            _buildDocumentItem(
-              title: 'Aadhaar Card',
-              detail: 'xxxx XXXX 4567',
-              icon: Icons.credit_card,
-              iconColor: Colors.blue,
-            ),
-            const SizedBox(height: 16),
-            _buildDocumentItem(
-              title: 'Bank Details',
-              detail: 'Account ending in 4567',
-              icon: Icons.account_balance,
-              iconColor: Colors.green,
-            ),
+            if (data.panCard != null)
+              _buildDocumentItem(
+                title: 'PAN Card',
+                detail: _getDocumentStatus(data.panCard!.uploaded ?? false),
+                isUploaded: data.panCard!.uploaded ?? false,
+                isVerified: data.panCard!.verified ?? false,
+                icon: Icons.credit_card,
+                iconColor: Colors.orange,
+                documentUrl: data.panCard!.url,
+              ),
+            if (data.aadhaarCard != null) ...[
+              const SizedBox(height: 16),
+              _buildDocumentItem(
+                title: 'Aadhaar Card',
+                detail: _getDocumentStatus(data.aadhaarCard!.uploaded ?? false),
+                isUploaded: data.aadhaarCard!.uploaded ?? false,
+                isVerified: data.aadhaarCard!.verified ?? false,
+                icon: Icons.credit_card,
+                iconColor: Colors.blue,
+                documentUrl: data.aadhaarCard!.frontUrl,
+              ),
+            ],
+            if (data.selfie != null) ...[
+              const SizedBox(height: 16),
+              _buildDocumentItem(
+                title: 'Selfie',
+                detail: _getDocumentStatus(data.selfie!.uploaded ?? false),
+                isUploaded: data.selfie!.uploaded ?? false,
+                isVerified: data.selfie!.verified ?? false,
+                icon: Icons.photo_camera,
+                iconColor: Colors.purple,
+                documentUrl: data.selfie!.url,
+              ),
+            ],
+            if (data.bankDetails != null) ...[
+              const SizedBox(height: 16),
+              _buildDocumentItem(
+                title: 'Bank Details',
+                detail: data.bankDetails!.provided == true
+                    ? '${data.bankDetails!.bankName ?? ''} - Account ending in ${_getLastDigits(data.bankDetails!.accountNumber ?? '')}'
+                    : 'Not provided',
+                isUploaded: data.bankDetails!.provided ?? false,
+                isVerified: data.bankDetails!.verified ?? false,
+                icon: Icons.account_balance,
+                iconColor: Colors.green,
+                documentUrl: null,
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
+  String _getDocumentStatus(bool isUploaded) {
+    return isUploaded ? 'Tap to view document' : 'Not uploaded';
+  }
+
+  String _getLastDigits(String accountNumber) {
+    if (accountNumber.isNotEmpty && accountNumber.length >= 4) {
+      return accountNumber.substring(accountNumber.length - 4);
+    }
+    return accountNumber;
+  }
+
   Widget _buildDocumentItem({
     required String title,
     required String detail,
+    required bool isUploaded,
+    required bool isVerified,
     required IconData icon,
     required Color iconColor,
+    String? documentUrl,
   }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: () {
+        if (isUploaded && documentUrl != null && documentUrl.isNotEmpty) {
+          _showDocumentPreview(documentUrl, title);
+        } else if (isUploaded) {
+          _showDocumentInfo(title);
+        }
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isUploaded ? Colors.grey.shade50 : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isUploaded ? Colors.grey.shade200 : Colors.grey.shade100,
           ),
-          child: Icon(icon, color: iconColor, size: 20),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (isVerified)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.green.shade200),
+                            ),
+                            child: Text(
+                              'Verified',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                          )
+                        else if (isUploaded)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.orange.shade200),
+                            ),
+                            child: Text(
+                              'Pending',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.orange.shade700,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          isUploaded ? Icons.visibility : Icons.info_outline,
+                          size: 12,
+                          color: Colors.grey.shade500,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            detail,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isUploaded 
+                                  ? Colors.blue.shade700 
+                                  : Colors.grey.shade500,
+                              fontWeight: isUploaded 
+                                  ? FontWeight.w500 
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                detail,
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-              ),
+              if (isUploaded && documentUrl != null)
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Colors.grey.shade400,
+                ),
             ],
           ),
         ),
-        IconButton(
-          icon: Icon(Icons.info_outline, size: 20, color: Colors.grey.shade400),
-          onPressed: () {
-            _showDocumentInfo(title);
-          },
+      ),
+    );
+  }
+
+  void _showDocumentPreview(String imageUrl, String title) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-      ],
+        child: Container(
+          width: double.maxFinite,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.5,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.grey.shade100,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.contain,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Loading image...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.broken_image,
+                              size: 48,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Failed to load image',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDocumentInfo(String documentType) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(documentType),
+        content: Text(
+          documentType == 'PAN Card'
+              ? 'PAN Card is a 10-character alphanumeric identifier issued by the Income Tax Department.'
+              : documentType == 'Aadhaar Card'
+              ? 'Aadhaar is a 12-digit unique identity number issued by the Government of India.'
+              : documentType == 'Selfie'
+              ? 'A clear selfie photo for identity verification.'
+              : 'Bank details are securely stored for processing payouts and refunds.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -530,29 +933,6 @@ class _KYCVerificationStatusScreenState
     );
   }
 
-  void _showDocumentInfo(String documentType) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(documentType),
-        content: Text(
-          documentType == 'PAN Card'
-              ? 'PAN Card is a 10-character alphanumeric identifier issued by the Income Tax Department.'
-              : documentType == 'Aadhaar Card'
-              ? 'Aadhaar is a 12-digit unique identity number issued by the Government of India.'
-              : 'Bank details are securely stored for processing payouts and refunds.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _contactSupport() {
     showDialog(
       context: context,
@@ -563,11 +943,9 @@ class _KYCVerificationStatusScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('📧 Email: support@digifarmer.com'),
+            Text('📧 Email: info@digifarmer.in'),
             SizedBox(height: 8),
-            Text('📞 Phone: +91 12345 67890'),
-            SizedBox(height: 8),
-            Text('💬 Live Chat: Available 9 AM - 6 PM'),
+            Text('📞 Phone: +91 9266157828'),
           ],
         ),
         actions: [
@@ -581,7 +959,6 @@ class _KYCVerificationStatusScreenState
   }
 
   void _navigateToHome() {
-    // Navigate to home screen
     Navigator.pushReplacementNamed(context, RoutesName.bottomNavBar);
   }
 }

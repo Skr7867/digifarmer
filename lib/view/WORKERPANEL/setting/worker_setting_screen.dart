@@ -355,7 +355,7 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
           : null,
       value: value,
       onChanged: onChanged,
-      activeColor: AppColors.greenColor,
+      activeThumbColor: AppColors.greenColor,
     );
   }
 

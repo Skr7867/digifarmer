@@ -25,20 +25,37 @@ class _HomeScreenState extends State<HomeScreen> {
   late ActiveInvestmentBloc activeInvestmentBloc;
   late UserProfileBloc userProfileBloc;
 
+  Future<void> _onRefresh() async {
+    activeInvestmentBloc.add(ActiveInvestmentFetched());
+    userProfileBloc.add(UserProfileFetched());
+
+    // Wait until both complete
+    await Future.wait([
+      activeInvestmentBloc.stream.firstWhere(
+        (s) => s.activeInvestment.status != Status.loading,
+      ),
+      userProfileBloc.stream.firstWhere(
+        (s) => s.userProfile.status != Status.loading,
+      ),
+    ]);
+  }
+
   @override
   void initState() {
     super.initState();
-    // Initialize blocs using getIt from main.dart
-    activeInvestmentBloc = ActiveInvestmentBloc(
-      activeInvestmentRepository: getIt(),
-    );
-    userProfileBloc = UserProfileBloc(userProfileRepository: getIt());
+    activeInvestmentBloc = getIt<ActiveInvestmentBloc>();
+    userProfileBloc = getIt<UserProfileBloc>();
+    if (activeInvestmentBloc.state.activeInvestment.status !=
+        Status.completed) {
+      activeInvestmentBloc.add(ActiveInvestmentFetched());
+    }
+    if (userProfileBloc.state.userProfile.status != Status.completed) {
+      userProfileBloc.add(UserProfileFetched());
+    }
   }
 
   @override
   void dispose() {
-    activeInvestmentBloc.close();
-    userProfileBloc.close();
     super.dispose();
   }
 
@@ -158,17 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           child: BlocBuilder<ActiveInvestmentBloc, ActiveInvestmentState>(
             builder: (context, investmentState) {
-              // Fetch data when bloc is ready
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (investmentState.activeInvestment.status == Status.loading) {
-                  activeInvestmentBloc.add(ActiveInvestmentFetched());
-                }
-                if (context.read<UserProfileBloc>().state.userProfile.status ==
-                    Status.loading) {
-                  context.read<UserProfileBloc>().add(UserProfileFetched());
-                }
-              });
-
               // Fix: Explicitly type cast to List<Investments>
               final List<Investments> activeInvestments =
                   investmentState.activeInvestment.status == Status.completed
@@ -199,522 +205,534 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? (totalProfit / totalInvested) * 100
                   : 0;
 
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    /// ================= HEADER =================
-                    BlocBuilder<UserProfileBloc, UserProfileState>(
-                      builder: (context, profileState) {
-                        final userName =
-                            profileState.userProfile.data?.user?.fullName ?? '';
-                        final userInitials = _getInitials(userName);
+              return RefreshIndicator(
+                onRefresh: _onRefresh,
+                color: const Color(0xff2FA463),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      /// ================= HEADER =================
+                      BlocBuilder<UserProfileBloc, UserProfileState>(
+                        builder: (context, profileState) {
+                          final userName =
+                              profileState.userProfile.data?.user?.fullName ??
+                              '';
+                          final userInitials = _getInitials(userName);
 
-                        return Container(
-                          padding: const EdgeInsets.fromLTRB(18, 50, 18, 20),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? [Colors.black87, Colors.black54]
-                                  : [
-                                      const Color(0xff1C6C8C),
-                                      const Color(0xff2FA463),
-                                    ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              /// Top Row with Avatar and Notification
-                              Row(
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        RoutesName.userProfileScreen,
-                                      );
-                                    },
-                                    child: CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor: Colors.white.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                      backgroundImage:
-                                          (profileState
-                                                      .userProfile
-                                                      .data
-                                                      ?.user
-                                                      ?.profileImage !=
-                                                  null &&
-                                              profileState
-                                                  .userProfile
-                                                  .data!
-                                                  .user!
-                                                  .profileImage!
-                                                  .isNotEmpty)
-                                          ? NetworkImage(
-                                              profileState
-                                                  .userProfile
-                                                  .data!
-                                                  .user!
-                                                  .profileImage!,
-                                            )
-                                          : null,
-                                      child:
-                                          (profileState
-                                                      .userProfile
-                                                      .data
-                                                      ?.user
-                                                      ?.profileImage !=
-                                                  null &&
-                                              profileState
-                                                  .userProfile
-                                                  .data!
-                                                  .user!
-                                                  .profileImage!
-                                                  .isNotEmpty)
-                                          ? null
-                                          : Text(
-                                              userInitials,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                                fontFamily: AppFonts.popinsBold,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          "Welcome back,",
-                                          style: TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12,
-                                            fontFamily: AppFonts.popins,
-                                          ),
-                                        ),
-                                        userName.isEmpty
-                                            ? Container(
-                                                height: 16,
-                                                width: 110,
-                                                margin: const EdgeInsets.only(
-                                                  top: 3,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white
-                                                      .withValues(alpha: 0.25),
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
-                                              )
-                                            : Text(
-                                                userName,
-                                                style: TextStyle(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).cardColor,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: AppFonts.popins,
-                                                ),
-                                              ),
+                          return Container(
+                            padding: const EdgeInsets.fromLTRB(18, 50, 18, 20),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? [Colors.black87, Colors.black54]
+                                    : [
+                                        const Color(0xff1C6C8C),
+                                        const Color(0xff2FA463),
                                       ],
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        RoutesName.workerNotification,
-                                      );
-                                    },
-                                    child: Container(
-                                      height: 40,
-                                      width: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white24,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Icon(
-                                        Icons.notifications_none,
-                                        color: Theme.of(context).cardColor,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-
-                              const SizedBox(height: 24),
-
-                              /// Portfolio Card with Real Data
-                              InkWell(
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    RoutesName.portFolioScreen,
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(.12),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      const Text(
-                                        "Total Portfolio Value",
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontFamily: AppFonts.popins,
-                                        ),
+                            ),
+                            child: Column(
+                              children: [
+                                /// Top Row with Avatar and Notification
+                                Row(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          RoutesName.userProfileScreen,
+                                        );
+                                      },
+                                      child: CircleAvatar(
+                                        radius: 20,
+                                        backgroundColor: Colors.white
+                                            .withValues(alpha: 0.3),
+                                        backgroundImage:
+                                            (profileState
+                                                        .userProfile
+                                                        .data
+                                                        ?.user
+                                                        ?.profileImage !=
+                                                    null &&
+                                                profileState
+                                                    .userProfile
+                                                    .data!
+                                                    .user!
+                                                    .profileImage!
+                                                    .isNotEmpty)
+                                            ? NetworkImage(
+                                                profileState
+                                                    .userProfile
+                                                    .data!
+                                                    .user!
+                                                    .profileImage!,
+                                              )
+                                            : null,
+                                        child:
+                                            (profileState
+                                                        .userProfile
+                                                        .data
+                                                        ?.user
+                                                        ?.profileImage !=
+                                                    null &&
+                                                profileState
+                                                    .userProfile
+                                                    .data!
+                                                    .user!
+                                                    .profileImage!
+                                                    .isNotEmpty)
+                                            ? null
+                                            : Text(
+                                                userInitials,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                  fontFamily:
+                                                      AppFonts.popinsBold,
+                                                ),
+                                              ),
                                       ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        "₹${NumberFormat('#,##,###').format(totalPortfolioValue)}",
-                                        style: TextStyle(
-                                          color: Theme.of(context).cardColor,
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: AppFonts.popins,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        profitPercentage >= 0
-                                            ? "+${profitPercentage.toStringAsFixed(1)}% ↑"
-                                            : "${profitPercentage.toStringAsFixed(1)}% ↓",
-                                        style: TextStyle(
-                                          color: profitPercentage >= 0
-                                              ? Colors.lightGreenAccent
-                                              : Colors.redAccent,
-                                          fontFamily: AppFonts.popins,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 18),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Column(
-                                            children: [
-                                              Text(
-                                                "Active Investments",
-                                                style: TextStyle(
-                                                  color: Colors.white70,
-                                                  fontFamily: AppFonts.popins,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                activeInvestments.length
-                                                    .toString(),
-                                                style: TextStyle(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).cardColor,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
-                                                  fontFamily: AppFonts.popins,
-                                                ),
-                                              ),
-                                            ],
+                                          const Text(
+                                            "Welcome back,",
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 12,
+                                              fontFamily: AppFonts.popins,
+                                            ),
                                           ),
-                                          Column(
-                                            children: [
-                                              Text(
-                                                "Monthly Returns",
-                                                style: TextStyle(
-                                                  color: Colors.white70,
-                                                  fontSize: 12,
-                                                  fontFamily: AppFonts.popins,
+                                          userName.isEmpty
+                                              ? Container(
+                                                  height: 16,
+                                                  width: 110,
+                                                  margin: const EdgeInsets.only(
+                                                    top: 3,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white
+                                                        .withValues(
+                                                          alpha: 0.25,
+                                                        ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          4,
+                                                        ),
+                                                  ),
+                                                )
+                                              : Text(
+                                                  userName,
+                                                  style: TextStyle(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).cardColor,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontFamily: AppFonts.popins,
+                                                  ),
                                                 ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                "₹${NumberFormat('#,##,###').format(monthlyReturns)}",
-                                                style: TextStyle(
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).cardColor,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
-                                                  fontFamily: AppFonts.popins,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-
-                    /// ================= BODY =================
-                    Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          /// Invested + Current Value Cards
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _smallCard(
-                                  icon: Icons.account_balance_wallet,
-                                  title: "Total Invested",
-                                  value:
-                                      "₹${NumberFormat('#,##,###').format(totalPortfolioValue)}",
-                                  percent: profitPercentage >= 0
-                                      ? "+${profitPercentage.toStringAsFixed(1)}%"
-                                      : "${profitPercentage.toStringAsFixed(1)}%",
-                                  color: const Color(0xffDFF3E7),
-                                  isPositive: profitPercentage >= 0,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: _smallCard(
-                                  icon: Icons.show_chart,
-                                  title: "Current Value",
-                                  value:
-                                      "₹${NumberFormat('#,##,###').format(totalPortfolioValue + (stats?.totalROIEarned ?? 0))}",
-                                  percent:
-                                      "+${((stats?.totalROIEarned ?? 0) / (totalPortfolioValue > 0 ? totalPortfolioValue : 1) * 100).toStringAsFixed(1)}%",
-                                  color: const Color(0xffE6EDFF),
-                                  isPositive: true,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          /// Expected Maturity Card
-                          if (activeInvestments.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.purple.shade100,
-                                    Colors.purple.shade50,
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.event_available,
-                                        color: Colors.purple,
-                                      ),
-                                      const SizedBox(width: 10),
-                                      const Expanded(
-                                        child: Text(
-                                          "Expected Maturity Value",
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontFamily: AppFonts.popins,
-                                            fontWeight: FontWeight.w500,
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          RoutesName.workerNotification,
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 40,
+                                        width: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white24,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
                                         ),
-                                      ),
-                                      Text(
-                                        "₹${NumberFormat('#,##,###').format(maturityValue)}",
-                                        style: const TextStyle(
-                                          color: Colors.purple,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          fontFamily: AppFonts.popins,
+                                        child: Icon(
+                                          Icons.notifications_none,
+                                          color: Theme.of(context).cardColor,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: LinearProgressIndicator(
-                                      value: totalPortfolioValue > 0
-                                          ? (totalPortfolioValue /
-                                                    (maturityValue > 0
-                                                        ? maturityValue
-                                                        : 1))
-                                                .clamp(0.0, 1.0)
-                                          : 0.0,
-                                      minHeight: 8,
-                                      backgroundColor: Colors.purple.shade100,
-                                      valueColor: const AlwaysStoppedAnimation(
-                                        Colors.purple,
-                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      "${((totalPortfolioValue / (maturityValue > 0 ? maturityValue : 1)) * 100).toStringAsFixed(1)}%",
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        fontFamily: AppFonts.popins,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          const SizedBox(height: 24),
-
-                          /// Active Investments Header
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Active Investments",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  fontFamily: AppFonts.popins,
+                                  ],
                                 ),
-                              ),
-                              if (activeInvestments.isNotEmpty)
+
+                                const SizedBox(height: 24),
+
+                                /// Portfolio Card with Real Data
                                 InkWell(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      RoutesName.activeInvestmentScreen,
-                                    );
-                                  },
-                                  child: Text(
-                                    "View All",
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: AppFonts.popins,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 14),
-
-                          /// Active Investments List or Empty State
-                          if (investmentState.activeInvestment.status ==
-                              Status.loading)
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(32),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          else if (activeInvestments.isEmpty)
-                            _buildEmptyActiveInvestments(context)
-                          else
-                            ...activeInvestments.take(3).map((investment) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _investmentTile(
-                                  title:
-                                      investment.planId?.planName ??
-                                      'Investment Plan',
-                                  subtitle:
-                                      "${investment.durationMonths} months • ${investment.roiFrequency ?? 'N/A'} ROI",
-                                  value:
-                                      "₹${NumberFormat('#,##,###').format(investment.investmentAmount)}",
-                                  roi:
-                                      "+${investment.expectedReturnPercent?.toStringAsFixed(1) ?? '0'}% ROI",
-                                  progress: _calculateProgress(investment),
-                                  startDate: investment.startDate,
-                                  endDate: investment.endDate,
-                                ),
-                              );
-                            }),
-
-                          const SizedBox(height: 24),
-
-                          /// Quick Actions
-                          const Text(
-                            "Quick Actions",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              fontFamily: AppFonts.popins,
-                            ),
-                          ),
-
-                          const SizedBox(height: 14),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _actionCard(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider(
-                                          create: (context) =>
-                                              AllInvestmentPlanBloc(
-                                                allInvestmentPlanRepository:
-                                                    getIt<
-                                                      AllInvestmentPlanRepository
-                                                    >(),
-                                              )..add(PlanFetched()),
-                                          child: const NewInvestmentScreen(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  title: "New Investment",
-                                  subtitle: "Browse opportunities",
-                                  color: const Color(0xff2FA463),
-                                  icon: Icons.add_circle_outline,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: _actionCard(
                                   onTap: () {
                                     Navigator.pushNamed(
                                       context,
                                       RoutesName.portFolioScreen,
                                     );
                                   },
-                                  title: "Portfolio",
-                                  subtitle: "View details",
-                                  color: const Color(0xff3B6FD8),
-                                  icon: Icons.pie_chart_outline,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(.12),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          "Total Portfolio Value",
+                                          style: TextStyle(
+                                            color: Colors.white70,
+                                            fontFamily: AppFonts.popins,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          "₹${NumberFormat('#,##,###').format(totalPortfolioValue)}",
+                                          style: TextStyle(
+                                            color: Theme.of(context).cardColor,
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: AppFonts.popins,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          profitPercentage >= 0
+                                              ? "+${profitPercentage.toStringAsFixed(1)}% ↑"
+                                              : "${profitPercentage.toStringAsFixed(1)}% ↓",
+                                          style: TextStyle(
+                                            color: profitPercentage >= 0
+                                                ? Colors.lightGreenAccent
+                                                : Colors.redAccent,
+                                            fontFamily: AppFonts.popins,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 18),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  "Active Investments",
+                                                  style: TextStyle(
+                                                    color: Colors.white70,
+                                                    fontFamily: AppFonts.popins,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  activeInvestments.length
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).cardColor,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                    fontFamily: AppFonts.popins,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  "Monthly Returns",
+                                                  style: TextStyle(
+                                                    color: Colors.white70,
+                                                    fontSize: 12,
+                                                    fontFamily: AppFonts.popins,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  "₹${NumberFormat('#,##,###').format(monthlyReturns)}",
+                                                  style: TextStyle(
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).cardColor,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                    fontFamily: AppFonts.popins,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+
+                      /// ================= BODY =================
+                      Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            /// Invested + Current Value Cards
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _smallCard(
+                                    icon: Icons.account_balance_wallet,
+                                    title: "Total Invested",
+                                    value:
+                                        "₹${NumberFormat('#,##,###').format(totalPortfolioValue)}",
+                                    percent: profitPercentage >= 0
+                                        ? "+${profitPercentage.toStringAsFixed(1)}%"
+                                        : "${profitPercentage.toStringAsFixed(1)}%",
+                                    color: const Color(0xffDFF3E7),
+                                    isPositive: profitPercentage >= 0,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: _smallCard(
+                                    icon: Icons.show_chart,
+                                    title: "Current Value",
+                                    value:
+                                        "₹${NumberFormat('#,##,###').format(totalPortfolioValue + (stats?.totalROIEarned ?? 0))}",
+                                    percent:
+                                        "+${((stats?.totalROIEarned ?? 0) / (totalPortfolioValue > 0 ? totalPortfolioValue : 1) * 100).toStringAsFixed(1)}%",
+                                    color: const Color(0xffE6EDFF),
+                                    isPositive: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            /// Expected Maturity Card
+                            if (activeInvestments.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.all(18),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.purple.shade100,
+                                      Colors.purple.shade50,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.event_available,
+                                          color: Colors.purple,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        const Expanded(
+                                          child: Text(
+                                            "Expected Maturity Value",
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontFamily: AppFonts.popins,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          "₹${NumberFormat('#,##,###').format(maturityValue)}",
+                                          style: const TextStyle(
+                                            color: Colors.purple,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            fontFamily: AppFonts.popins,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: LinearProgressIndicator(
+                                        value: totalPortfolioValue > 0
+                                            ? (totalPortfolioValue /
+                                                      (maturityValue > 0
+                                                          ? maturityValue
+                                                          : 1))
+                                                  .clamp(0.0, 1.0)
+                                            : 0.0,
+                                        minHeight: 8,
+                                        backgroundColor: Colors.purple.shade100,
+                                        valueColor:
+                                            const AlwaysStoppedAnimation(
+                                              Colors.purple,
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text(
+                                        "${((totalPortfolioValue / (maturityValue > 0 ? maturityValue : 1)) * 100).toStringAsFixed(1)}%",
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: AppFonts.popins,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
+
+                            const SizedBox(height: 24),
+
+                            /// Active Investments Header
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Active Investments",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    fontFamily: AppFonts.popins,
+                                  ),
+                                ),
+                                if (activeInvestments.isNotEmpty)
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        RoutesName.activeInvestmentScreen,
+                                      );
+                                    },
+                                    child: Text(
+                                      "View All",
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: AppFonts.popins,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            /// Active Investments List or Empty State
+                            if (investmentState.activeInvestment.status ==
+                                Status.loading)
+                              const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(32),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            else if (activeInvestments.isEmpty)
+                              _buildEmptyActiveInvestments(context)
+                            else
+                              ...activeInvestments.take(3).map((investment) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: _investmentTile(
+                                    title:
+                                        investment.planId?.planName ??
+                                        'Investment Plan',
+                                    subtitle:
+                                        "${investment.durationMonths} months • ${investment.roiFrequency ?? 'N/A'} ROI",
+                                    value:
+                                        "₹${NumberFormat('#,##,###').format(investment.investmentAmount)}",
+                                    roi:
+                                        "+${investment.expectedReturnPercent?.toStringAsFixed(1) ?? '0'}% ROI",
+                                    progress: _calculateProgress(investment),
+                                    startDate: investment.startDate,
+                                    endDate: investment.endDate,
+                                  ),
+                                );
+                              }),
+
+                            const SizedBox(height: 24),
+
+                            /// Quick Actions
+                            const Text(
+                              "Quick Actions",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                fontFamily: AppFonts.popins,
+                              ),
+                            ),
+
+                            const SizedBox(height: 14),
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _actionCard(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => BlocProvider(
+                                            create: (context) =>
+                                                AllInvestmentPlanBloc(
+                                                  allInvestmentPlanRepository:
+                                                      getIt<
+                                                        AllInvestmentPlanRepository
+                                                      >(),
+                                                )..add(PlanFetched()),
+                                            child: const NewInvestmentScreen(),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    title: "New Investment",
+                                    subtitle: "Browse opportunities",
+                                    color: const Color(0xff2FA463),
+                                    icon: Icons.add_circle_outline,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: _actionCard(
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        RoutesName.portFolioScreen,
+                                      );
+                                    },
+                                    title: "Portfolio",
+                                    subtitle: "View details",
+                                    color: const Color(0xff3B6FD8),
+                                    icon: Icons.pie_chart_outline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

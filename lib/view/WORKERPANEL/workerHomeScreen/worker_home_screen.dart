@@ -8,6 +8,7 @@ import 'package:digifarmer/utils/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../blocs/WORKERPANEL/startTask/start_task_bloc.dart';
 import '../../../config/component/internet_exception.dart';
 import '../../../main.dart';
@@ -22,71 +23,70 @@ class WorkerHomeScreen extends StatefulWidget {
 
 class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   late DashboardBloc dashboardBloc;
+  late UserProfileBloc userProfileBloc;
 
   @override
   void initState() {
     super.initState();
-    dashboardBloc = DashboardBloc(workerDashboardRepository: getIt());
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserProfileBloc>().add(UserProfileFetched());
-    });
+    dashboardBloc = getIt<DashboardBloc>();
+    userProfileBloc = getIt<UserProfileBloc>();
+  }
+
+  Future<void> _onRefresh() async {
+    dashboardBloc.add(DashboardFetched());
+    userProfileBloc.add(UserProfileFetched());
+
+    await Future.wait([
+      dashboardBloc.stream.firstWhere(
+        (s) => s.workerDashboard.status != Status.loading,
+      ),
+      userProfileBloc.stream.firstWhere(
+        (s) => s.userProfile.status != Status.loading,
+      ),
+    ]);
   }
 
   @override
-  void dispose() {
-    dashboardBloc.close();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF4F6F9),
-      body: MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (_) => dashboardBloc..add(DashboardFetched())),
-          BlocProvider(create: (context) => StartTaskBloc(repository: getIt())),
-        ],
-        child: MultiBlocListener(
-          listeners: [
-            BlocListener<StartTaskBloc, StartTaskState>(
-              listener: (context, startState) {
-                if (startState.startTaskResponse.status == Status.loading) {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (_) =>
-                        const Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                if (startState.startTaskResponse.status == Status.completed) {
-                  Navigator.pop(context);
-                  final taskId = startState.startTaskResponse.data?.task?.id;
-                  dashboardBloc.add(DashboardFetched());
-                  Navigator.pushNamed(
-                    context,
-                    RoutesName.workerTaskDetails,
-                    arguments: {'leadId': taskId},
-                  );
-                }
-
-                if (startState.startTaskResponse.status == Status.error) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        startState.startTaskResponse.message.toString(),
-                        style: const TextStyle(fontFamily: AppFonts.popins),
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ],
+      body: BlocProvider<StartTaskBloc>(
+        create: (_) => getIt<StartTaskBloc>(),
+        child: BlocListener<StartTaskBloc, StartTaskState>(
+          listener: (context, startState) {
+            if (startState.startTaskResponse.status == Status.loading) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) =>
+                    const Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (startState.startTaskResponse.status == Status.completed) {
+              Navigator.pop(context);
+              final taskId = startState.startTaskResponse.data?.task?.id;
+              dashboardBloc.add(DashboardFetched());
+              Navigator.pushNamed(
+                context,
+                RoutesName.workerTaskDetails,
+                arguments: {'leadId': taskId},
+              );
+            }
+            if (startState.startTaskResponse.status == Status.error) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    startState.startTaskResponse.message.toString(),
+                    style: const TextStyle(fontFamily: AppFonts.popins),
+                  ),
+                ),
+              );
+            }
+          },
           child: BlocBuilder<DashboardBloc, DashboardState>(
-            builder: (BuildContext context, state) {
+            builder: (context, state) {
               switch (state.workerDashboard.status) {
                 case Status.loading:
                   return const Center(child: CircularProgressIndicator());
@@ -96,9 +96,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       'No Internet Connection') {
                     return Center(
                       child: InternetException(
-                        onPress: () {
-                          dashboardBloc.add(DashboardFetched());
-                        },
+                        onPress: () => dashboardBloc.add(DashboardFetched()),
                       ),
                     );
                   }
@@ -118,10 +116,15 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                       ),
                     );
                   }
-                  final dashboardData = state.workerDashboard.data!;
-                  return _buildDashboardContent(context, dashboardData);
+                  return RefreshIndicator(
+                    onRefresh: _onRefresh,
+                    color: const Color(0xff2BB673),
+                    child: _buildDashboardContent(
+                      context,
+                      state.workerDashboard.data!,
+                    ),
+                  );
 
-                case Status.initial:
                 default:
                   return const SizedBox();
               }
@@ -642,7 +645,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -653,7 +656,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                 ),
               ),
               child: const Text(
-                'Continue',
+                'Start task',
                 style: TextStyle(
                   fontFamily: AppFonts.popins,
                   fontWeight: FontWeight.w500,
@@ -816,7 +819,7 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Assigned Lands ${totalAssignedCount > 2 ? '(Showing ${uniqueLands.length} of $totalAssignedCount)' : ''}",
+                "Assigned Lands",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,

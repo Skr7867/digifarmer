@@ -288,7 +288,7 @@ class _MyLandsScreenState extends State<MyLandsScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: _filterOptions.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
                 final option = _filterOptions[index];
                 final isSelected = _selectedFilter == option;
@@ -590,7 +590,7 @@ class _LandCard extends StatelessWidget {
                   height: 150,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     height: 150,
                     color: Colors.grey.shade200,
                     child: const Icon(
