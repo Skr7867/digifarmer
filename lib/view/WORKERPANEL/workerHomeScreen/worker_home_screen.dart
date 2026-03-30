@@ -136,80 +136,75 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Widget _buildDashboardContent(
-    BuildContext context,
-    WorkerDashBoardModel dashboardData,
-  ) {
-    final dashboard = dashboardData.dashboard;
-    final taskStatus = dashboard?.taskStatus;
-    final taskCounts = dashboard?.taskCounts;
+  BuildContext context,
+  WorkerDashBoardModel dashboardData,
+) {
+  final dashboard = dashboardData.dashboard;
+  final taskStatus = dashboard?.taskStatus;
+  final taskCounts = dashboard?.taskCounts;
 
-    // Get all tasks and limit to 2 each
-    final allInProgressTasks = taskStatus?.pending ?? [];
-    final allCompletedTasks = taskStatus?.completed ?? [];
-    final allAssignedLeads = dashboard?.assignedLeads ?? [];
+  // ✅ Combine inProgress + pending into one list for "Today's Tasks"
+  final allInProgressTasks = taskStatus?.inProgress ?? [];
+  final allPendingTasks = taskStatus?.pending ?? [];
+  final allActiveTasks = [...allInProgressTasks, ...allPendingTasks];
+  final allCompletedTasks = taskStatus?.completed ?? [];
+  final allAssignedLeads = dashboard?.assignedLeads ?? [];
 
-    // Show only first 2 tasks for each category
-    final inProgressTasks = allInProgressTasks.length > 2
-        ? allInProgressTasks.sublist(0, 2)
-        : allInProgressTasks;
+  // Show only first 2 tasks for each category
+  final activeTasks = allActiveTasks.length > 2
+      ? allActiveTasks.sublist(0, 2)
+      : allActiveTasks;
 
-    final completedTasks = allCompletedTasks.length > 2
-        ? allCompletedTasks.sublist(0, 2)
-        : allCompletedTasks;
+  final completedTasks = allCompletedTasks.length > 2
+      ? allCompletedTasks.sublist(0, 2)
+      : allCompletedTasks;
 
-    final assignedLeads = allAssignedLeads.length > 2
-        ? allAssignedLeads.sublist(0, 2)
-        : allAssignedLeads;
+  final assignedLeads = allAssignedLeads.length > 2
+      ? allAssignedLeads.sublist(0, 2)
+      : allAssignedLeads;
 
-    int totalTasksToday = taskCounts?.total ?? 0;
-    int completedCount = taskCounts?.completed ?? 0;
-    int inProgressCount = taskCounts?.inProgress ?? 0;
+  int totalTasksToday = taskCounts?.total ?? 0;
+  int completedCount = taskCounts?.completed ?? 0;
+  int inProgressCount = taskCounts?.inProgress ?? 0;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Pass profile state into header via BlocBuilder
-          BlocBuilder<UserProfileBloc, UserProfileState>(
-            builder: (context, profileState) {
-              final userName =
-                  profileState.userProfile.data?.user?.fullName ?? '';
-              final userInitials = _getInitials(userName);
-
-              return _buildHeader(
-                context,
-                dashboard?.today?.status ?? 'NOT_MARKED',
-                totalTasksToday,
-                completedCount,
-                inProgressCount,
-                userName,
-                userInitials,
-                profileState.userProfile.data?.user?.profileImage,
-              );
-            },
-          ),
-
-          const SizedBox(height: 20),
-          _buildTodayTasksSection(
-            context,
-            inProgressTasks,
-            completedTasks,
-            allInProgressTasks.length,
-            allCompletedTasks.length,
-          ),
-          const SizedBox(height: 20),
-          _buildAssignedLandsSection(
-            context,
-            assignedLeads,
-            allAssignedLeads.length,
-          ),
-          const SizedBox(height: 20),
-          _buildQuickActionsSection(),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
+  return SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlocBuilder<UserProfileBloc, UserProfileState>(
+          builder: (context, profileState) {
+            final userName =
+                profileState.userProfile.data?.user?.fullName ?? '';
+            final userInitials = _getInitials(userName);
+            return _buildHeader(
+              context,
+              dashboard?.today?.status ?? 'NOT_MARKED',
+              totalTasksToday,
+              completedCount,
+              inProgressCount,
+              userName,
+              userInitials,
+              profileState.userProfile.data?.user?.profileImage,
+            );
+          },
+        ),
+        const SizedBox(height: 20),
+        _buildTodayTasksSection(
+          context,
+          activeTasks,      // ✅ combined inProgress + pending
+          completedTasks,
+          allActiveTasks.length,
+          allCompletedTasks.length,
+        ),
+        const SizedBox(height: 20),
+        _buildAssignedLandsSection(context, assignedLeads, allAssignedLeads.length),
+        const SizedBox(height: 20),
+        _buildQuickActionsSection(),
+        const SizedBox(height: 20),
+      ],
+    ),
+  );
+}
 
   /// Extract initials from full name
   String _getInitials(String name) {
@@ -533,141 +528,207 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
   }
 
   Widget _buildInProgressTaskCard(BuildContext context, Pending task) {
-    String timeRange = _formatTimeRange(task.workday ?? 'Daily');
-    String dueDateText = '';
-    if (task.dueDate != null) {
-      final dueDate = DateTime.parse(task.dueDate!);
-      final now = DateTime.now();
-      final difference = dueDate.difference(now).inDays;
-      if (difference > 0) {
-        dueDateText = 'Due in $difference day${difference > 1 ? 's' : ''}';
-      } else if (difference == 0) {
-        dueDateText = 'Due today';
-      } else {
-        dueDateText =
-            'Overdue by ${-difference} day${-difference > 1 ? 's' : ''}';
-      }
+  String timeRange = _formatTimeRange(task.workday ?? 'Daily');
+  String dueDateText = '';
+  if (task.dueDate != null) {
+    final dueDate = DateTime.parse(task.dueDate!);
+    final now = DateTime.now();
+    final difference = dueDate.difference(now).inDays;
+    if (difference > 0) {
+      dueDateText = 'Due in $difference day${difference > 1 ? 's' : ''}';
+    } else if (difference == 0) {
+      dueDateText = 'Due today';
+    } else {
+      dueDateText =
+          'Overdue by ${-difference} day${-difference > 1 ? 's' : ''}';
     }
+  }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+  // ✅ Determine button behavior from status
+  final isInProgress = task.status == 'IN_PROGRESS';
+
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          task.taskTitle ?? 'No Title',
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            fontFamily: AppFonts.popins,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            task.taskTitle ?? 'No Title',
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              fontFamily: AppFonts.popins,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "${task.land?.landTitle ?? 'No Land'} - ${_getLocationFromLand(task.land)}",
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.grey,
+            fontFamily: AppFonts.popins,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            const Icon(Icons.access_time, size: 16, color: Colors.grey),
+            const SizedBox(width: 4),
+            Text(
+              timeRange,
+              style: const TextStyle(fontSize: 13, fontFamily: AppFonts.popins),
             ),
-          ),
+            const SizedBox(width: 16),
+            const Icon(Icons.agriculture, size: 16, color: Colors.grey),
+            const SizedBox(width: 4),
+            Text(
+              _getAreaFromTask(task),
+              style: const TextStyle(fontSize: 13, fontFamily: AppFonts.popins),
+            ),
+          ],
+        ),
+        if (dueDateText.isNotEmpty) ...[
           const SizedBox(height: 4),
-          Text(
-            "${task.land?.landTitle ?? 'No Land'} - ${_getLocationFromLand(task.land)}",
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.grey,
-              fontFamily: AppFonts.popins,
-            ),
-          ),
-          const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.access_time, size: 16, color: Colors.grey),
-              const SizedBox(width: 4),
-              Text(
-                timeRange,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontFamily: AppFonts.popins,
-                ),
+              Icon(
+                Icons.event,
+                size: 16,
+                color: dueDateText.contains('Overdue')
+                    ? Colors.red
+                    : Colors.orange,
               ),
-              const SizedBox(width: 16),
-              const Icon(Icons.agriculture, size: 16, color: Colors.grey),
               const SizedBox(width: 4),
               Text(
-                _getAreaFromTask(task),
-                style: const TextStyle(
+                dueDateText,
+                style: TextStyle(
                   fontSize: 13,
+                  color: dueDateText.contains('Overdue')
+                      ? Colors.red
+                      : Colors.orange,
                   fontFamily: AppFonts.popins,
                 ),
               ),
             ],
           ),
-
-          if (dueDateText.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.event,
-                  size: 16,
-                  color: dueDateText.contains('Overdue')
-                      ? Colors.red
-                      : Colors.orange,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  dueDateText,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: dueDateText.contains('Overdue')
-                        ? Colors.red
-                        : Colors.orange,
-                    fontFamily: AppFonts.popins,
-                  ),
-                ),
-              ],
-            ),
-          ],
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: () {
+        ],
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: ElevatedButton(
+            onPressed: () {
+              if (isInProgress) {
+                // ✅ Continue → go directly to task details
                 Navigator.pushNamed(
                   context,
                   RoutesName.workerTaskDetails,
                   arguments: {'leadId': task.id},
                 );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
+              } else {
+                // ✅ Pending → show confirm dialog then call Start Task API
+                _showStartTaskConfirmDialog(context, task.id ?? '');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isInProgress ? Colors.orange : Colors.green,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: const Text(
-                'Start task',
-                style: TextStyle(
-                  fontFamily: AppFonts.popins,
-                  fontWeight: FontWeight.w500,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isInProgress ? Icons.play_arrow : Icons.rocket_launch,
+                  size: 16,
                 ),
-              ),
+                const SizedBox(width: 6),
+                Text(
+                  isInProgress ? 'Continue' : 'Start Task',
+                  style: const TextStyle(
+                    fontFamily: AppFonts.popins,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  void _showStartTaskConfirmDialog(BuildContext context, String taskId) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Row(
+        children: [
+          Icon(Icons.play_circle_outline, color: Colors.green),
+          SizedBox(width: 8),
+          Text(
+            'Start Task',
+            style: TextStyle(
+              fontFamily: AppFonts.popins,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
       ),
-    );
-  }
+      content: const Text(
+        'Are you sure you want to start this task?',
+        style: TextStyle(fontFamily: AppFonts.popins),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(
+              fontFamily: AppFonts.popins,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(dialogContext); // close dialog first
+            context.read<StartTaskBloc>().add(StartTaskPressed( taskId));
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: const Text(
+            'Yes, Start',
+            style: TextStyle(
+              fontFamily: AppFonts.popins,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildCompletedTaskCard(BuildContext context, Completed task) {
     String timeRange = _formatTimeRange(task.workday ?? 'Daily');

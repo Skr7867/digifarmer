@@ -93,7 +93,7 @@ class _WorkerTaskUpdateScreenState extends State<WorkerTaskUpdateScreen> {
               );
 
               // Navigate back after successful submission
-              Future.delayed(const Duration(seconds: 1), () {
+              Future.delayed(const Duration(seconds: 2), () {
                 Navigator.pop(context, true);
               });
             }
@@ -977,7 +977,7 @@ class _WorkerTaskUpdateScreenState extends State<WorkerTaskUpdateScreen> {
                   context.read<TaskUpdateBloc>().add(
                     SubmitTaskUpdate(taskId: widget.taskId),
                   );
-                  Navigator.pop(context);
+                  
                 }
               },
         style: ElevatedButton.styleFrom(
@@ -1011,74 +1011,79 @@ class _WorkerTaskUpdateScreenState extends State<WorkerTaskUpdateScreen> {
 
   /// Helper Methods
   void _showImageSourceDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.blue),
-                title: const Text(
-                  'Choose from Gallery',
-                  style: TextStyle(fontFamily: AppFonts.popins),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(context, ImageSource.gallery);
-                },
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.blue),
+              title: const Text(
+                'Choose from Gallery',
+                style: TextStyle(fontFamily: AppFonts.popins),
               ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.green),
-                title: const Text(
-                  'Take a Photo',
-                  style: TextStyle(fontFamily: AppFonts.popins),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickImage(context, ImageSource.camera);
-                },
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);  
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.green),
+              title: const Text(
+                'Take a Photo',
+                style: TextStyle(fontFamily: AppFonts.popins),
               ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _pickImage(BuildContext context, ImageSource source) async {
-    try {
-      final XFile? pickedFile = await _imagePicker.pickImage(
-        source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 80,
-      );
-
-      if (pickedFile != null) {
-        context.read<TaskUpdateBloc>().add(
-          PhotoAdded({
-            'file': File(pickedFile.path),
-            'caption': '',
-            'url': null, // Will be set after upload
-          }),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error picking image: $e',
-            style: const TextStyle(fontFamily: AppFonts.popins),
-          ),
-          backgroundColor: Colors.red,
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);  
+              },
+            ),
+          ],
         ),
       );
+    },
+  );
+}
+
+ // Change the method signature - remove BuildContext parameter
+Future<void> _pickImage(ImageSource source) async {
+  try {
+    final XFile? pickedFile = await _imagePicker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 80,
+    );
+
+    if (!mounted) return;  // ✅ uses State.mounted, no context needed
+
+    if (pickedFile != null) {
+      _taskUpdateBloc.add(          // ✅ use bloc directly, not context.read
+        PhotoAdded({
+          'file': File(pickedFile.path),
+          'caption': '',
+          'url': null,
+        }),
+      );
     }
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(  // ✅ uses State.context, always valid
+      SnackBar(
+        content: Text(
+          'Error picking image: $e',
+          style: const TextStyle(fontFamily: AppFonts.popins),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
 
   /// Common Card Decoration
   BoxDecoration _cardDecoration() {

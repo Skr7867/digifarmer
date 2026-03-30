@@ -140,26 +140,33 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
   }
 
   Widget _buildDashboardContent(
-    BuildContext context,
-    WorkerDashBoardModel dashboardData,
-  ) {
-    final dashboard = dashboardData.dashboard;
-    final taskStatus = dashboard?.taskStatus;
-    final inProgressTasks = taskStatus?.pending ?? [];
-    final completedTasks = taskStatus?.completed ?? [];
+  BuildContext context,
+  WorkerDashBoardModel dashboardData,
+) {
+  final dashboard = dashboardData.dashboard;
+  final taskStatus = dashboard?.taskStatus;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Pass profile state into header via BlocBuilder
-          const SizedBox(height: 20),
-          _buildTodayTasksSection(context, inProgressTasks, completedTasks),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
+  // ✅ Correct: inProgress and pending are separate lists now
+  final inProgressTasks = taskStatus?.inProgress ?? [];
+  final pendingTasks = taskStatus?.pending ?? [];
+  final completedTasks = taskStatus?.completed ?? [];
+
+  return SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        _buildTodayTasksSection(
+          context,
+          inProgressTasks,
+          pendingTasks,
+          completedTasks,
+        ),
+        const SizedBox(height: 20),
+      ],
+    ),
+  );
+}
 
   /// Extract initials from full name
 }
@@ -167,6 +174,7 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
 Widget _buildTodayTasksSection(
   BuildContext context,
   List<Pending> inProgressTasks,
+  List<Pending> pendingTasks,
   List<Completed> completedTasks,
 ) {
   String todayDate = _getFormattedDate();
@@ -199,93 +207,46 @@ Widget _buildTodayTasksSection(
         ),
       ),
 
+      // ── IN PROGRESS SECTION ──
       if (inProgressTasks.isNotEmpty) ...[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: const BoxDecoration(
-                  color: Colors.orange,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                "In Progress",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                "Priority: ${inProgressTasks.first.priority ?? 'MEDIUM'}",
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-            ],
-          ),
-        ),
+        _buildSectionLabel('In Progress', Colors.orange,
+            inProgressTasks.first.priority ?? 'MEDIUM'),
         const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
-        ...inProgressTasks.map(
-          (task) => _buildInProgressTaskCard(context, task),
-        ),
+        ...inProgressTasks.map((task) => _buildTaskCard(context, task)),
       ],
 
       const SizedBox(height: 16),
 
+      // ── PENDING SECTION ──
+      if (pendingTasks.isNotEmpty) ...[
+        _buildSectionLabel('Pending', Colors.deepOrange,
+            pendingTasks.first.priority ?? 'MEDIUM'),
+        const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
+        ...pendingTasks.map((task) => _buildTaskCard(context, task)),
+      ],
+
+      const SizedBox(height: 16),
+
+      // ── COMPLETED SECTION ──
       if (completedTasks.isNotEmpty) ...[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                "Completed",
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                "Priority: ${completedTasks.isNotEmpty ? completedTasks.first.priority ?? 'MEDIUM' : 'MEDIUM'}",
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                  fontFamily: AppFonts.popins,
-                ),
-              ),
-            ],
-          ),
-        ),
+        _buildSectionLabel('Completed', Colors.green,
+            completedTasks.first.priority ?? 'MEDIUM'),
         const Divider(height: 16, thickness: 1, indent: 16, endIndent: 16),
         ...completedTasks.map((task) => _buildCompletedTaskCard(context, task)),
       ],
 
-      if (inProgressTasks.isEmpty && completedTasks.isEmpty) ...[
+      if (inProgressTasks.isEmpty &&
+          pendingTasks.isEmpty &&
+          completedTasks.isEmpty) ...[
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Center(
             child: Text(
               "No tasks for today",
-              style: TextStyle(color: Colors.grey, fontFamily: AppFonts.popins),
+              style: TextStyle(
+                color: Colors.grey,
+                fontFamily: AppFonts.popins,
+              ),
             ),
           ),
         ),
@@ -294,9 +255,45 @@ Widget _buildTodayTasksSection(
   );
 }
 
-Widget _buildInProgressTaskCard(BuildContext context, Pending task) {
+// ✅ Reusable section label
+Widget _buildSectionLabel(String title, Color color, String priority) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    child: Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            fontFamily: AppFonts.popins,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          "Priority: $priority",
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+            fontFamily: AppFonts.popins,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// ✅ Single card handles both PENDING and IN_PROGRESS via task.status
+Widget _buildTaskCard(BuildContext context, Pending task) {
   String timeRange = _formatTimeRange(task.workday ?? 'Daily');
   String dueDateText = '';
+
   if (task.dueDate != null) {
     final dueDate = DateTime.parse(task.dueDate!);
     final now = DateTime.now();
@@ -310,6 +307,8 @@ Widget _buildInProgressTaskCard(BuildContext context, Pending task) {
           'Overdue by ${-difference} day${-difference > 1 ? 's' : ''}';
     }
   }
+
+  final isInProgress = task.status == 'IN_PROGRESS';
 
   return Container(
     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -350,20 +349,17 @@ Widget _buildInProgressTaskCard(BuildContext context, Pending task) {
           children: [
             const Icon(Icons.access_time, size: 16, color: Colors.grey),
             const SizedBox(width: 4),
-            Text(
-              timeRange,
-              style: const TextStyle(fontSize: 13, fontFamily: AppFonts.popins),
-            ),
+            Text(timeRange,
+                style: const TextStyle(
+                    fontSize: 13, fontFamily: AppFonts.popins)),
             const SizedBox(width: 16),
             const Icon(Icons.agriculture, size: 16, color: Colors.grey),
             const SizedBox(width: 4),
-            Text(
-              _getAreaFromTask(task),
-              style: const TextStyle(fontSize: 13, fontFamily: AppFonts.popins),
-            ),
+            Text(_getAreaFromTask(task),
+                style: const TextStyle(
+                    fontSize: 13, fontFamily: AppFonts.popins)),
           ],
         ),
-
         if (dueDateText.isNotEmpty) ...[
           const SizedBox(height: 4),
           Row(
@@ -394,27 +390,95 @@ Widget _buildInProgressTaskCard(BuildContext context, Pending task) {
           alignment: Alignment.centerRight,
           child: ElevatedButton(
             onPressed: () {
-              Navigator.pushNamed(
-                context,
-                RoutesName.workerTaskDetails,
-                arguments: {'leadId': task.id},
-              );
+              if (isInProgress) {
+                // ✅ Continue — go directly to task details
+                Navigator.pushNamed(
+                  context,
+                  RoutesName.workerTaskDetails,
+                  arguments: {'leadId': task.id},
+                );
+              } else {
+                // ✅ Pending — show confirm dialog then call API
+                _showStartTaskConfirmDialog(context, task.id ?? '');
+              }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
+              backgroundColor: isInProgress ? Colors.orange : Colors.green,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ),
-            child: const Text(
-              'Continue',
-              style: TextStyle(
-                fontFamily: AppFonts.popins,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isInProgress ? Icons.play_arrow : Icons.rocket_launch,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  isInProgress ? 'Continue' : 'Start Task',
+                  style: const TextStyle(
+                    fontFamily: AppFonts.popins,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showStartTaskConfirmDialog(BuildContext context, String taskId) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: const Row(
+        children: [
+          Icon(Icons.play_circle_outline, color: Colors.green),
+          SizedBox(width: 8),
+          Text(
+            'Start Task',
+            style: TextStyle(
+              fontFamily: AppFonts.popins,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+      content: const Text(
+        'Are you sure you want to start this task?',
+        style: TextStyle(fontFamily: AppFonts.popins),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(fontFamily: AppFonts.popins, color: Colors.grey),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(dialogContext); // close dialog first
+            context.read<StartTaskBloc>().add(StartTaskPressed(taskId));
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: const Text(
+            'Yes, Start',
+            style: TextStyle(fontFamily: AppFonts.popins, color: Colors.white),
           ),
         ),
       ],

@@ -130,7 +130,7 @@ class CompleteTaskBloc extends Bloc<CompleteTaskEvent, CompleteTaskState> {
       if (state.photos.isNotEmpty) {
         data["photos"] = state.photos.map((photo) {
           return {
-            "url": photo['url'] ?? 'https://example.com/placeholder.jpg',
+            "file": photo['file'], // actual File object
             "caption": photo['caption'] ?? '',
           };
         }).toList();

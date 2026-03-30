@@ -124,7 +124,7 @@ class NetworkApiServices extends BaseApiServices {
         data: data,
         options: Options(
           headers: {
-            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/json',
             if (token != null) 'Authorization': 'Bearer $token',
           },
         ),

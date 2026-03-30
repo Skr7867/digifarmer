@@ -80,7 +80,7 @@ class Dashboard {
 
 class TaskStatus {
   List<Completed>? completed;
-  List<dynamic>? inProgress;
+  List<Pending>? inProgress; // ✅ Changed from List<dynamic> to List<Pending>
   List<Pending>? pending;
   List<dynamic>? onHold;
   List<dynamic>? cancelled;
@@ -92,30 +92,36 @@ class TaskStatus {
           .toList();
     }
 
-    inProgress = json['inProgress'];
-    onHold = json['onHold'];
-    cancelled = json['cancelled'];
+    // ✅ Parse inProgress properly
+    if (json['inProgress'] != null) {
+      inProgress = (json['inProgress'] as List)
+          .map((e) => Pending.fromJson(e))
+          .toList();
+    }
 
     if (json['pending'] != null) {
       pending = (json['pending'] as List)
           .map((e) => Pending.fromJson(e))
           .toList();
     }
+
+    onHold = json['onHold'];
+    cancelled = json['cancelled'];
   }
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
-
     if (completed != null) {
       data['completed'] = completed!.map((e) => e.toJson()).toList();
     }
-    data['inProgress'] = inProgress;
+    if (inProgress != null) {
+      data['inProgress'] = inProgress!.map((e) => e.toJson()).toList();
+    }
     if (pending != null) {
       data['pending'] = pending!.map((e) => e.toJson()).toList();
     }
     data['onHold'] = onHold;
     data['cancelled'] = cancelled;
-
     return data;
   }
 }
