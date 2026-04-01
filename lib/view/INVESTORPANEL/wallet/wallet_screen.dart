@@ -1,10 +1,15 @@
 import 'package:digifarmer/config/routes/routes_name.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
+import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import '../../../blocs/INVESTORPANEL/kycStatus/kyc_status_bloc.dart';
+import '../../../blocs/INVESTORPANEL/wallet/wallet_bloc.dart';
+import '../../../blocs/INVESTORPANEL/withdrawalAmount/withdrawal_amount_bloc.dart';
 import '../../../repository/INVESTORPANEL/kycStatus/kyc_status_http_repository.dart';
+import '../../../repository/INVESTORPANEL/wallet/wallet_http_repository.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../res/customeWidgets/custom_app_bar.dart';
 import '../../../utils/enums.dart';
@@ -24,6 +29,8 @@ class _WalletScreenState extends State<WalletScreen> {
   int selectedBankIndex = 0;
   int selectedQuickAmount = -1;
   late KycStatusBloc kycStatusBloc;
+  late WalletBloc walletBloc;
+  late WithdrawalAmountBloc withdrawalAmountBloc;
 
   final List<int> quickAmounts = [5000, 10000, 25000, 50000];
 
@@ -33,11 +40,18 @@ class _WalletScreenState extends State<WalletScreen> {
     kycStatusBloc = KycStatusBloc(
       kycStatusRepository: KycStatusHttpRepository(),
     )..add(KycStatusFetched());
+
+    walletBloc = WalletBloc(walletRepository: WalletHttpRepository())
+      ..add(WalletFetched());
+
+    withdrawalAmountBloc = GetIt.instance<WithdrawalAmountBloc>();
   }
 
   @override
   void dispose() {
     kycStatusBloc.close();
+    walletBloc.close();
+    withdrawalAmountBloc.close();
     _amountController.dispose();
     super.dispose();
   }
@@ -55,91 +69,159 @@ class _WalletScreenState extends State<WalletScreen> {
           end: Alignment.bottomRight,
         ),
       ),
-      body: BlocProvider(
-        create: (_) => kycStatusBloc,
-        child: BlocBuilder<KycStatusBloc, KycStatusState>(
-          builder: (BuildContext context, state) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// Balance Card
-                  _balanceCard(),
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => kycStatusBloc),
+          BlocProvider(create: (_) => walletBloc),
+          BlocProvider(create: (_) => withdrawalAmountBloc),
+        ],
+        child: Builder(
+          builder: (context) {
+            // This builder ensures we have the correct context with all providers
+            return BlocBuilder<KycStatusBloc, KycStatusState>(
+              builder: (BuildContext context, kycState) {
+                return BlocBuilder<WalletBloc, WalletState>(
+                  builder: (BuildContext context, walletState) {
+                    return BlocConsumer<
+                      WithdrawalAmountBloc,
+                      WithdrawalAmountState
+                    >(
+                      listener: (context, withdrawalState) {
+                        // Handle withdrawal API response
+                        if (withdrawalState.postApiStatus ==
+                            PostApiStatus.success) {
+                          // Show success message
+                          FlushBarHelper.flushBarSuccessMessage(
+                            withdrawalState.message,
+                            context,
+                          );
 
-                  const SizedBox(height: 20),
+                          // Refresh wallet balance after successful withdrawal
+                          walletBloc.add(WalletFetched());
 
-                  /// Withdrawal Amount
-                  const Text(
-                    "Withdrawal Amount",
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
+                          // Reset withdrawal state
+                          withdrawalAmountBloc.add(ResetWithdrawalState());
 
-                  TextField(
-                    controller: _amountController,
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                    decoration: InputDecoration(
-                      prefixText: "₹ ",
-                      filled: true,
-                      fillColor: Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
+                          // Reset amount field
+                          _amountController.text = "0";
+                          setState(() {
+                            selectedQuickAmount = -1;
+                          });
+                        } else if (withdrawalState.postApiStatus ==
+                            PostApiStatus.error) {
+                          // Show error message
+                          FlushBarHelper.flushBarErrorMessage(
+                            withdrawalState.message,
+                            context,
+                          );
+                        }
+                      },
+                      builder: (context, withdrawalState) {
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              /// Balance Card
+                              _balanceCard(walletState),
 
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "Min: ₹500",
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      Text(
-                        "Withdraw Max",
-                        style: TextStyle(
-                          color: Color(0xff1E8E5A),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
+                              const SizedBox(height: 20),
 
-                  const SizedBox(height: 20),
+                              /// Withdrawal Amount
+                              const Text(
+                                "Withdrawal Amount",
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 8),
 
-                  /// Quick Select
-                  const Text(
-                    "Quick Select",
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 10),
+                              TextField(
+                                controller: _amountController,
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  setState(() {
+                                    // Clear quick select when user types manually
+                                    if (selectedQuickAmount != -1) {
+                                      selectedQuickAmount = -1;
+                                    }
+                                  });
+                                  // Update BLoC with amount - using the context from builder
+                                  context.read<WithdrawalAmountBloc>().add(
+                                    AmountChanged(value),
+                                  );
+                                },
+                                decoration: InputDecoration(
+                                  prefixText: "₹ ",
+                                  filled: true,
+                                  fillColor: Colors.grey.shade200,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                              ),
 
-                  Wrap(
-                    spacing: 10,
-                    children: List.generate(
-                      quickAmounts.length,
-                      (index) => _quickAmountButton(index),
-                    ),
-                  ),
+                              const SizedBox(height: 6),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: const [
+                                  Text(
+                                    "Min: ₹500",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Withdraw Max",
+                                    style: TextStyle(
+                                      color: Color(0xff1E8E5A),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
 
-                  const SizedBox(height: 25),
+                              const SizedBox(height: 20),
 
-                  const SizedBox(height: 20),
+                              /// Quick Select
+                              const Text(
+                                "Quick Select",
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 10),
 
-                  /// Info Box
-                  _infoBox(),
+                              Wrap(
+                                spacing: 10,
+                                children: List.generate(
+                                  quickAmounts.length,
+                                  (index) => _quickAmountButton(context, index),
+                                ),
+                              ),
 
-                  const SizedBox(height: 20),
-                  _bottomSection(state),
-                ],
-              ),
+                              const SizedBox(height: 25),
+
+                              const SizedBox(height: 20),
+
+                              /// Info Box
+                              _infoBox(),
+
+                              const SizedBox(height: 20),
+                              _bottomSection(
+                                context,
+                                kycState,
+                                walletState,
+                                withdrawalState,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             );
           },
         ),
@@ -147,7 +229,30 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _balanceCard() {
+  Widget _balanceCard(WalletState walletState) {
+    String availableBalance = "0";
+    String lockedBalance = "0";
+    String withdrawableBalance = "0";
+    String totalROI = "0";
+
+    if (walletState.wallet.status == Status.completed &&
+        walletState.wallet.data != null) {
+      final walletData = walletState.wallet.data!;
+      availableBalance = walletData.availableBalance.toString();
+      lockedBalance = walletData.lockedBalance.toString();
+      totalROI = walletData.totalROIEarned.toString();
+
+      // Withdrawable balance = availableBalance + totalROI earned
+      final withdrawable =
+          walletData.availableBalance + walletData.totalROIEarned;
+      withdrawableBalance = withdrawable.toString();
+    } else if (walletState.wallet.status == Status.loading) {
+      availableBalance = "...";
+      lockedBalance = "...";
+      withdrawableBalance = "...";
+      totalROI = "...";
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
@@ -177,17 +282,15 @@ class _WalletScreenState extends State<WalletScreen> {
                 buttonColor: AppColors.whiteColor.withValues(alpha: 0.2),
                 title: 'Status',
                 onPress: () {
-                  // Refresh KYC status when clicking status button
-                  // kycStatusBloc.add(KycStatusFetched());
                   Navigator.pushNamed(context, RoutesName.withdrawScreen);
                 },
               ),
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            "₹1,24,500",
-            style: TextStyle(
+          Text(
+            "₹$availableBalance",
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -195,9 +298,9 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            "Locked Amount: ₹75,000\nWithdrawable: ₹49,500",
-            style: TextStyle(
+          Text(
+            "Locked Amount: ₹$lockedBalance\nWithdrawable: ₹$withdrawableBalance\nTotal ROI Earned: ₹$totalROI",
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 12,
               fontFamily: AppFonts.popins,
@@ -208,15 +311,20 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _quickAmountButton(int index) {
+  Widget _quickAmountButton(BuildContext context, int index) {
     final isSelected = selectedQuickAmount == index;
 
     return GestureDetector(
       onTap: () {
         setState(() {
           selectedQuickAmount = index;
-          _amountController.text = quickAmounts[index].toString();
+          final amount = quickAmounts[index].toString();
+          _amountController.text = amount;
         });
+        // Update BLoC with selected amount - using the provided context
+        context.read<WithdrawalAmountBloc>().add(
+          AmountChanged(quickAmounts[index].toString()),
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -267,61 +375,107 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  Widget _bottomSection(KycStatusState state) {
+  Widget _bottomSection(
+    BuildContext context,
+    KycStatusState kycState,
+    WalletState walletState,
+    WithdrawalAmountState withdrawalState,
+  ) {
     final amount = int.tryParse(_amountController.text) ?? 0;
-    final receiveAmount = amount;
+
+    // Get withdrawable balance from wallet
+    num maxWithdrawable = 0;
+    if (walletState.wallet.status == Status.completed &&
+        walletState.wallet.data != null) {
+      final walletData = walletState.wallet.data!;
+      maxWithdrawable = walletData.availableBalance + walletData.totalROIEarned;
+    }
+
+    final receiveAmount = amount > maxWithdrawable ? maxWithdrawable : amount;
+
     bool isKycCompleted = false;
     String buttonText = "Proceed to Withdraw";
     VoidCallback? onPressed;
 
-    if (state.kycStatus.status == Status.completed &&
-        state.kycStatus.data != null) {
-      final kycStatus = state.kycStatus.data!.data?.kycStatus ?? 'NOT_STARTED';
+    // Check if withdrawal is in progress
+    final isLoading = withdrawalState.postApiStatus == PostApiStatus.loading;
 
-      isKycCompleted = (kycStatus == 'COMPLETED' || kycStatus == 'VERIFIED');
+    if (kycState.kycStatus.status == Status.completed &&
+        kycState.kycStatus.data != null) {
+      final kycStatus =
+          kycState.kycStatus.data!.data?.kycStatus ?? 'NOT_STARTED';
+
+      // Check if KYC is completed (either COMPLETED, VERIFIED, or APPROVED)
+      isKycCompleted =
+          (kycStatus == 'COMPLETED' ||
+          kycStatus == 'VERIFIED' ||
+          kycStatus == 'APPROVED');
 
       if (isKycCompleted) {
-        // ✅ KYC completed
-        buttonText = "Proceed to Withdraw";
+        // ✅ KYC completed - allow withdrawal
+        buttonText = isLoading ? "Processing..." : "Proceed to Withdraw";
 
-        onPressed = () {
-          if (amount >= 500) {
-            Navigator.pushNamed(context, RoutesName.identityVerificationScreen);
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Minimum withdrawal amount is ₹500'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        };
+        onPressed = isLoading
+            ? null
+            : () {
+                if (amount >= 500) {
+                  if (amount > maxWithdrawable) {
+                    FlushBarHelper.flushBarErrorMessage(
+                      'Maximum withdrawal amount is ₹$maxWithdrawable',
+                      context,
+                    );
+                  } else if (amount <= 0) {
+                    FlushBarHelper.flushBarErrorMessage(
+                      'Please enter a valid amount',
+                      context,
+                    );
+                  } else {
+                    // Show confirmation dialog before withdrawal
+                    _showWithdrawalConfirmationDialog(context, amount);
+                  }
+                } else if (amount > 0 && amount < 500) {
+                  FlushBarHelper.flushBarErrorMessage(
+                    'Minimum withdrawal amount is ₹500',
+                    context,
+                  );
+                } else {
+                  FlushBarHelper.flushBarErrorMessage(
+                    'Please enter withdrawal amount',
+                    context,
+                  );
+                }
+              };
       } else {
+        // KYC not completed - handle based on status
         if (kycStatus == "DOCUMENTS_PENDING") {
           buttonText = "Upload Your Documents";
+          onPressed = () {
+            Navigator.pushNamed(context, RoutesName.uploadDocumentScreen);
+          };
         } else if (kycStatus == "UNDER_REVIEW") {
           buttonText = "Check Your KYC Verification Status";
-        } else {
-          buttonText = "Complete Your KYC";
-        }
-
-        onPressed = () {
-          if (kycStatus == "DOCUMENTS_PENDING") {
-            Navigator.pushNamed(context, RoutesName.uploadDocumentScreen);
-          } else if (kycStatus == "UNDER_REVIEW") {
+          onPressed = () {
             Navigator.pushNamed(
               context,
               RoutesName.kycVerificationStatusScreen,
             );
-          } else {
+          };
+        } else if (kycStatus == "REJECTED") {
+          buttonText = "Re-submit KYC Documents";
+          onPressed = () {
             Navigator.pushNamed(context, RoutesName.identityVerificationScreen);
-          }
-        };
+          };
+        } else {
+          buttonText = "Complete Your KYC";
+          onPressed = () {
+            Navigator.pushNamed(context, RoutesName.identityVerificationScreen);
+          };
+        }
       }
-    } else if (state.kycStatus.status == Status.loading) {
+    } else if (kycState.kycStatus.status == Status.loading) {
       buttonText = "Verifying KYC...";
       onPressed = null;
-    } else if (state.kycStatus.status == Status.error) {
+    } else if (kycState.kycStatus.status == Status.error) {
       buttonText = "Retry KYC Verification";
       onPressed = () {
         kycStatusBloc.add(KycStatusFetched());
@@ -335,24 +489,24 @@ class _WalletScreenState extends State<WalletScreen> {
 
     return Column(
       children: [
-        SizedBox(height: 50),
+        const SizedBox(height: 50),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
               "You will receive",
-              style: TextStyle(fontWeight: .bold, fontSize: 16),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Text(
               "₹$receiveAmount",
-              style: TextStyle(fontWeight: .bold, fontSize: 16),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ],
         ),
         const SizedBox(height: 10),
 
         // Show warning message for insufficient amount
-        if (amount < 500 && amount > 0)
+        if (amount < 500 && amount > 0 && !isLoading && isKycCompleted)
           Container(
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -379,8 +533,42 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
           ),
 
+        // Show warning message for exceeding withdrawable amount
+        if (amount > maxWithdrawable &&
+            amount > 0 &&
+            maxWithdrawable > 0 &&
+            !isLoading &&
+            isKycCompleted)
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 16,
+                  color: Colors.orange.shade700,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Maximum withdrawal amount is ₹$maxWithdrawable',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         // Show KYC warning message if not completed
-        if (!isKycCompleted && state.kycStatus.status == Status.completed)
+        if (!isKycCompleted &&
+            kycState.kycStatus.status == Status.completed &&
+            !isLoading)
           Container(
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -418,16 +606,93 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
             ),
             onPressed: onPressed,
-            child: Text(
-              buttonText,
-              style: TextStyle(
-                fontFamily: AppFonts.popins,
-                color: AppColors.whiteColor,
-              ),
-            ),
+            child: isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    buttonText,
+                    style: TextStyle(
+                      fontFamily: AppFonts.popins,
+                      color: AppColors.whiteColor,
+                    ),
+                  ),
           ),
         ),
       ],
     );
+  }
+
+  void _showWithdrawalConfirmationDialog(BuildContext context, int amount) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Withdrawal'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Amount: ₹$amount'),
+              const SizedBox(height: 8),
+              const Text('Payment Method: Bank Transfer'),
+              const SizedBox(height: 8),
+              const Text(
+                'This action cannot be undone.',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close confirmation dialog
+                _processWithdrawal(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xff2BB673),
+              ),
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _processWithdrawal(BuildContext context) {
+    // Show processing dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Payment Processing'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              const Text('Processing your withdrawal request...'),
+            ],
+          ),
+        );
+      },
+    ).then((_) {
+      // Trigger withdrawal API call
+      context.read<WithdrawalAmountBloc>().add(SubmitWithdrawal());
+    });
   }
 }

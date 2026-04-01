@@ -4,6 +4,7 @@ import 'package:digifarmer/res/fonts/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../blocs/LANDOWNERPANEL/landStatus/land_status_bloc.dart';
 import '../../../model/LANDOWNERSPANEL/landOwnerTimeLine/land_owner_timeline_model.dart';
@@ -594,12 +595,18 @@ class _QuickActions extends StatelessWidget {
         onTap: () => Navigator.pushNamed(context, RoutesName.addNewLandScreen),
       ),
 
-      _ActionData(
-        icon: Icons.support_agent_outlined,
-        label: "Support",
-        color: const Color(0xff9C27B0),
-        bg: const Color(0xffF3E5F5),
-      ),
+     _ActionData(
+  icon: Icons.support_agent_outlined,
+  label: "Support",
+  color: const Color(0xff9C27B0),
+  bg: const Color(0xffF3E5F5),
+  onTap: () async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: '9266157828');
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    }
+  },
+),
     ];
 
     return Row(

@@ -8,6 +8,8 @@ import 'package:digifarmer/repository/INVESTORPANEL/investmentDetails/investment
 import 'package:digifarmer/repository/INVESTORPANEL/investmentDetails/investment_details_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_http_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/resendOtp/resend_otp_http_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/resendOtp/resend_otp_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/submitBankDetails/submit_bank_details_http_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/submitBankDetails/submit_bank_details_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/submitKycDocuments/submit_kyc_documents_http_repository.dart';
@@ -16,6 +18,10 @@ import 'package:digifarmer/repository/INVESTORPANEL/userProfile/user_profile_htt
 import 'package:digifarmer/repository/INVESTORPANEL/userProfile/user_profile_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/verifyPayment/verify_payment_http_repository.dart';
 import 'package:digifarmer/repository/INVESTORPANEL/verifyPayment/verify_payment_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/wallet/wallet_http_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/wallet/wallet_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/withdrawalAmount/withdrawal_amount_http_repository.dart';
+import 'package:digifarmer/repository/INVESTORPANEL/withdrawalAmount/withdrawal_amount_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landImage/land_image_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landLocation/land_location_http_repository.dart';
 import 'package:digifarmer/repository/LANDOWNERPANEL/landLocation/land_location_repository.dart';
@@ -41,6 +47,7 @@ import '../../../blocs/INVESTORPANEL/activeInvestment/active_investment_bloc.dar
 import '../../../blocs/INVESTORPANEL/appTheme/theme_bloc.dart';
 import '../../../blocs/INVESTORPANEL/createPayment/create_payment_bloc.dart';
 import '../../../blocs/INVESTORPANEL/userProfile/user_profile_bloc.dart';
+import '../../../blocs/INVESTORPANEL/withdrawalAmount/withdrawal_amount_bloc.dart';
 import '../../../blocs/LANDOWNERPANEL/landStatus/land_status_bloc.dart';
 import '../../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
 import '../../../blocs/WORKERPANEL/landDetails/land_details_bloc.dart';
@@ -177,8 +184,21 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<UpdateProfileRepository>(
     () => UpdateProfileHttpRepository(),
   );
+
+  getIt.registerLazySingleton<ResendOtpRepository>(
+    () => ResendOtpHttpRepository(),
+  );
   getIt.registerLazySingleton<InvestmentDetailsRepository>(
     () => InvestmentDetailsHttpRepository(),
+  );
+  getIt.registerLazySingleton<WalletRepository>(
+    () => WalletHttpRepository(),
+  );
+  getIt.registerLazySingleton<WithdrawalAmountRepository>(
+    () => WithdrawalAmountHttpRepository(),
+  );
+   getIt.registerFactory<WithdrawalAmountBloc>(
+    () => WithdrawalAmountBloc(getIt<WithdrawalAmountRepository>()),
   );
   getIt.registerLazySingleton<VerifyPaymentRepository>(
     () => VerifyPaymentHttpRepository(),

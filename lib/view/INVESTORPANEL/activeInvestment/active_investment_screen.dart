@@ -1,6 +1,5 @@
 import 'package:digifarmer/config/component/internet_exception.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
-import 'package:digifarmer/main.dart';
 import 'package:digifarmer/res/customeWidgets/custom_app_bar.dart';
 import 'package:digifarmer/res/customeWidgets/round_button.dart';
 import 'package:digifarmer/res/fonts/app_fonts.dart';
@@ -11,6 +10,7 @@ import 'package:intl/intl.dart';
 
 import '../../../blocs/INVESTORPANEL/activeInvestment/active_investment_bloc.dart';
 import '../../../blocs/INVESTORPANEL/allInvestmentPlan/all_investment_plan_bloc.dart';
+import '../../../main.dart';
 import '../../../model/INVESTORPANEL/activeInvestment/active_investment_model.dart';
 import '../../../repository/INVESTORPANEL/invesmentPlan/all_investment_plan_repository.dart';
 import '../../../res/color/app_colors.dart';
@@ -142,7 +142,8 @@ class _ActiveInvestmentScreenState extends State<ActiveInvestmentScreen> {
                             style: Theme.of(context).textTheme.titleLarge
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green.shade700, fontFamily: AppFonts.popins
+                                  color: Colors.green.shade700,
+                                  fontFamily: AppFonts.popins,
                                 ),
                           ),
                         ),
@@ -716,7 +717,11 @@ class _ActiveInvestmentScreenState extends State<ActiveInvestmentScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, RoutesName.investmentDetailsScreen, arguments: investment.id);
+                      Navigator.pushNamed(
+                        context,
+                        RoutesName.investmentDetailsScreen,
+                        arguments: investment.id,
+                      );
                     },
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: Colors.green.shade300),

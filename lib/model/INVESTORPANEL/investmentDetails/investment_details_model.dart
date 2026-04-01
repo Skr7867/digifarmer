@@ -14,23 +14,14 @@ class InvestmentDetailsModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['success'] = success;
-    if (investment != null) {
-      data['investment'] = investment!.toJson();
-    }
+    if (investment != null) data['investment'] = investment!.toJson();
     return data;
   }
 }
 
-class Investment {
-  double? _toDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is int) return value.toDouble();
-    if (value is double) return value;
-    if (value is String) return double.tryParse(value);
-    return null;
-  }
-
-  int? _toInt(dynamic value) {
+// ✅ Shared helper mixin to avoid repeating _toInt/_toDouble everywhere
+class _TypeHelper {
+  static int? toInt(dynamic value) {
     if (value == null) return null;
     if (value is int) return value;
     if (value is double) return value.toInt();
@@ -38,12 +29,22 @@ class Investment {
     return null;
   }
 
+  static double? toDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+}
+
+class Investment {
   String? id;
   String? investmentId;
   String? investmentType;
   int? investmentAmount;
   int? durationMonths;
-  num? expectedReturnPercent;
+  double? expectedReturnPercent;
   String? applicationStatus;
   String? paymentStatus;
   String? paymentMethod;
@@ -69,13 +70,14 @@ class Investment {
   List<Documents>? documents;
   List<StatusTimeline>? statusTimeline;
   String? adminRemarks;
-  List<Null>? adminNotes;
+  List<dynamic>? adminNotes;
   ApprovedBy? approvedBy;
   String? approvedAt;
   String? createdAt;
   String? updatedAt;
   Allocations? allocations;
   PoolInfo? poolInfo;
+  TaskImages? taskImages; // ✅ NEW - was missing
 
   Investment({
     this.id,
@@ -116,26 +118,23 @@ class Investment {
     this.updatedAt,
     this.allocations,
     this.poolInfo,
+    this.taskImages,
   });
 
   Investment.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     investmentId = json['investmentId'];
     investmentType = json['investmentType'];
-
-    // Convert to int with proper handling
-    investmentAmount = _toInt(json['investmentAmount']);
-    durationMonths = _toInt(json['durationMonths']);
-    paidAmount = _toInt(json['paidAmount']);
-    selectedDuration = _toInt(json['selectedDuration']);
-    roiAmount = _toInt(json['roiAmount']);
-    totalRoiExpected = _toInt(json['totalRoiExpected']);
-    totalROIPaid = _toInt(json['totalROIPaid']);
-    pendingROI = _toInt(json['pendingROI']);
-    lockInPeriodMonths = _toInt(json['lockInPeriodMonths']);
-
-    expectedReturnPercent = _toDouble(json['expectedReturnPercent']);
-
+    investmentAmount = _TypeHelper.toInt(json['investmentAmount']);
+    durationMonths = _TypeHelper.toInt(json['durationMonths']);
+    paidAmount = _TypeHelper.toInt(json['paidAmount']);
+    selectedDuration = _TypeHelper.toInt(json['selectedDuration']);
+    roiAmount = _TypeHelper.toInt(json['roiAmount']);
+    totalRoiExpected = _TypeHelper.toInt(json['totalRoiExpected']);
+    totalROIPaid = _TypeHelper.toInt(json['totalROIPaid']);
+    pendingROI = _TypeHelper.toInt(json['pendingROI']);
+    lockInPeriodMonths = _TypeHelper.toInt(json['lockInPeriodMonths']);
+    expectedReturnPercent = _TypeHelper.toDouble(json['expectedReturnPercent']);
     applicationStatus = json['applicationStatus'];
     paymentStatus = json['paymentStatus'];
     paymentMethod = json['paymentMethod'];
@@ -143,9 +142,7 @@ class Investment {
     paymentReference = json['paymentReference'];
     razorpayOrderId = json['razorpayOrderId'];
     razorpayPaymentId = json['razorpayPaymentId'];
-
     planId = json['planId'] != null ? PlanId.fromJson(json['planId']) : null;
-
     roiFrequency = json['roiFrequency'];
     startDate = json['startDate'];
     endDate = json['endDate'];
@@ -155,24 +152,21 @@ class Investment {
     agreementPdfUrl = json['agreementPdfUrl'];
 
     if (json['documents'] != null) {
-      documents = <Documents>[];
-      json['documents'].forEach((v) {
-        documents!.add(Documents.fromJson(v));
-      });
+      documents = (json['documents'] as List)
+          .map((v) => Documents.fromJson(v))
+          .toList();
     }
 
     if (json['statusTimeline'] != null) {
-      statusTimeline = <StatusTimeline>[];
-      json['statusTimeline'].forEach((v) {
-        statusTimeline!.add(StatusTimeline.fromJson(v));
-      });
+      statusTimeline = (json['statusTimeline'] as List)
+          .map((v) => StatusTimeline.fromJson(v))
+          .toList();
     }
 
     adminRemarks = json['adminRemarks'];
-
-    if (json['adminNotes'] != null) {
-      adminNotes = <Null>[];
-    }
+    adminNotes = json['adminNotes'] != null
+        ? List<dynamic>.from(json['adminNotes'])
+        : [];
 
     approvedBy = json['approvedBy'] != null
         ? ApprovedBy.fromJson(json['approvedBy'])
@@ -188,6 +182,11 @@ class Investment {
 
     poolInfo = json['poolInfo'] != null
         ? PoolInfo.fromJson(json['poolInfo'])
+        : null;
+
+    // ✅ NEW
+    taskImages = json['taskImages'] != null
+        ? TaskImages.fromJson(json['taskImages'])
         : null;
   }
 
@@ -207,9 +206,7 @@ class Investment {
     data['paymentReference'] = paymentReference;
     data['razorpayOrderId'] = razorpayOrderId;
     data['razorpayPaymentId'] = razorpayPaymentId;
-    if (planId != null) {
-      data['planId'] = planId!.toJson();
-    }
+    if (planId != null) data['planId'] = planId!.toJson();
     data['selectedDuration'] = selectedDuration;
     data['roiFrequency'] = roiFrequency;
     data['roiAmount'] = roiAmount;
@@ -227,24 +224,17 @@ class Investment {
       data['documents'] = documents!.map((v) => v.toJson()).toList();
     }
     if (statusTimeline != null) {
-      data['statusTimeline'] = statusTimeline!
-          .map((v) => v.toJson())
-          .toList();
+      data['statusTimeline'] = statusTimeline!.map((v) => v.toJson()).toList();
     }
     data['adminRemarks'] = adminRemarks;
-
-    if (approvedBy != null) {
-      data['approvedBy'] = approvedBy!.toJson();
-    }
+    data['adminNotes'] = adminNotes;
+    if (approvedBy != null) data['approvedBy'] = approvedBy!.toJson();
     data['approvedAt'] = approvedAt;
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;
-    if (allocations != null) {
-      data['allocations'] = allocations!.toJson();
-    }
-    if (poolInfo != null) {
-      data['poolInfo'] = poolInfo!.toJson();
-    }
+    if (allocations != null) data['allocations'] = allocations!.toJson();
+    if (poolInfo != null) data['poolInfo'] = poolInfo!.toJson();
+    if (taskImages != null) data['taskImages'] = taskImages!.toJson();
     return data;
   }
 }
@@ -267,20 +257,18 @@ class PlanId {
   PlanId.fromJson(Map<String, dynamic> json) {
     sId = json['_id'];
     planName = json['planName'];
-    minInvestment = json['minInvestment'];
-    maxInvestment = json['maxInvestment'];
-    returnPercent = json['returnPercent'];
+    minInvestment = _TypeHelper.toInt(json['minInvestment']);
+    maxInvestment = _TypeHelper.toInt(json['maxInvestment']);
+    returnPercent = _TypeHelper.toInt(json['returnPercent']);
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = sId;
-    data['planName'] = planName;
-    data['minInvestment'] = minInvestment;
-    data['maxInvestment'] = maxInvestment;
-    data['returnPercent'] = returnPercent;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        '_id': sId,
+        'planName': planName,
+        'minInvestment': minInvestment,
+        'maxInvestment': maxInvestment,
+        'returnPercent': returnPercent,
+      };
 }
 
 class Documents {
@@ -298,14 +286,12 @@ class Documents {
     uploadedAt = json['uploadedAt'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['type'] = type;
-    data['url'] = url;
-    data['name'] = name;
-    data['uploadedAt'] = uploadedAt;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'url': url,
+        'name': name,
+        'uploadedAt': uploadedAt,
+      };
 }
 
 class StatusTimeline {
@@ -323,14 +309,12 @@ class StatusTimeline {
     updatedBy = json['updatedBy'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
-    data['note'] = note;
-    data['updatedAt'] = updatedAt;
-    data['updatedBy'] = updatedBy;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'status': status,
+        'note': note,
+        'updatedAt': updatedAt,
+        'updatedBy': updatedBy,
+      };
 }
 
 class ApprovedBy {
@@ -346,96 +330,110 @@ class ApprovedBy {
     fullName = json['fullName'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = sId;
-    data['mobileNumber'] = mobileNumber;
-    data['fullName'] = fullName;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        '_id': sId,
+        'mobileNumber': mobileNumber,
+        'fullName': fullName,
+      };
 }
 
 class Allocations {
   List<Lands>? lands;
-  List<Null>? crops;
+  List<dynamic>? crops;
   String? allocatedAt;
   String? allocatedBy;
+  int? totalAllocatedAmount; // ✅ NEW
+  String? allocationStatus;  // ✅ NEW
 
-  Allocations({this.lands, this.crops, this.allocatedAt, this.allocatedBy});
+  Allocations({
+    this.lands,
+    this.crops,
+    this.allocatedAt,
+    this.allocatedBy,
+    this.totalAllocatedAmount,
+    this.allocationStatus,
+  });
 
   Allocations.fromJson(Map<String, dynamic> json) {
     if (json['lands'] != null) {
-      lands = <Lands>[];
-      json['lands'].forEach((v) {
-        lands!.add(Lands.fromJson(v));
-      });
+      lands = (json['lands'] as List)
+          .map((v) => Lands.fromJson(v))
+          .toList();
     }
-    if (json['crops'] != null) {
-      crops = <Null>[];
-    }
+    crops = json['crops'] != null ? List<dynamic>.from(json['crops']) : [];
     allocatedAt = json['allocatedAt'];
     allocatedBy = json['allocatedBy'];
+    totalAllocatedAmount = _TypeHelper.toInt(json['totalAllocatedAmount']); // ✅ NEW
+    allocationStatus = json['allocationStatus']; // ✅ NEW
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (lands != null) {
-      data['lands'] = lands!.map((v) => v.toJson()).toList();
-    }
-
-    data['allocatedAt'] = allocatedAt;
-    data['allocatedBy'] = allocatedBy;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'lands': lands?.map((v) => v.toJson()).toList(),
+        'crops': crops,
+        'allocatedAt': allocatedAt,
+        'allocatedBy': allocatedBy,
+        'totalAllocatedAmount': totalAllocatedAmount,
+        'allocationStatus': allocationStatus,
+      };
 }
 
 class Lands {
   LandId? landId;
   int? allocatedAmount;
   int? allocationPercent;
+  String? allocatedAt;       // ✅ NEW
+  bool? isActive;            // ✅ NEW
   LandDetails? landDetails;
   List<Crops>? crops;
+  List<TaskImage>? taskImages;   // ✅ NEW
+  int? taskImagesCount;          // ✅ NEW
 
   Lands({
     this.landId,
     this.allocatedAmount,
     this.allocationPercent,
+    this.allocatedAt,
+    this.isActive,
     this.landDetails,
     this.crops,
+    this.taskImages,
+    this.taskImagesCount,
   });
 
   Lands.fromJson(Map<String, dynamic> json) {
-    landId = json['landId'] != null
-        ? LandId.fromJson(json['landId'])
-        : null;
-    allocatedAmount = json['allocatedAmount'];
-    allocationPercent = json['allocationPercent'];
+    landId = json['landId'] != null ? LandId.fromJson(json['landId']) : null;
+    allocatedAmount = _TypeHelper.toInt(json['allocatedAmount']);
+    allocationPercent = _TypeHelper.toInt(json['allocationPercent']);
+    allocatedAt = json['allocatedAt'];       // ✅ NEW
+    isActive = json['isActive'];             // ✅ NEW
     landDetails = json['landDetails'] != null
         ? LandDetails.fromJson(json['landDetails'])
         : null;
     if (json['crops'] != null) {
-      crops = <Crops>[];
-      json['crops'].forEach((v) {
-        crops!.add(Crops.fromJson(v));
-      });
+      crops = (json['crops'] as List)
+          .map((v) => Crops.fromJson(v))
+          .toList();
     }
+    // ✅ NEW
+    if (json['taskImages'] != null) {
+      taskImages = (json['taskImages'] as List)
+          .map((v) => TaskImage.fromJson(v))
+          .toList();
+    }
+    taskImagesCount = _TypeHelper.toInt(json['taskImagesCount']); // ✅ NEW
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    if (landId != null) {
-      data['landId'] = landId!.toJson();
-    }
-    data['allocatedAmount'] = allocatedAmount;
-    data['allocationPercent'] = allocationPercent;
-    if (landDetails != null) {
-      data['landDetails'] = landDetails!.toJson();
-    }
-    if (crops != null) {
-      data['crops'] = crops!.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'landId': landId?.toJson(),
+        'allocatedAmount': allocatedAmount,
+        'allocationPercent': allocationPercent,
+        'allocatedAt': allocatedAt,
+        'isActive': isActive,
+        'landDetails': landDetails?.toJson(),
+        'crops': crops?.map((v) => v.toJson()).toList(),
+        'taskImages': taskImages?.map((v) => v.toJson()).toList(),
+        'taskImagesCount': taskImagesCount,
+      };
 }
 
 class LandId {
@@ -468,63 +466,73 @@ class LandId {
     landTitle = json['landTitle'];
     surveyNumber = json['surveyNumber'];
     areaUnit = json['areaUnit'];
-    totalSize = json['totalSize'];
+    totalSize = _TypeHelper.toInt(json['totalSize']);
     description = json['description'];
-    landImages = json['landImages'].cast<String>();
+    landImages = json['landImages'] != null
+        ? List<String>.from(json['landImages'])
+        : [];
     address = json['address'];
     city = json['city'];
     state = json['state'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = sId;
-    data['landTitle'] = landTitle;
-    data['surveyNumber'] = surveyNumber;
-    data['areaUnit'] = areaUnit;
-    data['totalSize'] = totalSize;
-    data['description'] = description;
-    data['landImages'] = landImages;
-    data['address'] = address;
-    data['city'] = city;
-    data['state'] = state;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        '_id': sId,
+        'landTitle': landTitle,
+        'surveyNumber': surveyNumber,
+        'areaUnit': areaUnit,
+        'totalSize': totalSize,
+        'description': description,
+        'landImages': landImages,
+        'address': address,
+        'city': city,
+        'state': state,
+      };
 }
 
 class LandDetails {
+  String? id;       // ✅ NEW - was missing
   String? title;
   String? location;
   int? area;
   String? unit;
   List<String>? images;
 
-  LandDetails({this.title, this.location, this.area, this.unit, this.images});
+  LandDetails({
+    this.id,
+    this.title,
+    this.location,
+    this.area,
+    this.unit,
+    this.images,
+  });
 
   LandDetails.fromJson(Map<String, dynamic> json) {
+    id = json['id'];       // ✅ NEW
     title = json['title'];
     location = json['location'];
-    area = json['area'];
+    area = _TypeHelper.toInt(json['area']);
     unit = json['unit'];
-    images = json['images'].cast<String>();
+    images = json['images'] != null
+        ? List<String>.from(json['images'])
+        : [];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['title'] = title;
-    data['location'] = location;
-    data['area'] = area;
-    data['unit'] = unit;
-    data['images'] = images;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'location': location,
+        'area': area,
+        'unit': unit,
+        'images': images,
+      };
 }
 
 class Crops {
   String? type;
-  int? amount;
-  int? percent;
-  int? expectedReturn;
+  double? amount;    // ✅ changed int→double (API sends 15000.000000000002)
+  double? percent;  // ✅ changed int→double (API sends 33.333333333333336)
+  double? expectedReturn; // ✅ changed int→double (API sends 2700.0000000000005)
   String? season;
 
   Crops({
@@ -537,28 +545,26 @@ class Crops {
 
   Crops.fromJson(Map<String, dynamic> json) {
     type = json['type'];
-    amount = json['amount'];
-    percent = json['percent'];
-    expectedReturn = json['expectedReturn'];
+    amount = _TypeHelper.toDouble(json['amount']);
+    percent = _TypeHelper.toDouble(json['percent']);
+    expectedReturn = _TypeHelper.toDouble(json['expectedReturn']);
     season = json['season'];
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['type'] = type;
-    data['amount'] = amount;
-    data['percent'] = percent;
-    data['expectedReturn'] = expectedReturn;
-    data['season'] = season;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'amount': amount,
+        'percent': percent,
+        'expectedReturn': expectedReturn,
+        'season': season,
+      };
 }
 
 class PoolInfo {
   String? poolName;
   int? totalPoolSize;
   int? remainingAmount;
-  List<Null>? allocatedLands;
+  List<dynamic>? allocatedLands;
 
   PoolInfo({
     this.poolName,
@@ -569,19 +575,158 @@ class PoolInfo {
 
   PoolInfo.fromJson(Map<String, dynamic> json) {
     poolName = json['poolName'];
-    totalPoolSize = json['totalPoolSize'];
-    remainingAmount = json['remainingAmount'];
-    if (json['allocatedLands'] != null) {
-      allocatedLands = <Null>[];
+    totalPoolSize = _TypeHelper.toInt(json['totalPoolSize']);
+    remainingAmount = _TypeHelper.toInt(json['remainingAmount']);
+    allocatedLands = json['allocatedLands'] != null
+        ? List<dynamic>.from(json['allocatedLands'])
+        : [];
+  }
+
+  Map<String, dynamic> toJson() => {
+        'poolName': poolName,
+        'totalPoolSize': totalPoolSize,
+        'remainingAmount': remainingAmount,
+        'allocatedLands': allocatedLands,
+      };
+}
+
+// ✅ NEW - TaskImage model (used in both Lands.taskImages and TaskImages.allImages)
+class TaskImage {
+  String? id;
+  String? taskId;
+  String? taskTitle;
+  String? taskType;
+  String? workDone;
+  int? hoursWorked;
+  String? submittedAt;
+  String? imageUrl;
+  String? caption;
+  bool? isShareable;
+  String? landId;         // only in allImages / imagesByLand
+  String? landTitle;      // only in allImages / imagesByLand
+  String? landLocation;   // only in allImages / imagesByLand
+
+  TaskImage({
+    this.id,
+    this.taskId,
+    this.taskTitle,
+    this.taskType,
+    this.workDone,
+    this.hoursWorked,
+    this.submittedAt,
+    this.imageUrl,
+    this.caption,
+    this.isShareable,
+    this.landId,
+    this.landTitle,
+    this.landLocation,
+  });
+
+  TaskImage.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    taskId = json['taskId'];
+    taskTitle = json['taskTitle'];
+    taskType = json['taskType'];
+    workDone = json['workDone'];
+    hoursWorked = _TypeHelper.toInt(json['hoursWorked']);
+    submittedAt = json['submittedAt'];
+    imageUrl = json['imageUrl'];
+    caption = json['caption'];
+    isShareable = json['isShareable'];
+    landId = json['landId'];
+    landTitle = json['landTitle'];
+    landLocation = json['landLocation'];
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'taskId': taskId,
+        'taskTitle': taskTitle,
+        'taskType': taskType,
+        'workDone': workDone,
+        'hoursWorked': hoursWorked,
+        'submittedAt': submittedAt,
+        'imageUrl': imageUrl,
+        'caption': caption,
+        'isShareable': isShareable,
+        'landId': landId,
+        'landTitle': landTitle,
+        'landLocation': landLocation,
+      };
+}
+
+// ✅ NEW - TaskImages wrapper (top-level investment.taskImages)
+class TaskImages {
+  List<TaskImage>? allImages;
+  List<ImagesByLand>? imagesByLand;
+  int? totalImages;
+  int? landsWithImages;
+
+  TaskImages({
+    this.allImages,
+    this.imagesByLand,
+    this.totalImages,
+    this.landsWithImages,
+  });
+
+  TaskImages.fromJson(Map<String, dynamic> json) {
+    if (json['allImages'] != null) {
+      allImages = (json['allImages'] as List)
+          .map((v) => TaskImage.fromJson(v))
+          .toList();
+    }
+    if (json['imagesByLand'] != null) {
+      imagesByLand = (json['imagesByLand'] as List)
+          .map((v) => ImagesByLand.fromJson(v))
+          .toList();
+    }
+    totalImages = _TypeHelper.toInt(json['totalImages']);
+    landsWithImages = _TypeHelper.toInt(json['landsWithImages']);
+  }
+
+  Map<String, dynamic> toJson() => {
+        'allImages': allImages?.map((v) => v.toJson()).toList(),
+        'imagesByLand': imagesByLand?.map((v) => v.toJson()).toList(),
+        'totalImages': totalImages,
+        'landsWithImages': landsWithImages,
+      };
+}
+
+// ✅ NEW - ImagesByLand model
+class ImagesByLand {
+  String? landId;
+  String? landTitle;
+  String? landLocation;
+  List<String>? landImages;
+  List<TaskImage>? images;
+
+  ImagesByLand({
+    this.landId,
+    this.landTitle,
+    this.landLocation,
+    this.landImages,
+    this.images,
+  });
+
+  ImagesByLand.fromJson(Map<String, dynamic> json) {
+    landId = json['landId'];
+    landTitle = json['landTitle'];
+    landLocation = json['landLocation'];
+    landImages = json['landImages'] != null
+        ? List<String>.from(json['landImages'])
+        : [];
+    if (json['images'] != null) {
+      images = (json['images'] as List)
+          .map((v) => TaskImage.fromJson(v))
+          .toList();
     }
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['poolName'] = poolName;
-    data['totalPoolSize'] = totalPoolSize;
-    data['remainingAmount'] = remainingAmount;
-
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'landId': landId,
+        'landTitle': landTitle,
+        'landLocation': landLocation,
+        'landImages': landImages,
+        'images': images?.map((v) => v.toJson()).toList(),
+      };
 }

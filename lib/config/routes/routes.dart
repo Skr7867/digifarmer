@@ -25,6 +25,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/INVESTORPANEL/planPurchase/plan_purchase_bloc.dart';
 import '../../blocs/WORKERPANEL/attendanceHistory/attendance_history_bloc.dart';
 import '../../blocs/WORKERPANEL/landDetails/land_details_bloc.dart';
+import '../../model/INVESTORPANEL/investmentDetails/investment_details_model.dart';
 import '../../model/INVESTORPANEL/investmentPlan/investment_select_model.dart';
 import '../../repository/INVESTORPANEL/planPurchased/plan_purchased_repository.dart';
 import '../../view/INVESTORPANEL/paymentSuccess/payment_sucess_screen.dart';
@@ -91,15 +92,16 @@ class Routes {
         return MaterialPageRoute(builder: (context) => HomeScreen());
       case RoutesName.bottomNavBar:
         return MaterialPageRoute(builder: (context) => BottomnavBar());
-       case RoutesName.landImagesScreen:
-      final args = settings.arguments as Map<String, dynamic>?;
-      return MaterialPageRoute(
-        builder: (context) => LandImagesScreen(
-          images: args?['images'] as List<String>?,
-          landTitle: args?['landTitle'] as String?,
-          initialIndex: args?['initialIndex'] as int? ?? 0,
-        ),
-      );
+      case RoutesName.landImagesScreen:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => LandImagesScreen(
+            taskImages: args['taskImages'] as List<TaskImage>?,
+            images: args['images'] as List<String>?,
+            landTitle: args['landTitle'] as String?,
+            initialIndex: args['initialIndex'] as int? ?? 0,
+          ),
+        );
       case RoutesName.newInvestmentScreen:
         return MaterialPageRoute(builder: (context) => NewInvestmentScreen());
       case RoutesName.portFolioScreen:

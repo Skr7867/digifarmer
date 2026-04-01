@@ -131,7 +131,9 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                               );
                             },
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  value.length < 10) {
                                 return 'Enter your mobile number ';
                               }
                               return null;
@@ -249,6 +251,27 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                                 ? 'Please wait...'
                                 : 'Send OTP',
                             onPress: () {
+                              final state = context
+                                  .read<UserRegisterBloc>()
+                                  .state;
+                              final mobile = state.mobile;
+
+                              if (mobile.isEmpty) {
+                                FlushBarHelper.flushBarErrorMessage(
+                                  "Mobile number is required",
+                                  context,
+                                );
+                                return;
+                              }
+
+                              if (mobile.length < 10) {
+                                FlushBarHelper.flushBarErrorMessage(
+                                  "Mobile number should be 10 digits",
+                                  context,
+                                );
+                                return;
+                              }
+
                               context.read<UserRegisterBloc>().add(SendOtp());
                             },
                           );
@@ -257,7 +280,10 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
 
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, RoutesName.userLoginScreen);
+                          Navigator.pushNamed(
+                            context,
+                            RoutesName.userLoginScreen,
+                          );
                         },
                         child: Text(
                           'Already have an account ? Login',

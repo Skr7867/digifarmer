@@ -101,9 +101,13 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
                     );
                   }
                   return Center(
-                    child: Text(
-                      state.workerDashboard.message.toString(),
-                      style: const TextStyle(fontFamily: AppFonts.popins),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        state.workerDashboard.message.toString(),
+                        style: const TextStyle(fontFamily: AppFonts.popins, color: Colors.redAccent, fontSize: 20),
+                      ),
                     ),
                   );
 

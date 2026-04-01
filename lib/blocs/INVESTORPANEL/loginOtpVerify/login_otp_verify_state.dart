@@ -22,7 +22,7 @@ class LoginVerifyOtpState extends Equatable {
     this.resendPostApiStatus = ResendPostApiStatus.initial,
     this.accessToken = '',
     this.refreshToken = '',
-    this.remainingSeconds = 60,
+   this.remainingSeconds = 600,
     this.isResendEnabled = false,
     this.role = '',
   });

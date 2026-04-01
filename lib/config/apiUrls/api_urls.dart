@@ -1,5 +1,6 @@
 class ApiUrls {
-  static String baseUrl = 'https://backend-apis-t1qb.onrender.com';
+  // static String baseUrl = 'https://backend-apis-t1qb.onrender.com';
+  static String baseUrl = 'https://api.digifarmer.in';
 
   static String userRegisterApi = '$baseUrl/api/v1/auth/send-otp';
   static String verifyOtpApi = '$baseUrl/api/v1/auth/verify-otp';
@@ -18,11 +19,13 @@ class ApiUrls {
       '$baseUrl/api/v1/investor/investments/$planId';
   static String kycStatusApi = '$baseUrl/api/v1/kyc/status';
   static String submitBankDetailsApi = '$baseUrl/api/v1/kyc/bank-details';
-
+  static String withdrawalAmountApi  = "$baseUrl/api/v1/wallet/withdraw";
   static String uploadPanUrl = '$baseUrl/api/v1/kyc/upload/pan';
   static String uploadAadhaarUrl = '$baseUrl/api/v1/kyc/upload/aadhaar';
   static String uploadSelfieUrl = '$baseUrl/api/v1/kyc/upload/selfie';
   static String submitKycDocumentsApi = '$baseUrl/api/v1/kyc/submit';
+  static String resendOtp = '$baseUrl/api/v1/auth/login/resend-otp';
+  static String walletApi = '$baseUrl/api/v1/wallet/details';
 
   //*********************************Land owner panel api */
   static String landOwnerSaveBasicInfoApi =

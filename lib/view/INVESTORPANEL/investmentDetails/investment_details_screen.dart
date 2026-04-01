@@ -596,97 +596,68 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
   // _buildLandAllocationCard method to pass images
 
   Widget _buildLandAllocationCard(Investment investment) {
-    final lands = investment.allocations!.lands!;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Land Allocation',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: AppFonts.popins,
-                ),
+  final lands = investment.allocations!.lands!;
+
+  // ✅ Get task images from investment.taskImages instead of land images
+  final taskImageList = investment.taskImages?.allImages ?? [];
+
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withValues(alpha: 0.1),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Land Allocation',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: AppFonts.popins,
               ),
-              // Only show Photos button if there are lands with images
-              if (lands.any(
-                (land) =>
-                    (land.landId?.landImages != null &&
-                        land.landId!.landImages!.isNotEmpty) ||
-                    (land.landDetails?.images != null &&
-                        land.landDetails!.images!.isNotEmpty),
-              ))
-                RoundButton(
-                  fontSize: 10,
-                  height: 20,
-                  width: 60,
-                  buttonColor: AppColors.greenColor,
-                  title: 'Photos',
-                  onPress: () {
-                    // Collect all images from all lands
-                    final allImages = <String>[];
-                    String? landTitle;
-
-                    for (var land in lands) {
-                      // Get images from landId
-                      if (land.landId?.landImages != null) {
-                        allImages.addAll(land.landId!.landImages!);
-                        landTitle ??= land.landId?.landTitle;
-                      }
-                      // Get images from landDetails
-                      if (land.landDetails?.images != null) {
-                        allImages.addAll(land.landDetails!.images!);
-                        landTitle ??= land.landDetails?.title;
-                      }
-                    }
-
-                    // Navigate to LandImagesScreen with all images
-                    if (allImages.isNotEmpty) {
-                      Navigator.pushNamed(
-                        context,
-                        RoutesName.landImagesScreen,
-                        arguments: {
-                          'images': allImages,
-                          'landTitle': landTitle ?? 'Land Images',
-                          'initialIndex': 0,
-                        },
-                      );
-                    } else {
-                      // Show message if no images
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('No images available for this land'),
-                          backgroundColor: Colors.orange,
-                        ),
-                      );
-                    }
-                  },
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...lands.map((land) => _buildLandCard(land)),
-        ],
-      ),
-    );
-  }
+            ),
+            // ✅ Show Photos button only if task images exist
+            if (taskImageList.isNotEmpty)
+              RoundButton(
+                fontSize: 10,
+                height: 20,
+                width: 80,
+                buttonColor: AppColors.greenColor,
+                title: 'Task Photos',
+                onPress: () {
+                  // ✅ Navigate with TaskImage list instead of String list
+                  Navigator.pushNamed(
+                    context,
+                    RoutesName.landImagesScreen,
+                    arguments: {
+                      'taskImages': taskImageList, // ✅ pass TaskImage objects
+                      'landTitle': 'Task Photos',
+                      'initialIndex': 0,
+                    },
+                  );
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...lands.map((land) => _buildLandCard(land)),
+      ],
+    ),
+  );
+}
 
   Widget _buildLandCard(Lands land) {
     return Container(

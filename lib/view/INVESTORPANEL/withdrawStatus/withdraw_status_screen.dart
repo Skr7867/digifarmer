@@ -24,7 +24,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
       accountSuffix: '4567',
       requestedOn: '12 Dec 2024, 10:30 AM',
       extraInfo: 'Paid On: 14 Dec 2024, 02:15 PM',
-      showReceiptButton: true,
+      showReceiptButton: false,
     ),
     WithdrawalItem(
       amount: '₹15,500',
@@ -108,8 +108,8 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
             const SizedBox(height: 24),
 
           // Warning / Info card for approved withdrawal - only show in appropriate tabs
-          if (_selectedTab == 'All' || _selectedTab == 'Pending')
-            _buildInfoCard(),
+          // if (_selectedTab == 'All' || _selectedTab == 'Pending')
+          //   _buildInfoCard(),
         ],
       ),
     );
@@ -307,7 +307,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                         ),
                       ),
                       child: Text(
-                        'Receipt',
+                        '',
                         style: TextStyle(
                           fontFamily: AppFonts.popins,
                           fontSize: 13,
@@ -317,29 +317,29 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                       ),
                     ),
                   ),
-                TextButton(
-                  onPressed: () {
-                    // Handle view details action
-                  },
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: Text(
-                    'View Details',
-                    style: TextStyle(
-                      fontFamily: AppFonts.popins,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.blue.shade700,
-                    ),
-                  ),
-                ),
+                // TextButton(
+                //   onPressed: () {
+                //     // Handle view details action
+                //   },
+                //   style: TextButton.styleFrom(
+                //     padding: const EdgeInsets.symmetric(
+                //       horizontal: 12,
+                //       vertical: 8,
+                //     ),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(30),
+                //     ),
+                //   ),
+                //   child: Text(
+                //     'View Details',
+                //     style: TextStyle(
+                //       fontFamily: AppFonts.popins,
+                //       fontSize: 13,
+                //       fontWeight: FontWeight.w500,
+                //       color: Colors.blue.shade700,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ],
@@ -348,97 +348,97 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
     );
   }
 
-  Widget _buildInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade200),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                size: 20,
-                color: Colors.orange.shade800,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Your withdrawal has been approved and is being processed. Amount will be credited within 1–2 business days.',
-                  style: TextStyle(
-                    fontFamily: AppFonts.popins,
-                    fontSize: 13,
-                    color: Colors.orange.shade900,
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () {
-                  // Handle cancel action
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  side: BorderSide(color: Colors.orange.shade300),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                ),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontFamily: AppFonts.popins,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.red.shade700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () {
-                  // Handle view details action
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                ),
-                child: Text(
-                  'View Details',
-                  style: TextStyle(
-                    fontFamily: AppFonts.popins,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildInfoCard() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.orange.shade50,
+  //       borderRadius: BorderRadius.circular(16),
+  //       border: Border.all(color: Colors.orange.shade200),
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Icon(
+  //               Icons.warning_amber_rounded,
+  //               size: 20,
+  //               color: Colors.orange.shade800,
+  //             ),
+  //             const SizedBox(width: 12),
+  //             Expanded(
+  //               child: Text(
+  //                 'Your withdrawal has been approved and is being processed. Amount will be credited within 1–2 business days.',
+  //                 style: TextStyle(
+  //                   fontFamily: AppFonts.popins,
+  //                   fontSize: 13,
+  //                   color: Colors.orange.shade900,
+  //                   height: 1.4,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.end,
+  //           children: [
+  //             TextButton(
+  //               onPressed: () {
+  //                 // Handle cancel action
+  //               },
+  //               style: TextButton.styleFrom(
+  //                 backgroundColor: Colors.white,
+  //                 side: BorderSide(color: Colors.orange.shade300),
+  //                 shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(30),
+  //                 ),
+  //                 padding: const EdgeInsets.symmetric(
+  //                   horizontal: 20,
+  //                   vertical: 8,
+  //                 ),
+  //               ),
+  //               child: Text(
+  //                 'Cancel',
+  //                 style: TextStyle(
+  //                   fontFamily: AppFonts.popins,
+  //                   fontSize: 13,
+  //                   fontWeight: FontWeight.w500,
+  //                   color: Colors.red.shade700,
+  //                 ),
+  //               ),
+  //             ),
+  //             const SizedBox(width: 12),
+  //             ElevatedButton(
+  //               onPressed: () {
+  //                 // Handle view details action
+  //               },
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: Colors.blue,
+  //                 shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(30),
+  //                 ),
+  //                 padding: const EdgeInsets.symmetric(
+  //                   horizontal: 20,
+  //                   vertical: 8,
+  //                 ),
+  //               ),
+  //               child: Text(
+  //                 'View Details',
+  //                 style: TextStyle(
+  //                   fontFamily: AppFonts.popins,
+  //                   fontSize: 13,
+  //                   fontWeight: FontWeight.w500,
+  //                   color: Colors.white,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
 
 // Data model for withdrawal items

@@ -51,7 +51,9 @@ class LoginVerifyOtpBloc
 
   void _onResetTimer(ResetTimerEvent event, Emitter<LoginVerifyOtpState> emit) {
     _timer?.cancel();
-    emit(state.copyWith(remainingSeconds: 60, isResendEnabled: false));
+    emit(
+      state.copyWith(remainingSeconds: 600, isResendEnabled: false),
+    ); // ← 600
     _startTimer();
   }
 

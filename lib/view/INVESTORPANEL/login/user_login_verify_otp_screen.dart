@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pinput/pinput.dart';
 import '../../../blocs/INVESTORPANEL/loginOtpVerify/login_otp_verify_bloc.dart';
+import '../../../blocs/INVESTORPANEL/resendOtp/resend_otp_bloc.dart'; // ← NEW
 import '../../../repository/INVESTORPANEL/loginOtpVerify/login_otp_verify_repository.dart';
+import '../../../repository/INVESTORPANEL/resendOtp/resend_otp_repository.dart'; // ← NEW
 import '../../../res/assets/image_assets.dart';
 import '../../../res/color/app_colors.dart';
 import '../../../res/fonts/app_fonts.dart';
@@ -31,9 +33,13 @@ class UserLoginVerifyOtpScreen extends StatefulWidget {
 class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
     with TickerProviderStateMixin {
   late final LoginVerifyOtpBloc _bloc;
+  late final ResendOtpBloc _resendBloc; // ← NEW
 
   final TextEditingController _pinController = TextEditingController();
   final FocusNode _pinFocusNode = FocusNode();
+
+  // ── Tracks the latest OTP to show in the badge (updates after resend) ──
+  late String _currentOtp; // ← NEW
 
   // Animation controllers
   late AnimationController _entranceController;
@@ -51,13 +57,14 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
   @override
   void initState() {
     super.initState();
+    _currentOtp = widget.otp; // ← initialise with the otp passed from login
     _bloc = LoginVerifyOtpBloc(getIt<LoginOtpVerifyRepository>());
+    _resendBloc = ResendOtpBloc(getIt<ResendOtpRepository>()); // ← NEW
     _bloc.add(SetUniqueKey(widget.uniqueKey));
     _initializeAnimations();
   }
 
   void _initializeAnimations() {
-    // Entrance
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
@@ -73,7 +80,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
           ),
         );
 
-    // Shake on error
     _shakeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -89,7 +95,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
           CurvedAnimation(parent: _shakeController, curve: Curves.easeInOut),
         );
 
-    // Floating background elements
     _floatingController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
@@ -98,7 +103,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
       CurvedAnimation(parent: _floatingController, curve: Curves.easeInOut),
     );
 
-    // Pulse on logo
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -107,7 +111,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Success micro-animation
     _successController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -126,6 +129,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
     _pulseController.dispose();
     _successController.dispose();
     _bloc.close();
+    _resendBloc.close(); // ← NEW
     super.dispose();
   }
 
@@ -136,81 +140,110 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
     final size = MediaQuery.of(context).size;
     final isSmall = size.height < 680;
 
-    return BlocProvider.value(
-      value: _bloc,
+    return MultiBlocProvider(
+      // ── replaced BlocProvider.value with MultiBlocProvider ──
+      providers: [
+        BlocProvider.value(value: _bloc),
+        BlocProvider.value(value: _resendBloc), // ← NEW
+      ],
       child: Scaffold(
         body: Stack(
           children: [
-            // ── Background ─────────────────────────────────────────────
             _buildBackground(size),
-
-            // ── Floating decorations ────────────────────────────────────
             _buildFloatingDecor(size),
 
-            // ── Content ─────────────────────────────────────────────────
-            BlocListener<LoginVerifyOtpBloc, LoginVerifyOtpState>(
-              listenWhen: (current, previous) =>
-                  current.postApiStatus != previous.postApiStatus ||
-                  current.resendPostApiStatus != previous.resendPostApiStatus,
-              listener: (context, state) {
-                if (state.postApiStatus == PostApiStatus.error) {
-                  _triggerShake();
-                  _pinController.clear();
-                  _bloc.add(OtpChanged(''));
-                  FlushBarHelper.flushBarErrorMessage(state.message, context);
-                }
-                if (state.postApiStatus == PostApiStatus.success) {
-                  FlushBarHelper.flushBarSuccessMessage(state.message, context);
-                  _navigateByRole(context, state.role);
-                }
-                if (state.resendPostApiStatus == ResendPostApiStatus.error) {
-                  FlushBarHelper.flushBarErrorMessage(state.message, context);
-                }
-                if (state.resendPostApiStatus == ResendPostApiStatus.success) {
-                  FlushBarHelper.flushBarSuccessMessage(
-                    'OTP resent successfully!',
-                    context,
-                  );
-                  _pinController.clear();
-                  _bloc.add(OtpChanged(''));
-                  _pinFocusNode.requestFocus();
-                }
-              },
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    _buildAppBar(context),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: size.width * 0.06,
-                          vertical: isSmall ? 12 : 20,
-                        ),
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: SlideTransition(
-                            position: _slideAnimation,
-                            child: Column(
-                              children: [
-                                _buildTopCard(size, isSmall),
-                                SizedBox(height: isSmall ? 16 : 24),
-                                _buildOtpCard(size, isSmall),
-                                SizedBox(height: isSmall ? 14 : 20),
-                                _buildTimerCard(),
-                                SizedBox(height: isSmall ? 20 : 28),
-                                _buildVerifyButton(size),
-                                SizedBox(height: isSmall ? 14 : 20),
-                                _buildResendSection(),
-                                const SizedBox(height: 24),
-                              ],
-                            ),
+            // ── replaced single BlocListener with MultiBlocListener ──
+            MultiBlocListener(
+              listeners: [
+                // ── existing OTP verify listener (unchanged) ──
+                BlocListener<LoginVerifyOtpBloc, LoginVerifyOtpState>(
+                  listenWhen: (current, previous) =>
+                      current.postApiStatus != previous.postApiStatus,
+                  listener: (context, state) {
+                    if (state.postApiStatus == PostApiStatus.error) {
+                      _triggerShake();
+                      _pinController.clear();
+                      _bloc.add(OtpChanged(''));
+                      FlushBarHelper.flushBarErrorMessage(
+                        state.message,
+                        context,
+                      );
+                    }
+                    if (state.postApiStatus == PostApiStatus.success) {
+                      FlushBarHelper.flushBarSuccessMessage(
+                        state.message,
+                        context,
+                      );
+                      _navigateByRole(context, state.role);
+                    }
+                  },
+                ),
+
+                // ── NEW resend otp listener ──
+                BlocListener<ResendOtpBloc, ResendOtpState>(
+                  listenWhen: (current, previous) =>
+                      current.postApiStatus != previous.postApiStatus,
+                  listener: (context, state) {
+                    if (state.postApiStatus == PostApiStatus.error) {
+                      FlushBarHelper.flushBarErrorMessage(
+                        state.message,
+                        context,
+                      );
+                    }
+                    if (state.postApiStatus == PostApiStatus.success) {
+                      // ✅ Push new uniqueKey into verify bloc so next
+                      //    SubmitLoginOtp uses the freshly issued key
+                      _bloc.add(SetUniqueKey(state.uniqueKey));
+
+                      // ✅ Update the OTP badge in the UI
+                      setState(() => _currentOtp = state.otp);
+
+                      // ✅ Clear pin and refocus
+                      _pinController.clear();
+                      _bloc.add(OtpChanged(''));
+                      _pinFocusNode.requestFocus();
+
+                      FlushBarHelper.flushBarSuccessMessage(
+                        'OTP resent successfully!',
+                        context,
+                      );
+                    }
+                  },
+                ),
+              ],
+              child: Column(
+                children: [
+                  _buildAppBar(context),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: size.width * 0.06,
+                        vertical: isSmall ? 12 : 20,
+                      ),
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: Column(
+                            children: [
+                              _buildTopCard(size, isSmall),
+                              SizedBox(height: isSmall ? 16 : 24),
+                              _buildOtpCard(size, isSmall),
+                              SizedBox(height: isSmall ? 14 : 20),
+                              _buildTimerCard(),
+                              SizedBox(height: isSmall ? 20 : 28),
+                              _buildVerifyButton(size),
+                              SizedBox(height: isSmall ? 14 : 20),
+                              _buildResendSection(),
+                              const SizedBox(height: 24),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -223,6 +256,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
 
   Widget _buildAppBar(BuildContext context) {
     return Container(
+      height: 80,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -254,7 +288,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
               ),
             ),
           ),
-          // Balance the back arrow
           const SizedBox(width: 48),
         ],
       ),
@@ -277,7 +310,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
       ),
       child: Stack(
         children: [
-          // Top-right green blob
           Positioned(
             top: -size.height * 0.06,
             right: -size.width * 0.18,
@@ -295,7 +327,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
               ),
             ),
           ),
-          // Bottom-left blue blob
           Positioned(
             bottom: -size.height * 0.04,
             left: -size.width * 0.12,
@@ -313,7 +344,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
               ),
             ),
           ),
-          // Dot grid
           CustomPaint(
             size: Size(size.width, size.height),
             painter: _DotGridPainter(),
@@ -393,7 +423,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
     );
   }
 
-  // ── TOP CARD (logo + heading + otp chip) ────────────────────────────────────
+  // ── TOP CARD ────────────────────────────────────────────────────────────────
 
   Widget _buildTopCard(Size size, bool isSmall) {
     final logoSize = isSmall ? size.width * 0.14 : size.width * 0.16;
@@ -420,7 +450,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Logo with pulse
           AnimatedBuilder(
             animation: _pulseController,
             builder: (context, _) {
@@ -465,7 +494,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
             },
           ),
           const SizedBox(width: 18),
-          // Text content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -499,7 +527,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                   ),
                 ),
                 SizedBox(height: isSmall ? 8 : 12),
-                // Sent to chip
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -633,7 +660,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
           Row(
             children: [
               Container(
@@ -659,7 +685,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                 ),
               ),
               const Spacer(),
-              // OTP hint badge
+              // ── OTP badge: shows _currentOtp which updates after resend ──
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -680,7 +706,7 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      widget.otp,
+                      _currentOtp, // ← uses local state, updated on resend
                       style: TextStyle(
                         color: AppColors.greenColor,
                         fontWeight: FontWeight.bold,
@@ -697,7 +723,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
 
           SizedBox(height: isSmall ? 16 : 22),
 
-          // Pinput with shake
           AnimatedBuilder(
             animation: _shakeAnimation,
             builder: (context, child) => Transform.translate(
@@ -748,7 +773,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
 
           SizedBox(height: isSmall ? 12 : 16),
 
-          // Helper text
           Center(
             child: Text(
               'Enter the code sent to your phone',
@@ -773,9 +797,8 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
           current.isResendEnabled != previous.isResendEnabled,
       builder: (context, state) {
         final isExpired = state.isResendEnabled;
-        final isWarning = state.remainingSeconds < 10 && !isExpired;
+        final isWarning = state.remainingSeconds < 60 && !isExpired;
 
-        // Colors based on state
         final bgColor = isExpired
             ? Colors.orange.shade50
             : isWarning
@@ -814,7 +837,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
           ),
           child: Row(
             children: [
-              // Animated icon container
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 width: 36,
@@ -842,7 +864,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                 ),
               ),
               if (!isExpired)
-                // Countdown pill
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   padding: const EdgeInsets.symmetric(
@@ -866,7 +887,11 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                     ],
                   ),
                   child: Text(
-                    '00:${state.remainingSeconds.toString().padLeft(2, '0')}',
+                    () {
+                      final minutes = state.remainingSeconds ~/ 60;
+                      final seconds = state.remainingSeconds % 60;
+                      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+                    }(),
                     style: TextStyle(
                       color: isWarning
                           ? Colors.red.shade700
@@ -879,7 +904,6 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
                   ),
                 )
               else
-                // Expired label
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -1013,97 +1037,110 @@ class _UserLoginVerifyOtpScreenState extends State<UserLoginVerifyOtpScreen>
   // ── RESEND SECTION ──────────────────────────────────────────────────────────
 
   Widget _buildResendSection() {
-    return BlocBuilder<LoginVerifyOtpBloc, LoginVerifyOtpState>(
+    // ── outer builder watches ResendOtpBloc for loading state ──
+    return BlocBuilder<ResendOtpBloc, ResendOtpState>(
       buildWhen: (current, previous) =>
-          current.isResendEnabled != previous.isResendEnabled ||
-          current.resendPostApiStatus != previous.resendPostApiStatus,
-      builder: (context, state) {
-        final isLoading =
-            state.resendPostApiStatus == ResendPostApiStatus.loading;
-        final isEnabled = state.isResendEnabled && !isLoading;
+          current.postApiStatus != previous.postApiStatus,
+      builder: (context, resendState) {
+        final isLoading = resendState.postApiStatus == PostApiStatus.loading;
 
-        return Column(
-          children: [
-            Text(
-              "Didn't receive the code?",
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                fontFamily: AppFonts.popins,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: isEnabled
-                  ? () => Navigator.pushNamed(context, RoutesName.userLoginScreen)
-                  : null,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 13,
-                ),
-                decoration: BoxDecoration(
-                  color: isEnabled
-                      ? const Color(0xFF34A853).withOpacity(0.07)
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    color: isEnabled
-                        ? const Color(0xFF34A853).withOpacity(0.5)
-                        : Colors.grey.shade200,
-                    width: 1.5,
+        // ── inner builder watches timer from LoginVerifyOtpBloc ──
+        return BlocBuilder<LoginVerifyOtpBloc, LoginVerifyOtpState>(
+          buildWhen: (current, previous) =>
+              current.isResendEnabled != previous.isResendEnabled,
+          builder: (context, verifyState) {
+            final isEnabled = verifyState.isResendEnabled && !isLoading;
+
+            return Column(
+              children: [
+                Text(
+                  "Didn't receive the code?",
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontFamily: AppFonts.popins,
+                    fontSize: 13,
                   ),
-                  boxShadow: isEnabled
-                      ? [
-                          BoxShadow(
-                            color: const Color(0xFF34A853).withOpacity(0.12),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : [],
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isLoading)
-                      SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            const Color(0xFF34A853),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: isEnabled
+                      ? () => _resendBloc.add(
+                          ResendOtpSubmit(
+                            widget.mobileNumber,
+                          ), // ← fires resend API
+                        )
+                      : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 13,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isEnabled
+                          ? const Color(0xFF34A853).withOpacity(0.07)
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(
+                        color: isEnabled
+                            ? const Color(0xFF34A853).withOpacity(0.5)
+                            : Colors.grey.shade200,
+                        width: 1.5,
+                      ),
+                      boxShadow: isEnabled
+                          ? [
+                              BoxShadow(
+                                color: const Color(
+                                  0xFF34A853,
+                                ).withOpacity(0.12),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isLoading)
+                          const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF34A853),
+                              ),
+                            ),
+                          )
+                        else
+                          Icon(
+                            Icons.refresh_rounded,
+                            size: 17,
+                            color: isEnabled
+                                ? const Color(0xFF34A853)
+                                : Colors.grey.shade400,
+                          ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isLoading ? 'Resending...' : 'Resend OTP',
+                          style: TextStyle(
+                            color: isEnabled
+                                ? const Color(0xFF34A853)
+                                : Colors.grey.shade400,
+                            fontFamily: AppFonts.popinsBold,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            letterSpacing: 0.3,
                           ),
                         ),
-                      )
-                    else
-                      Icon(
-                        Icons.refresh_rounded,
-                        size: 17,
-                        color: isEnabled
-                            ? const Color(0xFF34A853)
-                            : Colors.grey.shade400,
-                      ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isLoading ? 'Resending...' : 'Resend OTP',
-                      style: TextStyle(
-                        color: isEnabled
-                            ? const Color(0xFF34A853)
-                            : Colors.grey.shade400,
-                        fontFamily: AppFonts.popinsBold,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        letterSpacing: 0.3,
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
