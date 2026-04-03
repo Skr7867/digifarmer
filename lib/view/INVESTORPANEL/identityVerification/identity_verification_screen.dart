@@ -239,7 +239,6 @@ class _IdentityVerificationScreenState
           child: ElevatedButton(
             onPressed: () {
               Navigator.pushNamed(context, RoutesName.bankDetailsScreen);
-              _startVerification();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
@@ -325,17 +324,6 @@ class _IdentityVerificationScreenState
           ),
         ),
       ],
-    );
-  }
-
-  void _startVerification() {
-    // Navigate to document upload screen
-    // Navigator.pushNamed(context, RoutesName.documentUploadScreen);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Starting verification process...'),
-        backgroundColor: Colors.blue,
-      ),
     );
   }
 

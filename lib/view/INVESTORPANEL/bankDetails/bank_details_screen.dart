@@ -201,7 +201,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
 
                         // Submit Button
                         _buildSubmitButton(state, context),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 40),
                       ],
                     ),
                   ),
@@ -353,6 +353,10 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
                   horizontal: 16,
                   vertical: 14,
                 ),
+                // ADD THIS:
+                errorText: state.bankNameError.isNotEmpty
+                    ? state.bankNameError
+                    : null,
               ),
               items: _bankNames.map((String bank) {
                 return DropdownMenuItem<String>(value: bank, child: Text(bank));
@@ -366,12 +370,6 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
                     BankNameChanged(bankName: value),
                   );
                 }
-              },
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select bank name';
-                }
-                return null;
               },
             ),
             const SizedBox(height: 16),
@@ -622,13 +620,17 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
         onPressed: state.postApiStatus == PostApiStatus.loading
             ? null
             : () {
-                // Manually validate the form before submission
-                if (_formKey.currentState?.validate() ?? false) {
-                  // Trigger form submission
-                  context.read<SubmitBankDetailsBloc>().add(
-                    SubmitBankDetailsApi(),
-                  );
-                }
+                final bloc = context.read<SubmitBankDetailsBloc>();
+                // Fire unfocused events so BLoC shows errors under every empty field
+                bloc.add(AccountNumberUnfocused());
+                bloc.add(ConfirmAccountNumberUnfocused());
+                bloc.add(IfscCodeUnfocused());
+                bloc.add(BankNameUnfocused());
+                bloc.add(AccountHolderNameUnfocused());
+                bloc.add(AccountTypeUnfocused());
+                bloc.add(UpiIdUnfocused());
+                // Submit only if everything is valid
+                bloc.add(SubmitBankDetailsApi());
               },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.green,

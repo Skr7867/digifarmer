@@ -1,8 +1,11 @@
 import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+
 import '../../../repository/INVESTORPANEL/submitBankDetails/submit_bank_details_repository.dart';
 import '../../../utils/enums.dart';
+
 part 'submit_bank_details_event.dart';
 part 'submit_bank_details_state.dart';
 
@@ -11,7 +14,7 @@ class SubmitBankDetailsBloc
   final SubmitBankDetailsRepository submitBankDetailsRepository;
 
   SubmitBankDetailsBloc(this.submitBankDetailsRepository)
-      : super(const SubmitBankDetailsState()) {
+    : super(const SubmitBankDetailsState()) {
     on<AccountNumberChanged>(_onAccountNumberChanged);
     on<ConfirmAccountNumberChanged>(_onConfirmAccountNumberChanged);
     on<IfscCodeChanged>(_onIfscCodeChanged);
@@ -20,7 +23,7 @@ class SubmitBankDetailsBloc
     on<AccountTypeChanged>(_onAccountTypeChanged);
     on<UpiIdChanged>(_onUpiIdChanged);
     on<SubmitBankDetailsApi>(_submitBankDetailsApi);
-    
+
     // Unfocused events
     on<AccountNumberUnfocused>(_onAccountNumberUnfocused);
     on<ConfirmAccountNumberUnfocused>(_onConfirmAccountNumberUnfocused);
@@ -32,9 +35,11 @@ class SubmitBankDetailsBloc
   }
 
   void _onAccountNumberChanged(
-      AccountNumberChanged event, Emitter<SubmitBankDetailsState> emit) {
+    AccountNumberChanged event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     emit(state.copyWith(accountNumber: event.accountNumber));
-    
+
     // Clear error when user starts typing
     if (state.accountNumberError.isNotEmpty) {
       emit(state.copyWith(accountNumberError: ''));
@@ -42,9 +47,11 @@ class SubmitBankDetailsBloc
   }
 
   void _onConfirmAccountNumberChanged(
-      ConfirmAccountNumberChanged event, Emitter<SubmitBankDetailsState> emit) {
+    ConfirmAccountNumberChanged event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     emit(state.copyWith(confirmAccountNumber: event.confirmAccountNumber));
-    
+
     // Clear error when user starts typing
     if (state.confirmAccountNumberError.isNotEmpty) {
       emit(state.copyWith(confirmAccountNumberError: ''));
@@ -52,9 +59,11 @@ class SubmitBankDetailsBloc
   }
 
   void _onIfscCodeChanged(
-      IfscCodeChanged event, Emitter<SubmitBankDetailsState> emit) {
+    IfscCodeChanged event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     emit(state.copyWith(ifscCode: event.ifscCode.toUpperCase()));
-    
+
     // Clear error when user starts typing
     if (state.ifscCodeError.isNotEmpty) {
       emit(state.copyWith(ifscCodeError: ''));
@@ -62,9 +71,11 @@ class SubmitBankDetailsBloc
   }
 
   void _onBankNameChanged(
-      BankNameChanged event, Emitter<SubmitBankDetailsState> emit) {
+    BankNameChanged event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     emit(state.copyWith(bankName: event.bankName));
-    
+
     // Clear error when user starts typing
     if (state.bankNameError.isNotEmpty) {
       emit(state.copyWith(bankNameError: ''));
@@ -72,9 +83,11 @@ class SubmitBankDetailsBloc
   }
 
   void _onAccountHolderNameChanged(
-      AccountHolderNameChanged event, Emitter<SubmitBankDetailsState> emit) {
+    AccountHolderNameChanged event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     emit(state.copyWith(accountHolderName: event.accountHolderName));
-    
+
     // Clear error when user starts typing
     if (state.accountHolderNameError.isNotEmpty) {
       emit(state.copyWith(accountHolderNameError: ''));
@@ -82,19 +95,23 @@ class SubmitBankDetailsBloc
   }
 
   void _onAccountTypeChanged(
-      AccountTypeChanged event, Emitter<SubmitBankDetailsState> emit) {
-    emit(state.copyWith(accountType: event.accountType));
-    
-    // Clear error when user starts typing
+    AccountTypeChanged event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
+    // Convert to uppercase to match API expectation (SAVINGS / CURRENT)
+    emit(state.copyWith(accountType: event.accountType.toUpperCase()));
+
     if (state.accountTypeError.isNotEmpty) {
       emit(state.copyWith(accountTypeError: ''));
     }
   }
 
   void _onUpiIdChanged(
-      UpiIdChanged event, Emitter<SubmitBankDetailsState> emit) {
+    UpiIdChanged event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     emit(state.copyWith(upiId: event.upiId));
-    
+
     // Clear error when user starts typing
     if (state.upiIdError.isNotEmpty) {
       emit(state.copyWith(upiIdError: ''));
@@ -103,13 +120,17 @@ class SubmitBankDetailsBloc
 
   // Validation on unfocus
   void _onAccountNumberUnfocused(
-      AccountNumberUnfocused event, Emitter<SubmitBankDetailsState> emit) {
+    AccountNumberUnfocused event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     final error = _validateAccountNumber(state.accountNumber);
     emit(state.copyWith(accountNumberError: error));
   }
 
   void _onConfirmAccountNumberUnfocused(
-      ConfirmAccountNumberUnfocused event, Emitter<SubmitBankDetailsState> emit) {
+    ConfirmAccountNumberUnfocused event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     final error = _validateConfirmAccountNumber(
       state.confirmAccountNumber,
       state.accountNumber,
@@ -118,31 +139,41 @@ class SubmitBankDetailsBloc
   }
 
   void _onIfscCodeUnfocused(
-      IfscCodeUnfocused event, Emitter<SubmitBankDetailsState> emit) {
+    IfscCodeUnfocused event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     final error = _validateIfscCode(state.ifscCode);
     emit(state.copyWith(ifscCodeError: error));
   }
 
   void _onBankNameUnfocused(
-      BankNameUnfocused event, Emitter<SubmitBankDetailsState> emit) {
+    BankNameUnfocused event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     final error = _validateBankName(state.bankName);
     emit(state.copyWith(bankNameError: error));
   }
 
   void _onAccountHolderNameUnfocused(
-      AccountHolderNameUnfocused event, Emitter<SubmitBankDetailsState> emit) {
+    AccountHolderNameUnfocused event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     final error = _validateAccountHolderName(state.accountHolderName);
     emit(state.copyWith(accountHolderNameError: error));
   }
 
   void _onAccountTypeUnfocused(
-      AccountTypeUnfocused event, Emitter<SubmitBankDetailsState> emit) {
+    AccountTypeUnfocused event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     final error = _validateAccountType(state.accountType);
     emit(state.copyWith(accountTypeError: error));
   }
 
   void _onUpiIdUnfocused(
-      UpiIdUnfocused event, Emitter<SubmitBankDetailsState> emit) {
+    UpiIdUnfocused event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) {
     final error = _validateUpiId(state.upiId);
     emit(state.copyWith(upiIdError: error));
   }
@@ -161,7 +192,10 @@ class SubmitBankDetailsBloc
     return '';
   }
 
-  String _validateConfirmAccountNumber(String confirmAccountNumber, String accountNumber) {
+  String _validateConfirmAccountNumber(
+    String confirmAccountNumber,
+    String accountNumber,
+  ) {
     if (confirmAccountNumber.isEmpty) {
       return 'Please confirm account number';
     }
@@ -228,20 +262,24 @@ class SubmitBankDetailsBloc
     );
     final ifscCodeError = _validateIfscCode(state.ifscCode);
     final bankNameError = _validateBankName(state.bankName);
-    final accountHolderNameError = _validateAccountHolderName(state.accountHolderName);
+    final accountHolderNameError = _validateAccountHolderName(
+      state.accountHolderName,
+    );
     final accountTypeError = _validateAccountType(state.accountType);
     final upiIdError = _validateUpiId(state.upiId);
 
     // ignore: invalid_use_of_visible_for_testing_member
-    emit(state.copyWith(
-      accountNumberError: accountNumberError,
-      confirmAccountNumberError: confirmAccountNumberError,
-      ifscCodeError: ifscCodeError,
-      bankNameError: bankNameError,
-      accountHolderNameError: accountHolderNameError,
-      accountTypeError: accountTypeError,
-      upiIdError: upiIdError,
-    ));
+    emit(
+      state.copyWith(
+        accountNumberError: accountNumberError,
+        confirmAccountNumberError: confirmAccountNumberError,
+        ifscCodeError: ifscCodeError,
+        bankNameError: bankNameError,
+        accountHolderNameError: accountHolderNameError,
+        accountTypeError: accountTypeError,
+        upiIdError: upiIdError,
+      ),
+    );
 
     return accountNumberError.isEmpty &&
         confirmAccountNumberError.isEmpty &&
@@ -253,7 +291,9 @@ class SubmitBankDetailsBloc
   }
 
   Future<void> _submitBankDetailsApi(
-      SubmitBankDetailsApi event, Emitter<SubmitBankDetailsState> emit) async {
+    SubmitBankDetailsApi event,
+    Emitter<SubmitBankDetailsState> emit,
+  ) async {
     // Validate form before submission
     if (!_validateForm(state)) {
       return;
@@ -272,27 +312,35 @@ class SubmitBankDetailsBloc
         "upiId": state.upiId,
       };
 
-      final response = await submitBankDetailsRepository.submitBankDetailsApi(data);
+      final response = await submitBankDetailsRepository.submitBankDetailsApi(
+        data,
+      );
 
       if (response.success == true) {
-        emit(state.copyWith(
-          messages: response.message ?? "Bank details submitted successfully",
-          postApiStatus: PostApiStatus.success,
-        ));
+        emit(
+          state.copyWith(
+            messages: response.message ?? "Bank details submitted successfully",
+            postApiStatus: PostApiStatus.success,
+          ),
+        );
       } else {
-        emit(state.copyWith(
-          messages: response.message ?? "Failed to submit bank details",
-          postApiStatus: PostApiStatus.error,
-        ));
+        emit(
+          state.copyWith(
+            messages: response.message ?? "Failed to submit bank details",
+            postApiStatus: PostApiStatus.error,
+          ),
+        );
       }
     } catch (error, stackTrace) {
       log(error.toString());
       log(stackTrace.toString());
 
-      emit(state.copyWith(
-        messages: error.toString(),
-        postApiStatus: PostApiStatus.error,
-      ));
+      emit(
+        state.copyWith(
+          messages: error.toString(),
+          postApiStatus: PostApiStatus.error,
+        ),
+      );
     }
   }
 }

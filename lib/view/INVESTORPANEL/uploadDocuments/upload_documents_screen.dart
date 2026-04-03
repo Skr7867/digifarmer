@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:digifarmer/blocs/INVESTORPANEL/documentUpload/document_upload_bloc.dart';
 import 'package:digifarmer/blocs/INVESTORPANEL/submitKycDocuments/submit_kyc_documents_bloc.dart';
 import 'package:digifarmer/config/routes/routes_name.dart';
@@ -8,6 +9,7 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../res/customeWidgets/custom_app_bar.dart';
 import '../../../utils/enums.dart';
 
@@ -31,14 +33,12 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => DocumentUploadBloc(
-            repository: DocumentUploadHttpRepository(),
-          ),
+          create: (_) =>
+              DocumentUploadBloc(repository: DocumentUploadHttpRepository()),
         ),
         BlocProvider(
-          create: (_) => SubmitKycDocumentsBloc(
-            SubmitKycDocumentsHttpRepository(),
-          ),
+          create: (_) =>
+              SubmitKycDocumentsBloc(SubmitKycDocumentsHttpRepository()),
         ),
       ],
       child: Builder(
@@ -83,7 +83,10 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                           const Text(
                             'Upload clear photos of your PAN, Aadhaar, and Selfie for verification',
                             style: TextStyle(
-                                fontSize: 14, color: Colors.grey, height: 1.4),
+                              fontSize: 14,
+                              color: Colors.grey,
+                              height: 1.4,
+                            ),
                           ),
                           const SizedBox(height: 32),
 
@@ -98,9 +101,15 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                             file: _panCardFile,
                             status: state.panStatus,
                             onUpload: () => _pickImage(
-                                ImageSource.gallery, 'pan', builderContext),
+                              ImageSource.gallery,
+                              'pan',
+                              builderContext,
+                            ),
                             onCamera: () => _pickImage(
-                                ImageSource.camera, 'pan', builderContext),
+                              ImageSource.camera,
+                              'pan',
+                              builderContext,
+                            ),
                             onRemove: () =>
                                 _removeDocument('pan', builderContext),
                           ),
@@ -117,9 +126,15 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                             file: _selfieFile,
                             status: state.selfieStatus,
                             onUpload: () => _pickImage(
-                                ImageSource.gallery, 'selfie', builderContext),
+                              ImageSource.gallery,
+                              'selfie',
+                              builderContext,
+                            ),
                             onCamera: () => _pickImage(
-                                ImageSource.camera, 'selfie', builderContext),
+                              ImageSource.camera,
+                              'selfie',
+                              builderContext,
+                            ),
                             onRemove: () =>
                                 _removeDocument('selfie', builderContext),
                           ),
@@ -130,7 +145,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
                           // Submit Button
                           _buildSubmitButton(state, builderContext),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 40),
                         ],
                       ),
                     ),
@@ -148,8 +163,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   // Aadhaar Section
   // ─────────────────────────────────────────────────────────────
 
-  Widget _buildAadhaarSection(
-      DocumentUploadState state, BuildContext context) {
+  Widget _buildAadhaarSection(DocumentUploadState state, BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -190,8 +204,10 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                       ),
                       Text(
                         'Upload both front and back sides',
-                        style:
-                            TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -331,8 +347,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
               padding: const EdgeInsets.all(12.0),
               child: Row(
                 children: [
-                  Icon(Icons.check_circle,
-                      color: Colors.green.shade600, size: 20),
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green.shade600,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -349,15 +368,20 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                         Text(
                           file.path.split('/').last,
                           style: TextStyle(
-                              fontSize: 11, color: Colors.green.shade600),
+                            fontSize: 11,
+                            color: Colors.green.shade600,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.close,
-                        size: 20, color: Colors.grey.shade600),
+                    icon: Icon(
+                      Icons.close,
+                      size: 20,
+                      color: Colors.grey.shade600,
+                    ),
                     onPressed: onRemove,
                   ),
                 ],
@@ -399,13 +423,18 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.error_outline,
-                        color: Colors.red.shade700, size: 32),
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.red.shade700,
+                      size: 32,
+                    ),
                     const SizedBox(height: 8),
                     Text(
                       'Upload failed. Tap to retry',
                       style: TextStyle(
-                          fontSize: 13, color: Colors.red.shade700),
+                        fontSize: 13,
+                        color: Colors.red.shade700,
+                      ),
                     ),
                   ],
                 ),
@@ -429,12 +458,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.photo_library,
-                            size: 28, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.photo_library,
+                          size: 28,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(height: 4),
-                        Text('Gallery',
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey.shade600)),
+                        Text(
+                          'Gallery',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -453,12 +489,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.camera_alt,
-                            size: 28, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.camera_alt,
+                          size: 28,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(height: 4),
-                        Text('Camera',
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey.shade600)),
+                        Text(
+                          'Camera',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -520,9 +563,10 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
           Icon(Icons.check_circle, size: 16, color: Colors.green.shade600),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text,
-                style:
-                    TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+            ),
           ),
         ],
       ),
@@ -562,7 +606,10 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                   'Your documents are encrypted and stored securely. '
                   'We comply with all data protection regulations.',
                   style: TextStyle(
-                      fontSize: 12, color: Colors.green.shade600, height: 1.3),
+                    fontSize: 12,
+                    color: Colors.green.shade600,
+                    height: 1.3,
+                  ),
                 ),
               ],
             ),
@@ -576,14 +623,14 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   // Submit Button (Updated)
   // ─────────────────────────────────────────────────────────────
 
-  Widget _buildSubmitButton(
-      DocumentUploadState state, BuildContext context) {
+  Widget _buildSubmitButton(DocumentUploadState state, BuildContext context) {
     return BlocBuilder<SubmitKycDocumentsBloc, SubmitKycDocumentsState>(
       builder: (context, submitState) {
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: state.isAllDocumentsUploaded &&
+            onPressed:
+                state.isAllDocumentsUploaded &&
                     submitState.postApiStatus != PostApiStatus.loading
                 ? () => _submitKycDocuments(context)
                 : null,
@@ -626,9 +673,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       // Trigger the submit API call
@@ -674,7 +719,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       if (fileSizeInMB > 5) {
         if (mounted) {
           FlushBarHelper.flushBarErrorMessage(
-              'File size exceeds 5MB limit', context);
+            'File size exceeds 5MB limit',
+            context,
+          );
         }
         return;
       }
@@ -700,7 +747,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     } catch (e) {
       if (mounted) {
         FlushBarHelper.flushBarErrorMessage(
-            'Error picking image: ${e.toString()}', context);
+          'Error picking image: ${e.toString()}',
+          context,
+        );
       }
     }
   }
