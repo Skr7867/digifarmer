@@ -1,115 +1,262 @@
 class WalletResponse {
-  final bool success;
-  final WalletModel wallet;
+  bool? success;
+  Wallet? wallet;
 
-  WalletResponse({
-    required this.success,
-    required this.wallet,
-  });
+  WalletResponse({this.success, this.wallet});
 
-  factory WalletResponse.fromJson(Map<String, dynamic> json) {
-    return WalletResponse(
-      success: json['success'] ?? false,
-      wallet: WalletModel.fromJson(json['wallet']),
-    );
+  WalletResponse.fromJson(Map<String, dynamic> json) {
+    success = json['success'];
+    wallet = json['wallet'] != null ? Wallet.fromJson(json['wallet']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'wallet': wallet.toJson(),
-    };
+    final Map<String, dynamic> data = {};
+    data['success'] = success;
+    if (wallet != null) {
+      data['wallet'] = wallet!.toJson();
+    }
+    return data;
   }
 }
 
-class WalletModel {
-  final String id;
-  final num totalInvested;
-  final num totalROIEarned;
-  final num availableBalance;
-  final num lockedBalance;
-  final num pendingWithdrawal;
-  final WalletSummary summary;
-  final List<dynamic> activeInvestments;
-  final List<dynamic> upcomingUnlocks;
-  final List<dynamic> withdrawalRequests;
-  final List<dynamic> recentTransactions;
+class Wallet {
+  String? id;
+  int? totalInvested;
+  int? totalROIEarned;
+  int? availableBalance;
+  int? lockedBalance;
+  int? pendingWithdrawal;
+  Summary? summary;
 
-  WalletModel({
-    required this.id,
-    required this.totalInvested,
-    required this.totalROIEarned,
-    required this.availableBalance,
-    required this.lockedBalance,
-    required this.pendingWithdrawal,
-    required this.summary,
-    required this.activeInvestments,
-    required this.upcomingUnlocks,
-    required this.withdrawalRequests,
-    required this.recentTransactions,
+  List<dynamic>? activeInvestments;
+  List<dynamic>? upcomingUnlocks;
+
+  List<WithdrawalRequest>? withdrawalRequests;
+  List<RecentTransactions>? recentTransactions;
+
+  Wallet({
+    this.id,
+    this.totalInvested,
+    this.totalROIEarned,
+    this.availableBalance,
+    this.lockedBalance,
+    this.pendingWithdrawal,
+    this.summary,
+    this.activeInvestments,
+    this.upcomingUnlocks,
+    this.withdrawalRequests,
+    this.recentTransactions,
   });
 
-  factory WalletModel.fromJson(Map<String, dynamic> json) {
-    return WalletModel(
-      id: json['id'] ?? '',
-      totalInvested: json['totalInvested'] ?? 0,
-      totalROIEarned: json['totalROIEarned'] ?? 0,
-      availableBalance: json['availableBalance'] ?? 0,
-      lockedBalance: json['lockedBalance'] ?? 0,
-      pendingWithdrawal: json['pendingWithdrawal'] ?? 0,
-      summary: WalletSummary.fromJson(json['summary']),
-      activeInvestments: json['activeInvestments'] ?? [],
-      upcomingUnlocks: json['upcomingUnlocks'] ?? [],
-      withdrawalRequests: json['withdrawalRequests'] ?? [],
-      recentTransactions: json['recentTransactions'] ?? [],
-    );
+  Wallet.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    totalInvested = json['totalInvested'];
+    totalROIEarned = json['totalROIEarned'];
+    availableBalance = json['availableBalance'];
+    lockedBalance = json['lockedBalance'];
+    pendingWithdrawal = json['pendingWithdrawal'];
+
+    summary = json['summary'] != null
+        ? Summary.fromJson(json['summary'])
+        : null;
+
+    activeInvestments = json['activeInvestments'] != null
+        ? List.from(json['activeInvestments'])
+        : null;
+
+    upcomingUnlocks = json['upcomingUnlocks'] != null
+        ? List.from(json['upcomingUnlocks'])
+        : null;
+
+    // ✅ FIXED: withdrawalRequests model
+    if (json['withdrawalRequests'] != null) {
+      withdrawalRequests = (json['withdrawalRequests'] as List)
+          .map((v) => WithdrawalRequest.fromJson(v))
+          .toList();
+    }
+
+    // ✅ FIXED: recentTransactions with metadata
+    if (json['recentTransactions'] != null) {
+      recentTransactions = (json['recentTransactions'] as List)
+          .map((v) => RecentTransactions.fromJson(v))
+          .toList();
+    }
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'totalInvested': totalInvested,
-      'totalROIEarned': totalROIEarned,
-      'availableBalance': availableBalance,
-      'lockedBalance': lockedBalance,
-      'pendingWithdrawal': pendingWithdrawal,
-      'summary': summary.toJson(),
-      'activeInvestments': activeInvestments,
-      'upcomingUnlocks': upcomingUnlocks,
-      'withdrawalRequests': withdrawalRequests,
-      'recentTransactions': recentTransactions,
-    };
+    final Map<String, dynamic> data = {};
+
+    data['id'] = id;
+    data['totalInvested'] = totalInvested;
+    data['totalROIEarned'] = totalROIEarned;
+    data['availableBalance'] = availableBalance;
+    data['lockedBalance'] = lockedBalance;
+    data['pendingWithdrawal'] = pendingWithdrawal;
+
+    if (summary != null) {
+      data['summary'] = summary!.toJson();
+    }
+
+    if (activeInvestments != null) {
+      data['activeInvestments'] = activeInvestments;
+    }
+
+    if (upcomingUnlocks != null) {
+      data['upcomingUnlocks'] = upcomingUnlocks;
+    }
+
+    if (withdrawalRequests != null) {
+      data['withdrawalRequests'] = withdrawalRequests!
+          .map((v) => v.toJson())
+          .toList();
+    }
+
+    if (recentTransactions != null) {
+      data['recentTransactions'] = recentTransactions!
+          .map((v) => v.toJson())
+          .toList();
+    }
+
+    return data;
   }
 }
 
-class WalletSummary {
-  final int activeInvestments;
-  final int maturedInvestments;
-  final int pendingWithdrawals;
-  final num totalPendingWithdrawalAmount;
+class WithdrawalRequest {
+  int? amount;
+  String? status;
+  String? requestedAt;
+  String? paymentMethod;
+  String? notes;
+  String? id;
 
-  WalletSummary({
-    required this.activeInvestments,
-    required this.maturedInvestments,
-    required this.pendingWithdrawals,
-    required this.totalPendingWithdrawalAmount,
+  WithdrawalRequest({
+    this.amount,
+    this.status,
+    this.requestedAt,
+    this.paymentMethod,
+    this.notes,
+    this.id,
   });
 
-  factory WalletSummary.fromJson(Map<String, dynamic> json) {
-    return WalletSummary(
-      activeInvestments: json['activeInvestments'] ?? 0,
-      maturedInvestments: json['maturedInvestments'] ?? 0,
-      pendingWithdrawals: json['pendingWithdrawals'] ?? 0,
-      totalPendingWithdrawalAmount: json['totalPendingWithdrawalAmount'] ?? 0,
-    );
+  WithdrawalRequest.fromJson(Map<String, dynamic> json) {
+    amount = json['amount'];
+    status = json['status'];
+    requestedAt = json['requestedAt'];
+    paymentMethod = json['paymentMethod'];
+    notes = json['notes'];
+    id = json['id'];
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'activeInvestments': activeInvestments,
-      'maturedInvestments': maturedInvestments,
-      'pendingWithdrawals': pendingWithdrawals,
-      'totalPendingWithdrawalAmount': totalPendingWithdrawalAmount,
-    };
+    final Map<String, dynamic> data = {};
+    data['amount'] = amount;
+    data['status'] = status;
+    data['requestedAt'] = requestedAt;
+    data['paymentMethod'] = paymentMethod;
+    data['notes'] = notes;
+    data['id'] = id;
+    return data;
+  }
+}
+
+class Summary {
+  int? activeInvestments;
+  int? maturedInvestments;
+  int? pendingWithdrawals;
+  int? totalPendingWithdrawalAmount;
+
+  Summary({
+    this.activeInvestments,
+    this.maturedInvestments,
+    this.pendingWithdrawals,
+    this.totalPendingWithdrawalAmount,
+  });
+
+  Summary.fromJson(Map<String, dynamic> json) {
+    activeInvestments = json['activeInvestments'];
+    maturedInvestments = json['maturedInvestments'];
+    pendingWithdrawals = json['pendingWithdrawals'];
+    totalPendingWithdrawalAmount = json['totalPendingWithdrawalAmount'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['activeInvestments'] = activeInvestments;
+    data['maturedInvestments'] = maturedInvestments;
+    data['pendingWithdrawals'] = pendingWithdrawals;
+    data['totalPendingWithdrawalAmount'] = totalPendingWithdrawalAmount;
+    return data;
+  }
+}
+
+class RecentTransactions {
+  String? transactionId;
+  String? type;
+  int? amount;
+  String? status;
+  String? description;
+  Metadata? metadata; // ✅ NEW
+  String? createdAt;
+  String? updatedAt;
+
+  RecentTransactions({
+    this.transactionId,
+    this.type,
+    this.amount,
+    this.status,
+    this.description,
+    this.metadata,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  RecentTransactions.fromJson(Map<String, dynamic> json) {
+    transactionId = json['transactionId'];
+    type = json['type'];
+    amount = json['amount'];
+    status = json['status'];
+    description = json['description'];
+    metadata = json['metadata'] != null
+        ? Metadata.fromJson(json['metadata'])
+        : null;
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['transactionId'] = transactionId;
+    data['type'] = type;
+    data['amount'] = amount;
+    data['status'] = status;
+    data['description'] = description;
+    if (metadata != null) {
+      data['metadata'] = metadata!.toJson();
+    }
+    data['createdAt'] = createdAt;
+    data['updatedAt'] = updatedAt;
+    return data;
+  }
+}
+
+class Metadata {
+  String? paymentMethod;
+  String? notes;
+  String? requestId;
+
+  Metadata({this.paymentMethod, this.notes, this.requestId});
+
+  Metadata.fromJson(Map<String, dynamic> json) {
+    paymentMethod = json['paymentMethod'];
+    notes = json['notes'];
+    requestId = json['requestId'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    data['paymentMethod'] = paymentMethod;
+    data['notes'] = notes;
+    data['requestId'] = requestId;
+    return data;
   }
 }

@@ -161,7 +161,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   // ─────────────────────────────────────────────────────────────
   // Aadhaar Section
-  // ─────────────────────────────────────────────────────────────
 
   Widget _buildAadhaarSection(DocumentUploadState state, BuildContext context) {
     return Container(

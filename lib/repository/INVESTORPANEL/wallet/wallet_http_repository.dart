@@ -6,8 +6,8 @@ import '../../../config/data/network/network_services_api.dart';
 class WalletHttpRepository implements WalletRepository {
   final _apiServices = NetworkApiServices();
   @override
-  Future<WalletModel> fetchWalletBalance() async {
+  Future<WalletResponse> fetchWalletBalance() async {
     final response = await _apiServices.getApi(ApiUrls.walletApi);
-    return WalletModel.fromJson(response);
+    return WalletResponse.fromJson(response);
   }
 }

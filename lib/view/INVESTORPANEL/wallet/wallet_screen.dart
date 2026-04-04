@@ -5,6 +5,7 @@ import 'package:digifarmer/utils/flush_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+
 import '../../../blocs/INVESTORPANEL/kycStatus/kyc_status_bloc.dart';
 import '../../../blocs/INVESTORPANEL/wallet/wallet_bloc.dart';
 import '../../../blocs/INVESTORPANEL/withdrawalAmount/withdrawal_amount_bloc.dart';
@@ -86,30 +87,31 @@ class _WalletScreenState extends State<WalletScreen> {
                       WithdrawalAmountBloc,
                       WithdrawalAmountState
                     >(
+                      // REPLACE your existing listener block:
+                      // WITH this — dismisses the loading dialog, then navigates or shows error:
                       listener: (context, withdrawalState) {
-                        // Handle withdrawal API response
                         if (withdrawalState.postApiStatus ==
                             PostApiStatus.success) {
-                          // Show success message
+                          Navigator.pop(context); // ✅ closes the loading dialog
                           FlushBarHelper.flushBarSuccessMessage(
                             withdrawalState.message,
                             context,
                           );
-
-                          // Refresh wallet balance after successful withdrawal
                           walletBloc.add(WalletFetched());
-
-                          // Reset withdrawal state
                           withdrawalAmountBloc.add(ResetWithdrawalState());
-
-                          // Reset amount field
                           _amountController.text = "0";
                           setState(() {
                             selectedQuickAmount = -1;
                           });
+                          Navigator.pushNamed(
+                            context,
+                            RoutesName.withdrawScreen,
+                          );
                         } else if (withdrawalState.postApiStatus ==
                             PostApiStatus.error) {
-                          // Show error message
+                          Navigator.pop(
+                            context,
+                          ); // ✅ closes the loading dialog on error too
                           FlushBarHelper.flushBarErrorMessage(
                             withdrawalState.message,
                             context,
@@ -166,7 +168,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: const [
                                   Text(
-                                    "Min: ₹500",
+                                    "Min: ₹1000",
                                     style: TextStyle(
                                       color: Colors.grey,
                                       fontSize: 12,
@@ -238,13 +240,12 @@ class _WalletScreenState extends State<WalletScreen> {
     if (walletState.wallet.status == Status.completed &&
         walletState.wallet.data != null) {
       final walletData = walletState.wallet.data!;
-      availableBalance = walletData.availableBalance.toString();
-      lockedBalance = walletData.lockedBalance.toString();
-      totalROI = walletData.totalROIEarned.toString();
+      availableBalance = walletData.wallet!.availableBalance.toString();
+      lockedBalance = walletData.wallet!.lockedBalance.toString();
+      totalROI = walletData.wallet!.totalROIEarned.toString();
 
       // Withdrawable balance = availableBalance + totalROI earned
-      final withdrawable =
-          walletData.availableBalance + walletData.totalROIEarned;
+      final withdrawable = walletData.wallet!.totalROIEarned.toString();
       withdrawableBalance = withdrawable.toString();
     } else if (walletState.wallet.status == Status.loading) {
       availableBalance = "...";
@@ -367,7 +368,7 @@ class _WalletScreenState extends State<WalletScreen> {
           Text(
             "• Processing time: 2-3 business days\n"
             "• No withdrawal charges\n"
-            "• Minimum withdrawal ₹500",
+            "• Minimum withdrawal ₹1000",
             style: TextStyle(fontSize: 12, fontFamily: AppFonts.popins),
           ),
         ],
@@ -384,11 +385,13 @@ class _WalletScreenState extends State<WalletScreen> {
     final amount = int.tryParse(_amountController.text) ?? 0;
 
     // Get withdrawable balance from wallet
-    num maxWithdrawable = 0;
+    num maxWithdrawable = 1000;
     if (walletState.wallet.status == Status.completed &&
         walletState.wallet.data != null) {
       final walletData = walletState.wallet.data!;
-      maxWithdrawable = walletData.availableBalance + walletData.totalROIEarned;
+      maxWithdrawable =
+          (walletData.wallet?.availableBalance ?? 0) +
+          (walletData.wallet?.totalROIEarned ?? 0);
     }
 
     final receiveAmount = amount > maxWithdrawable ? maxWithdrawable : amount;
@@ -418,7 +421,7 @@ class _WalletScreenState extends State<WalletScreen> {
         onPressed = isLoading
             ? null
             : () {
-                if (amount >= 500) {
+                if (amount >= 1000) {
                   if (amount > maxWithdrawable) {
                     FlushBarHelper.flushBarErrorMessage(
                       'Maximum withdrawal amount is ₹$maxWithdrawable',
@@ -433,9 +436,9 @@ class _WalletScreenState extends State<WalletScreen> {
                     // Show confirmation dialog before withdrawal
                     _showWithdrawalConfirmationDialog(context, amount);
                   }
-                } else if (amount > 0 && amount < 500) {
+                } else if (amount > 0 && amount < 1000) {
                   FlushBarHelper.flushBarErrorMessage(
-                    'Minimum withdrawal amount is ₹500',
+                    'Minimum withdrawal amount is ₹1000',
                     context,
                   );
                 } else {
@@ -506,7 +509,7 @@ class _WalletScreenState extends State<WalletScreen> {
         const SizedBox(height: 10),
 
         // Show warning message for insufficient amount
-        if (amount < 500 && amount > 0 && !isLoading && isKycCompleted)
+        if (amount < 1000 && amount > 0 && !isLoading && isKycCompleted)
           Container(
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -525,7 +528,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
-                    'Minimum withdrawal amount is ₹500',
+                    'Minimum withdrawal amount is ₹1000',
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
@@ -628,11 +631,11 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  void _showWithdrawalConfirmationDialog(BuildContext context, int amount) {
+  void _showWithdrawalConfirmationDialog(BuildContext blocContext, int amount) {
     showDialog(
-      context: context,
+      context: blocContext,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Confirm Withdrawal'),
           content: Column(
@@ -651,15 +654,15 @@ class _WalletScreenState extends State<WalletScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // Close confirmation dialog
-                _processWithdrawal(context);
+                Navigator.pop(dialogContext); // close confirm dialog
+                _processWithdrawal(
+                  blocContext,
+                ); // ✅ pass bloc context, not dialog context
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xff2BB673),
@@ -672,27 +675,27 @@ class _WalletScreenState extends State<WalletScreen> {
     );
   }
 
-  void _processWithdrawal(BuildContext context) {
-    // Show processing dialog
+  // WITH this fixed version:
+  void _processWithdrawal(BuildContext blocContext) {
+    // ✅ Dispatch using the BlocProvider context BEFORE showing dialog
+    blocContext.read<WithdrawalAmountBloc>().add(SubmitWithdrawal());
+
     showDialog(
-      context: context,
+      context: blocContext,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Payment Processing'),
+      builder: (BuildContext dialogContext) {
+        return const AlertDialog(
+          title: Text('Payment Processing'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 20),
-              const Text('Processing your withdrawal request...'),
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text('Processing your withdrawal request...'),
             ],
           ),
         );
       },
-    ).then((_) {
-      // Trigger withdrawal API call
-      context.read<WithdrawalAmountBloc>().add(SubmitWithdrawal());
-    });
+    );
   }
 }
