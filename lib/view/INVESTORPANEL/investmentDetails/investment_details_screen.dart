@@ -396,7 +396,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
                   valueColor: riskColor,
                 ),
                 _buildHeaderInfo(
-                  'ROI Frequency',
+                  'ROI\nFrequency',
                   investment.roiFrequency ?? 'N/A',
                   Icons.timeline,
                 ),
@@ -418,6 +418,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
+          softWrap: true,
           title,
           style: TextStyle(
             color: textColor.withOpacity(0.8),
@@ -427,6 +428,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
         ),
         const SizedBox(height: 4),
         Text(
+          softWrap: true,
           value,
           style: TextStyle(
             color: valueColor ?? textColor,
@@ -453,6 +455,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
+              softWrap: true,
               label,
               style: const TextStyle(
                 color: Colors.white70,
@@ -462,6 +465,7 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
               ),
             ),
             Text(
+              softWrap: true,
               value,
               style: TextStyle(
                 color: valueColor ?? Colors.white,
@@ -596,68 +600,68 @@ class _InvestmentDetailsScreenState extends State<InvestmentDetailsScreen>
   // _buildLandAllocationCard method to pass images
 
   Widget _buildLandAllocationCard(Investment investment) {
-  final lands = investment.allocations!.lands!;
+    final lands = investment.allocations!.lands!;
 
-  // ✅ Get task images from investment.taskImages instead of land images
-  final taskImageList = investment.taskImages?.allImages ?? [];
+    // ✅ Get task images from investment.taskImages instead of land images
+    final taskImageList = investment.taskImages?.allImages ?? [];
 
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withValues(alpha: 0.1),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Land Allocation',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: AppFonts.popins,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Land Allocation',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: AppFonts.popins,
+                ),
               ),
-            ),
-            // ✅ Show Photos button only if task images exist
-            if (taskImageList.isNotEmpty)
-              RoundButton(
-                fontSize: 10,
-                height: 20,
-                width: 80,
-                buttonColor: AppColors.greenColor,
-                title: 'Task Photos',
-                onPress: () {
-                  // ✅ Navigate with TaskImage list instead of String list
-                  Navigator.pushNamed(
-                    context,
-                    RoutesName.landImagesScreen,
-                    arguments: {
-                      'taskImages': taskImageList, // ✅ pass TaskImage objects
-                      'landTitle': 'Task Photos',
-                      'initialIndex': 0,
-                    },
-                  );
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...lands.map((land) => _buildLandCard(land)),
-      ],
-    ),
-  );
-}
+              // ✅ Show Photos button only if task images exist
+              if (taskImageList.isNotEmpty)
+                RoundButton(
+                  fontSize: 10,
+                  height: 20,
+                  width: 80,
+                  buttonColor: AppColors.greenColor,
+                  title: 'Task Photos',
+                  onPress: () {
+                    // ✅ Navigate with TaskImage list instead of String list
+                    Navigator.pushNamed(
+                      context,
+                      RoutesName.landImagesScreen,
+                      arguments: {
+                        'taskImages': taskImageList, // ✅ pass TaskImage objects
+                        'landTitle': 'Task Photos',
+                        'initialIndex': 0,
+                      },
+                    );
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...lands.map((land) => _buildLandCard(land)),
+        ],
+      ),
+    );
+  }
 
   Widget _buildLandCard(Lands land) {
     return Container(
