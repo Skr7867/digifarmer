@@ -18,7 +18,9 @@ import 'package:digifarmer/view/WORKERPANEL/helpAndSupport/help_and_support_scre
 import 'package:digifarmer/view/WORKERPANEL/landDetails/land_details_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/markAttendance/mark_attendance_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/notification/worker_notification_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/privacyPolicy/privacy_policy_screen.dart';
 import 'package:digifarmer/view/WORKERPANEL/setting/worker_setting_screen.dart';
+import 'package:digifarmer/view/WORKERPANEL/termsAndCondition/terms_and_condition.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -104,6 +106,12 @@ class Routes {
         );
       case RoutesName.newInvestmentScreen:
         return MaterialPageRoute(builder: (context) => NewInvestmentScreen());
+      case RoutesName.privacyPolicyScreen:
+        return MaterialPageRoute(builder: (context) => PrivacyPolicyScreen());
+      case RoutesName.termAndConditionScreen:
+        return MaterialPageRoute(
+          builder: (context) => TermsAndConditionScreen(),
+        );
       case RoutesName.portFolioScreen:
         return MaterialPageRoute(builder: (context) => PortfolioScreen());
       case RoutesName.identityVerificationScreen:

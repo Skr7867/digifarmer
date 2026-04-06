@@ -51,4 +51,6 @@ class RoutesName {
   static const String landDetailScreen = 'land_details_screen';
   static const String allTaskScreen = 'all_task_screen';
   static const String allLandsScreen = 'all_lands_screen';
+  static const String privacyPolicyScreen = 'privacy_policy_screen';
+  static const String termAndConditionScreen = 'terms_and_condition_screen';
 }

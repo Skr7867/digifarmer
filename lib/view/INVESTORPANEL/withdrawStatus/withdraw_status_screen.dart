@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../blocs/INVESTORPANEL/wallet/wallet_bloc.dart';
+import '../../../repository/INVESTORPANEL/wallet/wallet_http_repository.dart';
 import '../../../res/customeWidgets/custom_app_bar.dart';
 import '../../../res/fonts/app_fonts.dart';
+import '../../../utils/enums.dart';
 
 class WithdrawalStatusScreen extends StatefulWidget {
   const WithdrawalStatusScreen({super.key});
@@ -11,109 +15,186 @@ class WithdrawalStatusScreen extends StatefulWidget {
 }
 
 class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
-  String _selectedTab = 'All'; // 'All', 'Pending', 'Paid'
+  String _selectedTab = 'All';
+  late WalletBloc walletBloc;
 
-  // Sample withdrawal data
-  final List<WithdrawalItem> _allWithdrawals = [
-    WithdrawalItem(
-      amount: '₹25,000',
-      ref: 'WD2024001234',
-      status: 'Paid',
-      statusColor: Colors.green,
-      bankName: 'HDFC Bank',
-      accountSuffix: '4567',
-      requestedOn: '12 Dec 2024, 10:30 AM',
-      extraInfo: 'Paid On: 14 Dec 2024, 02:15 PM',
-      showReceiptButton: false,
-    ),
-    WithdrawalItem(
-      amount: '₹15,500',
-      ref: 'WD2024001235',
-      status: 'Approved',
-      statusColor: Colors.orange.shade700,
-      bankName: 'ICICI Bank',
-      accountSuffix: '8901',
-      requestedOn: '18 Dec 2024, 03:45 PM',
-      extraInfo: 'Expected By: 20 Dec 2024',
-      showReceiptButton: false,
-    ),
-    WithdrawalItem(
-      amount: '₹10,000',
-      ref: 'WD2024001236',
-      status: 'Pending',
-      statusColor: Colors.grey.shade600,
-      bankName: 'HDFC Bank',
-      accountSuffix: '4567',
-      requestedOn: '20 Dec 2024, 11:20 AM',
-      extraInfo: 'Processing Time: 2–3 Business Days',
-      showReceiptButton: false,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    walletBloc = WalletBloc(walletRepository: WalletHttpRepository())
+      ..add(WalletFetched());
+  }
 
-  List<WithdrawalItem> get _filteredWithdrawals {
-    if (_selectedTab == 'All') {
-      return _allWithdrawals;
-    } else if (_selectedTab == 'Pending') {
-      return _allWithdrawals
-          .where(
-            (item) => item.status == 'Pending' || item.status == 'Approved',
-          )
-          .toList();
-    } else if (_selectedTab == 'Paid') {
-      return _allWithdrawals.where((item) => item.status == 'Paid').toList();
+  @override
+  void dispose() {
+    walletBloc.close();
+    super.dispose();
+  }
+
+  /// Map API status string → display label, color, tab bucket
+  _StatusMeta _getStatusMeta(String apiStatus) {
+    switch (apiStatus.toUpperCase()) {
+      case 'PAID':
+      case 'COMPLETED':
+        return _StatusMeta('Paid', Colors.green);
+      case 'APPROVED':
+        return _StatusMeta('Approved', Colors.orange.shade700);
+      case 'REJECTED':
+        return _StatusMeta('Rejected', Colors.red);
+      case 'PENDING':
+      default:
+        return _StatusMeta('Pending', Colors.grey.shade600);
     }
-    return _allWithdrawals;
+  }
+
+  /// Which tab bucket does this status belong to?
+  bool _matchesTab(String apiStatus, String tab) {
+    if (tab == 'All') return true;
+    final upper = apiStatus.toUpperCase();
+    if (tab == 'Pending') {
+      return upper == 'PENDING' || upper == 'APPROVED';
+    }
+    if (tab == 'Paid') {
+      return upper == 'PAID' || upper == 'COMPLETED';
+    }
+    return true;
+  }
+
+  String _formatDate(String? isoDate) {
+    if (isoDate == null) return '—';
+    try {
+      final dt = DateTime.parse(isoDate).toLocal();
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
+      final hour = dt.hour > 12
+          ? dt.hour - 12
+          : dt.hour == 0
+          ? 12
+          : dt.hour;
+      final minute = dt.minute.toString().padLeft(2, '0');
+      final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+      return '${dt.day} ${months[dt.month - 1]} ${dt.year}, $hour:$minute $ampm';
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  String _formatPaymentMethod(String? method) {
+    if (method == null) return '—';
+    return method.replaceAll('_', ' ');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: CustomAppBar(
-        title: 'Withdrawal Status',
-        automaticallyImplyLeading: true,
-        gradient: const LinearGradient(
-          colors: [Color(0xff34A853), Color(0xff0D47A1)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return BlocProvider(
+      create: (_) => walletBloc,
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
+        appBar: CustomAppBar(
+          title: 'Withdrawal Status',
+          automaticallyImplyLeading: true,
+          gradient: const LinearGradient(
+            colors: [Color(0xff34A853), Color(0xff0D47A1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Tab row: All | Pending | Paid
-          _buildStatusTabs(),
-          const SizedBox(height: 20),
+        body: BlocBuilder<WalletBloc, WalletState>(
+          builder: (context, walletState) {
+            // ── Loading ──────────────────────────────────────────────────
+            if (walletState.wallet.status == Status.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          // Withdrawal Cards - filtered based on selected tab
-          ..._filteredWithdrawals.map((item) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _buildWithdrawalCard(
-                amount: item.amount,
-                ref: item.ref,
-                status: item.status,
-                statusColor: item.statusColor,
-                bankName: item.bankName,
-                accountSuffix: item.accountSuffix,
-                requestedOn: item.requestedOn,
-                extraInfo: item.extraInfo,
-                showReceiptButton: item.showReceiptButton,
-              ),
+            // ── Error ────────────────────────────────────────────────────
+            if (walletState.wallet.status == Status.error) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.red.shade300,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      walletState.wallet.message ?? 'Something went wrong',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: AppFonts.popins,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => walletBloc.add(WalletFetched()),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff2BB673),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // ── Data ─────────────────────────────────────────────────────
+            final requests =
+                walletState.wallet.data?.wallet?.withdrawalRequests ?? [];
+
+            // Filter by selected tab
+            final filtered = requests
+                .where((r) => _matchesTab(r.status ?? '', _selectedTab))
+                .toList();
+
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildStatusTabs(),
+                const SizedBox(height: 20),
+
+                if (filtered.isEmpty)
+                  _buildEmptyState()
+                else
+                  ...filtered.map((item) {
+                    final meta = _getStatusMeta(item.status ?? '');
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildWithdrawalCard(
+                        amount: item.amount ?? 0,
+                        ref: item.id ?? '—',
+                        status: meta.label,
+                        statusColor: meta.color,
+                        paymentMethod: _formatPaymentMethod(item.paymentMethod),
+                        requestedOn: _formatDate(item.requestedAt),
+                        notes: item.notes,
+                        apiStatus: item.status ?? '',
+                      ),
+                    );
+                  }),
+              ],
             );
-          }),
-
-          if (_selectedTab == 'Approved' ||
-              (_selectedTab == 'Pending' && _filteredWithdrawals.isNotEmpty))
-            const SizedBox(height: 24),
-
-          // Warning / Info card for approved withdrawal - only show in appropriate tabs
-          // if (_selectedTab == 'All' || _selectedTab == 'Pending')
-          //   _buildInfoCard(),
-        ],
+          },
+        ),
       ),
     );
   }
+
+  // ── Tab bar ─────────────────────────────────────────────────────────────────
 
   Widget _buildStatusTabs() {
     return Container(
@@ -123,29 +204,22 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Row(
-        children: [
-          _tabItem('All', isSelected: _selectedTab == 'All'),
-          _tabItem('Pending', isSelected: _selectedTab == 'Pending'),
-          _tabItem('Paid', isSelected: _selectedTab == 'Paid'),
-        ],
+        children: [_tabItem('All'), _tabItem('Pending'), _tabItem('Paid')],
       ),
     );
   }
 
-  Widget _tabItem(String title, {required bool isSelected}) {
+  Widget _tabItem(String title) {
+    final isSelected = _selectedTab == title;
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedTab = title;
-          });
-        },
+        onTap: () => setState(() => _selectedTab = title),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          margin: EdgeInsets.all(5),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           decoration: BoxDecoration(
-            border: isSelected
-                ? const Border(bottom: BorderSide(color: Colors.blue, width: 2))
-                : null,
+            color: isSelected ? Colors.green : Colors.white,
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             title,
@@ -154,7 +228,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
               fontFamily: AppFonts.popins,
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? Colors.blue : Colors.grey.shade700,
+              color: isSelected ? Colors.white : Colors.grey.shade700,
             ),
           ),
         ),
@@ -162,26 +236,64 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
     );
   }
 
+  // ── Empty state ──────────────────────────────────────────────────────────────
+
+  Widget _buildEmptyState() {
+    final messages = {
+      'All': 'No withdrawal requests yet',
+      'Pending': 'No pending withdrawals',
+      'Paid': 'No completed withdrawals',
+    };
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 60),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.account_balance_wallet_outlined,
+            size: 56,
+            color: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            messages[_selectedTab] ?? 'No data',
+            style: TextStyle(
+              fontFamily: AppFonts.popins,
+              fontSize: 15,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Card ─────────────────────────────────────────────────────────────────────
+
   Widget _buildWithdrawalCard({
-    required String amount,
+    required num amount,
     required String ref,
     required String status,
     required Color statusColor,
-    required String bankName,
-    required String accountSuffix,
+    required String paymentMethod,
     required String requestedOn,
-    required String extraInfo,
-    required bool showReceiptButton,
+    String? notes,
+    required String apiStatus,
   }) {
+    final isPaid =
+        apiStatus.toUpperCase() == 'PAID' ||
+        apiStatus.toUpperCase() == 'COMPLETED';
+    final isRejected = apiStatus.toUpperCase() == 'REJECTED';
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
           ),
         ],
         border: Border.all(color: Colors.grey.shade100),
@@ -191,11 +303,12 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Amount + Status badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  amount,
+                  '₹${_formatAmount(amount)}',
                   style: TextStyle(
                     fontFamily: AppFonts.popins,
                     fontSize: 24,
@@ -209,7 +322,7 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -224,7 +337,8 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+
+            const SizedBox(height: 4),
             Text(
               'Ref: $ref',
               style: TextStyle(
@@ -233,114 +347,41 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
                 color: Colors.grey.shade500,
               ),
             ),
-            const Divider(height: 24, thickness: 0.5, color: Colors.grey),
-            Row(
-              children: [
-                const Icon(Icons.account_balance, size: 16, color: Colors.grey),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Bank Account: $bankName ****$accountSuffix',
-                    style: TextStyle(
-                      fontFamily: AppFonts.popins,
-                      fontSize: 13,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+
+            const Divider(height: 24, thickness: 0.5),
+
+            // Payment method
+            _infoRow(Icons.account_balance, 'Payment: $paymentMethod'),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
-                const SizedBox(width: 6),
-                Text(
-                  'Requested On: $requestedOn',
-                  style: TextStyle(
-                    fontFamily: AppFonts.popins,
-                    fontSize: 13,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ],
-            ),
+
+            // Requested on
+            _infoRow(Icons.calendar_today, 'Requested On: $requestedOn'),
+
+            // Notes (if any and not the default placeholder)
+            if (notes != null && notes.isNotEmpty && notes != 'string') ...[
+              const SizedBox(height: 8),
+              _infoRow(Icons.notes, 'Note: $notes'),
+            ],
+
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  status == 'Paid'
-                      ? Icons.check_circle_outline
-                      : Icons.access_time,
-                  size: 14,
-                  color: Colors.grey,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  extraInfo,
-                  style: TextStyle(
-                    fontFamily: AppFonts.popins,
-                    fontSize: 13,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (showReceiptButton)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: TextButton(
-                      onPressed: () {
-                        // Handle receipt action
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: Text(
-                        '',
-                        style: TextStyle(
-                          fontFamily: AppFonts.popins,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ),
-                  ),
-                // TextButton(
-                //   onPressed: () {
-                //     // Handle view details action
-                //   },
-                //   style: TextButton.styleFrom(
-                //     padding: const EdgeInsets.symmetric(
-                //       horizontal: 12,
-                //       vertical: 8,
-                //     ),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(30),
-                //     ),
-                //   ),
-                //   child: Text(
-                //     'View Details',
-                //     style: TextStyle(
-                //       fontFamily: AppFonts.popins,
-                //       fontSize: 13,
-                //       fontWeight: FontWeight.w500,
-                //       color: Colors.blue.shade700,
-                //     ),
-                //   ),
-                // ),
-              ],
+
+            // Status-specific extra info row
+            _infoRow(
+              isPaid
+                  ? Icons.check_circle_outline
+                  : isRejected
+                  ? Icons.cancel_outlined
+                  : Icons.access_time,
+              isPaid
+                  ? 'Payment completed'
+                  : isRejected
+                  ? 'Request rejected'
+                  : 'Processing Time: 2–3 Business Days',
+              color: isPaid
+                  ? Colors.green
+                  : isRejected
+                  ? Colors.red
+                  : Colors.grey,
             ),
           ],
         ),
@@ -348,120 +389,42 @@ class _WithdrawalStatusScreenState extends State<WithdrawalStatusScreen> {
     );
   }
 
-  // Widget _buildInfoCard() {
-  //   return Container(
-  //     padding: const EdgeInsets.all(16),
-  //     decoration: BoxDecoration(
-  //       color: Colors.orange.shade50,
-  //       borderRadius: BorderRadius.circular(16),
-  //       border: Border.all(color: Colors.orange.shade200),
-  //     ),
-  //     child: Column(
-  //       children: [
-  //         Row(
-  //           children: [
-  //             Icon(
-  //               Icons.warning_amber_rounded,
-  //               size: 20,
-  //               color: Colors.orange.shade800,
-  //             ),
-  //             const SizedBox(width: 12),
-  //             Expanded(
-  //               child: Text(
-  //                 'Your withdrawal has been approved and is being processed. Amount will be credited within 1–2 business days.',
-  //                 style: TextStyle(
-  //                   fontFamily: AppFonts.popins,
-  //                   fontSize: 13,
-  //                   color: Colors.orange.shade900,
-  //                   height: 1.4,
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //         const SizedBox(height: 16),
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.end,
-  //           children: [
-  //             TextButton(
-  //               onPressed: () {
-  //                 // Handle cancel action
-  //               },
-  //               style: TextButton.styleFrom(
-  //                 backgroundColor: Colors.white,
-  //                 side: BorderSide(color: Colors.orange.shade300),
-  //                 shape: RoundedRectangleBorder(
-  //                   borderRadius: BorderRadius.circular(30),
-  //                 ),
-  //                 padding: const EdgeInsets.symmetric(
-  //                   horizontal: 20,
-  //                   vertical: 8,
-  //                 ),
-  //               ),
-  //               child: Text(
-  //                 'Cancel',
-  //                 style: TextStyle(
-  //                   fontFamily: AppFonts.popins,
-  //                   fontSize: 13,
-  //                   fontWeight: FontWeight.w500,
-  //                   color: Colors.red.shade700,
-  //                 ),
-  //               ),
-  //             ),
-  //             const SizedBox(width: 12),
-  //             ElevatedButton(
-  //               onPressed: () {
-  //                 // Handle view details action
-  //               },
-  //               style: ElevatedButton.styleFrom(
-  //                 backgroundColor: Colors.blue,
-  //                 shape: RoundedRectangleBorder(
-  //                   borderRadius: BorderRadius.circular(30),
-  //                 ),
-  //                 padding: const EdgeInsets.symmetric(
-  //                   horizontal: 20,
-  //                   vertical: 8,
-  //                 ),
-  //               ),
-  //               child: Text(
-  //                 'View Details',
-  //                 style: TextStyle(
-  //                   fontFamily: AppFonts.popins,
-  //                   fontSize: 13,
-  //                   fontWeight: FontWeight.w500,
-  //                   color: Colors.white,
-  //                 ),
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  Widget _infoRow(IconData icon, String text, {Color? color}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: color ?? Colors.grey),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontFamily: AppFonts.popins,
+              fontSize: 13,
+              color: color ?? Colors.grey.shade700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatAmount(num amount) {
+    // Adds comma formatting: 25000 → 25,000
+    final str = amount.toStringAsFixed(0);
+    final result = StringBuffer();
+    int count = 0;
+    for (int i = str.length - 1; i >= 0; i--) {
+      if (count > 0 && count % 3 == 0) result.write(',');
+      result.write(str[i]);
+      count++;
+    }
+    return result.toString().split('').reversed.join();
+  }
 }
 
-// Data model for withdrawal items
-class WithdrawalItem {
-  final String amount;
-  final String ref;
-  final String status;
-  final Color statusColor;
-  final String bankName;
-  final String accountSuffix;
-  final String requestedOn;
-  final String extraInfo;
-  final bool showReceiptButton;
-
-  WithdrawalItem({
-    required this.amount,
-    required this.ref,
-    required this.status,
-    required this.statusColor,
-    required this.bankName,
-    required this.accountSuffix,
-    required this.requestedOn,
-    required this.extraInfo,
-    required this.showReceiptButton,
-  });
+class _StatusMeta {
+  final String label;
+  final Color color;
+  const _StatusMeta(this.label, this.color);
 }

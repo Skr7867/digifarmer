@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../res/customeWidgets/custom_app_bar.dart';
+import '../faq/faq_screen.dart';
 
 class WorkerHelpAndSupportScreen extends StatefulWidget {
   const WorkerHelpAndSupportScreen({super.key});
 
   @override
-  State<WorkerHelpAndSupportScreen> createState() => _WorkerHelpAndSupportScreenState();
+  State<WorkerHelpAndSupportScreen> createState() =>
+      _WorkerHelpAndSupportScreenState();
 }
 
-class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen> {
+class _WorkerHelpAndSupportScreenState
+    extends State<WorkerHelpAndSupportScreen> {
   final TextEditingController _feedbackController = TextEditingController();
 
   @override
@@ -99,16 +102,7 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
             /// -------- FAQ ----------
             _sectionCard(
               title: "Frequently Asked Questions",
-              child: Column(
-                children: [
-                  _faqTile("How do I make my first investment?"),
-                  _faqTile("When can I withdraw my investment?"),
-                  _faqTile("How is my investment secured?"),
-                  _faqTile("How do I track my farm progress?"),
-                  _faqTile("What if my KYC is rejected?"),
-                  _faqTile("How do I change my bank details?"),
-                ],
-              ),
+              child: Column(children: [FAQScreen()]),
             ),
 
             const SizedBox(height: 14),
@@ -119,27 +113,27 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
               child: Column(
                 children: [
                   _categoryTile(
-                    Icons.trending_up, 
+                    Icons.trending_up,
                     "Investment Help",
                     onTap: () => _openWhatsApp('9266157828'),
                   ),
                   _categoryTile(
-                    Icons.payment, 
+                    Icons.payment,
                     "Payment Issues",
                     onTap: () => _openWhatsApp('9266157828'),
                   ),
                   _categoryTile(
-                    Icons.person, 
+                    Icons.person,
                     "Account & KYC",
                     onTap: () => _openWhatsApp('9266157828'),
                   ),
                   _categoryTile(
-                    Icons.agriculture, 
+                    Icons.agriculture,
                     "Farming & Tasks",
                     onTap: () => _openWhatsApp('9266157828'),
                   ),
                   _categoryTile(
-                    Icons.security, 
+                    Icons.security,
                     "Security & Privacy",
                     onTap: () => _openWhatsApp('9266157828'),
                   ),
@@ -210,10 +204,7 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),
           child,
@@ -284,31 +275,13 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
   }
 
   /// ---------- FAQ Tile ----------
-  Widget _faqTile(String text) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: ExpansionTile(
-        title: Text(text, style: const TextStyle(fontSize: 13)),
-        children: const [
-          Padding(
-            padding: EdgeInsets.all(12),
-            child: Text(
-              "Answer content will be shown here.",
-              style: TextStyle(fontSize: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// ---------- Category Tile ----------
-  Widget _categoryTile(IconData icon, String text, {required VoidCallback onTap}) {
+  Widget _categoryTile(
+    IconData icon,
+    String text, {
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: ListTile(
@@ -329,10 +302,7 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
 
   /// ---------- Phone Call Function ----------
   Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber,
-    );
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
     try {
       if (await canLaunchUrl(launchUri)) {
         await launchUrl(launchUri);
@@ -351,18 +321,18 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
     if (formattedNumber.startsWith('0')) {
       formattedNumber = formattedNumber.substring(1);
     }
-    
+
     // For WhatsApp, we need to add country code if not present
     if (!formattedNumber.startsWith('91') && formattedNumber.length == 10) {
       formattedNumber = '91$formattedNumber';
     }
-    
+
     final Uri whatsappUri = Uri(
       scheme: 'https',
       host: 'wa.me',
       path: formattedNumber,
     );
-    
+
     try {
       if (await canLaunchUrl(whatsappUri)) {
         await launchUrl(whatsappUri);
@@ -381,7 +351,7 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
       path: email,
       query: 'subject=Help & Support - DigiFarmer',
     );
-    
+
     try {
       if (await canLaunchUrl(emailUri)) {
         await launchUrl(emailUri);
@@ -399,24 +369,22 @@ class _WorkerHelpAndSupportScreenState extends State<WorkerHelpAndSupportScreen>
       _showErrorSnackBar('Please enter your feedback before submitting');
       return;
     }
-    
+
     // Clear the feedback field
     _feedbackController.clear();
-    
+
     // Show success snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
           'Your feedback submitted successfully!',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w500),
         ),
         backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),
     );
-    
+
     // You can also send the feedback to your backend here
     // _sendFeedbackToServer(_feedbackController.text);
   }

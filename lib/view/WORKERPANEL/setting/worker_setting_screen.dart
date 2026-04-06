@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, unused_field
+
 import 'package:digifarmer/view/WORKERPANEL/helpAndSupport/help_and_support_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -26,14 +28,15 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-       appBar: CustomAppBar(
+      appBar: CustomAppBar(
         title: 'Settings',
         automaticallyImplyLeading: true,
         gradient: const LinearGradient(
           colors: [Color(0xff34A853), Color(0xff0D47A1)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-        ),),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -50,41 +53,39 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
             const SizedBox(height: 14),
 
             /// -------- App Preference ----------
-            _sectionCard(
-              title: "App Preferences",
-              children: [
-                _tile(
-                  icon: Icons.language,
-                  text: "Language",
-                  subtitle: "English",
-                  onTap: () {
-                    _showLanguageDialog();
-                  },
-                ),
-                _switchTile(
-                  icon: Icons.dark_mode,
-                  text: "Dark Mode",
-                  subtitle: "Switch to dark theme",
-                  value: _darkMode,
-                  onChanged: (value) {
-                    setState(() {
-                      _darkMode = value;
-                    });
-                    _handleDarkModeChange(value);
-                  },
-                ),
-                _tile(
-                  icon: Icons.palette,
-                  text: "Theme",
-                  subtitle: "Green & Blue",
-                  onTap: () {
-                    _showThemeDialog();
-                  },
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 14),
+            // _sectionCard(
+            //   title: "App Preferences",
+            //   children: [
+            //     _tile(
+            //       icon: Icons.language,
+            //       text: "Language",
+            //       subtitle: "English",
+            //       onTap: () {
+            //         _showLanguageDialog();
+            //       },
+            //     ),
+            //     _switchTile(
+            //       icon: Icons.dark_mode,
+            //       text: "Dark Mode",
+            //       subtitle: "Switch to dark theme",
+            //       value: _darkMode,
+            //       onChanged: (value) {
+            //         setState(() {
+            //           _darkMode = value;
+            //         });
+            //         _handleDarkModeChange(value);
+            //       },
+            //     ),
+            //     _tile(
+            //       icon: Icons.palette,
+            //       text: "Theme",
+            //       subtitle: "Green & Blue",
+            //       onTap: () {
+            //         _showThemeDialog();
+            //       },
+            //     ),
+            //   ],
+            // ),
 
             /// -------- Notifications ----------
             _sectionCard(
@@ -149,23 +150,26 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
               children: [
                 _tile(
                   icon: Icons.lock,
-                  text: "Change PIN",
+                  text: "Terms & Condition",
                   onTap: () {
-                    _showChangePinDialog();
+                    Navigator.pushNamed(
+                      context,
+                      RoutesName.termAndConditionScreen,
+                    );
                   },
                 ),
-                _switchTile(
-                  icon: Icons.fingerprint,
-                  text: "Biometric Login",
-                  subtitle: "Use fingerprint to login",
-                  value: _biometricLogin,
-                  onChanged: (value) {
-                    setState(() {
-                      _biometricLogin = value;
-                    });
-                    _handleBiometricChange(value);
-                  },
-                ),
+                // _switchTile(
+                //   icon: Icons.fingerprint,
+                //   text: "Biometric Login",
+                //   subtitle: "Use fingerprint to login",
+                //   value: _biometricLogin,
+                //   onChanged: (value) {
+                //     setState(() {
+                //       _biometricLogin = value;
+                //     });
+                //     _handleBiometricChange(value);
+                //   },
+                // ),
                 // _tile(
                 //   icon: Icons.timer,
                 //   text: "Auto Lock",
@@ -175,7 +179,11 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
                   icon: Icons.policy,
                   text: "Privacy Policy",
                   onTap: () {
-                    _showPrivacyPolicy();
+                    // _showPrivacyPolicy();
+                    Navigator.pushNamed(
+                      context,
+                      RoutesName.privacyPolicyScreen,
+                    );
                   },
                 ),
               ],
@@ -187,13 +195,6 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
             _sectionCard(
               title: "Support & About",
               children: [
-                _tile(
-                  icon: Icons.help,
-                  text: "Help & FAQ",
-                  onTap: () {
-                    _showHelpAndFAQ();
-                  },
-                ),
                 _tile(
                   icon: Icons.support_agent,
                   text: "Contact Support",
@@ -257,10 +258,7 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
   }
 
   /// ---------- Section Card ----------
-  Widget _sectionCard({
-    required String title,
-    required List<Widget> children,
-  }) {
+  Widget _sectionCard({required String title, required List<Widget> children}) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -311,10 +309,7 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: const TextStyle(
-                fontSize: 12,
-                fontFamily: AppFonts.popins,
-              ),
+              style: const TextStyle(fontSize: 12, fontFamily: AppFonts.popins),
             )
           : null,
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -347,10 +342,7 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: const TextStyle(
-                fontSize: 12,
-                fontFamily: AppFonts.popins,
-              ),
+              style: const TextStyle(fontSize: 12, fontFamily: AppFonts.popins),
             )
           : null,
       value: value,
@@ -366,7 +358,7 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
       await localStorage.clearValue('token');
       await localStorage.clearValue('isLogin');
       await localStorage.clearValue('userData');
-      
+
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -498,7 +490,10 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('English', style: TextStyle(fontFamily: AppFonts.popins)),
+                title: const Text(
+                  'English',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Implement language change
@@ -511,7 +506,10 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
                 },
               ),
               ListTile(
-                title: const Text('हिंदी', style: TextStyle(fontFamily: AppFonts.popins)),
+                title: const Text(
+                  'हिंदी',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Implement language change
@@ -524,7 +522,10 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
                 },
               ),
               ListTile(
-                title: const Text('मराठी', style: TextStyle(fontFamily: AppFonts.popins)),
+                title: const Text(
+                  'मराठी',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   // Implement language change
@@ -556,7 +557,10 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Green & Blue', style: TextStyle(fontFamily: AppFonts.popins)),
+                title: const Text(
+                  'Green & Blue',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -568,7 +572,10 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
                 },
               ),
               ListTile(
-                title: const Text('Dark Mode', style: TextStyle(fontFamily: AppFonts.popins)),
+                title: const Text(
+                  'Dark Mode',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
@@ -578,7 +585,10 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
                 },
               ),
               ListTile(
-                title: const Text('Light Mode', style: TextStyle(fontFamily: AppFonts.popins)),
+                title: const Text(
+                  'Light Mode',
+                  style: TextStyle(fontFamily: AppFonts.popins),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
@@ -589,88 +599,6 @@ class _WorkerSettingScreenState extends State<WorkerSettingScreen> {
               ),
             ],
           ),
-        );
-      },
-    );
-  }
-
-  void _showChangePinDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'Change PIN',
-            style: TextStyle(fontFamily: AppFonts.popins),
-          ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                obscureText: true,
-                maxLength: 6,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Enter new PIN',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                obscureText: true,
-                maxLength: 6,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Confirm new PIN',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('PIN changed successfully'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
-              },
-              child: const Text('Change'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showPrivacyPolicy() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'Privacy Policy',
-            style: TextStyle(fontFamily: AppFonts.popins),
-          ),
-          content: const SingleChildScrollView(
-            child: Text(
-              'Your privacy is important to us. This privacy policy explains how we collect, use, and protect your personal information...',
-              style: TextStyle(fontFamily: AppFonts.popins),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
         );
       },
     );

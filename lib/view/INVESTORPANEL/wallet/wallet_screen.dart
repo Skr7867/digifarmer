@@ -130,18 +130,21 @@ class _WalletScreenState extends State<WalletScreen> {
                               const SizedBox(height: 20),
 
                               /// Withdrawal Amount
-                              const Text(
+                              Text(
                                 "Withdrawal Amount",
-                                style: TextStyle(fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: AppFonts.popins,
+                                ),
                               ),
                               const SizedBox(height: 8),
 
                               TextField(
                                 controller: _amountController,
                                 keyboardType: TextInputType.number,
+
                                 onChanged: (value) {
                                   setState(() {
-                                    // Clear quick select when user types manually
                                     if (selectedQuickAmount != -1) {
                                       selectedQuickAmount = -1;
                                     }
@@ -153,6 +156,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                 },
                                 decoration: InputDecoration(
                                   prefixText: "₹ ",
+
                                   filled: true,
                                   fillColor: Colors.grey.shade200,
                                   border: OutlineInputBorder(
